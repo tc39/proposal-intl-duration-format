@@ -1,34 +1,44 @@
-# template-for-proposals
+# Proposal for Int duration format
+Champions: Younies Mahmoud ([@younies](https://github.com/younies))
 
-A repository template for ECMAScript proposals.
+Status: Stage 1
 
-## Before creating a proposal
+## Overview
 
-Please ensure the following:
-  1. You have read the [process document](https://tc39.github.io/process-document/)
-  1. You have reviewed the [existing proposals](https://github.com/tc39/proposals/)
-  1. You are aware that your proposal requires being a member of TC39, or locating a TC39 member to "champion" your proposal
+* Time Duration is how long something lasts, from the start to end. It can be represented by a single time unit or multiple ones. 
+  - For example,
+    - 10000 seconds
+    - 2 hours 46 minutes 40 seconds
 
-## Create your proposal repo
+* Every locale has its own way to format duration. 
+  - For example:
+    - en-US: 1 hour, 46 minutes and 40 seconds
+    - fr-FR: 1 heure, 46 minutes et 40 secondes
 
-Follow these steps:
-  1.  Create your own repo, clone this one, and copy its contents into your repo. (Note: Do not fork this repo in GitHub's web interface, as that will later prevent transfer into the TC39 organization)
-  1.  Go to your repo settings “Options” page, under “GitHub Pages”, and set the source to the **master branch** and click Save.
-      1. Ensure "Issues" is checked.
-      1. Also, you probably want to disable "Wiki" and "Projects"
-  1.  Avoid merge conflicts with build process output files by running:
-      ```sh
-      git config --local --add merge.output.driver true
-      git config --local --add merge.output.driver true
-      ```
-  1.  Add a post-rewrite git hook to auto-rebuild the output on every commit:
-      ```sh
-      cp hooks/post-rewrite .git/hooks/post-rewrite
-      chmod +x .git/hooks/post-rewrite
-      ```
+* There are multiple widths for the time duration.
+  - For example, wide and short
+    - 1 hour, 46 minutes and 40 seconds → Wide
+    - 1 hr, 46 min, 40 sec → Short
 
-## Maintain your proposal repo
+## Motivation
 
-  1. Make your changes to `spec.emu` (ecmarkup uses HTML syntax, but is not HTML, so I strongly suggest not naming it ".html")
-  1. Any commit that makes meaningful changes to the spec, should run `npm run build` and commit the resulting output.
-  1. Whenever you update `ecmarkup`, run `npm run build` and commit any changes that come from that dependency.
+* Users need all types of duration format depending on the requirements of their application. For example, in the airlines websites, to show how long a flight takes, the duration should be in Short or Narrow format
+ - 1 hr 40 min 60 sec → Short 
+ - 1 h 40 m 60 sec  → Narrow
+
+* Furthermore, for TTS (text to speech) applications, Wide format is needed
+ - 1 hour, 40 minutes and 60 seconds.
+
+
+## API design
+
+  ```javascript
+    const formatter =  new Intl.DurationFormatter('en-US' , { style: 'short', fields: 'hours-minutes-seconds'});
+
+    const duration =  Temporal.Duration.from({
+                        hours: 2, minutes: 46, seconds: 40
+                      });
+
+    console.log(formatter.format(duration));
+    // output: 2 hr 46 min 40 sec
+  ```
