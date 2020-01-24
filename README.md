@@ -1,7 +1,14 @@
-# Proposal for Int duration format
-Champions: Younies Mahmoud ([@younies](https://github.com/younies))
+# Proposal for Int Duration Format
 
-Status: Stage 1
+**Stage**: 0
+
+**Champion**: Younies Mahmoud [@younies](https://github.com/younies)
+
+**Authors**: Younies Mahmoud [@younies](https://github.com/younies)
+
+**[slide](https://docs.google.com/presentation/d/1IfyFfYBROZJkODWWHudBKuGkKvTzN_Pwn2iq1ZM4_JY/edit?usp=sharing)**
+
+This proposal is currently stage 0 and ready for present on 2020 Feb TC39 meeting.
 
 ## Overview
 
