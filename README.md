@@ -23,11 +23,11 @@ Status: Stage 1
 ## Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, in the airlines websites, to show how long a flight takes, the duration should be in Short or Narrow format
- - 1 hr 40 min 60 sec → Short 
- - 1 h 40 m 60 sec  → Narrow
+  - 1 hr 40 min 60 sec → Short 
+  - 1 h 40 m 60 sec  → Narrow
 
 * Furthermore, for TTS (text to speech) applications, Wide format is needed
- - 1 hour, 40 minutes and 60 seconds.
+  - 1 hour, 40 minutes and 60 seconds.
 
 
 ## API design
