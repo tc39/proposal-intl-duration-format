@@ -4,9 +4,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
 <script src="./spec.js"></script>
 <pre class="metadata">
-title: Proposal Title Goes Here
-stage: -1
-contributors: Your Name Goes Here
+title: Intl.DurationFormat
+stage: 1
+contributors: Ujjwal Sharma
 </pre>
 
 <emu-clause id="sec-demo-clause">
