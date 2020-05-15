@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="./spec.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
 <script src="./spec.js"></script>
-<title>Intl.DurationFormat</title><script type="application/json" id="menu-search-biblio">[{"type":"clause","id":"sec-demo-clause","aoid":null,"title":"This is an emu-clause","titleHTML":"This is an emu-clause","number":"1","namespace":"<no location>","location":"","referencingIds":[],"key":"This is an emu-clause"},{"type":"clause","id":"sec-copyright-and-software-license","aoid":null,"title":"Copyright & Software License","titleHTML":"Copyright &amp; Software License","number":"A","namespace":"<no location>","location":"","referencingIds":[],"key":"Copyright & Software License"}]</script><script>"use strict";
+<title>Intl.DurationFormat</title><script type="application/json" id="menu-search-biblio">[{"type":"clause","id":"sec-intl-durationformat-abstracts","aoid":null,"title":"Abstract Operations for DurationFormat Objects","titleHTML":"Abstract Operations for DurationFormat Objects","number":"1.1","namespace":"<no location>","location":"","referencingIds":[],"key":"Abstract Operations for DurationFormat Objects"},{"type":"term","term":"%DurationFormat%","refId":"sec-intl-durationformat-constructor","referencingIds":[],"namespace":"<no location>","location":"","key":"%DurationFormat%"},{"type":"clause","id":"sec-Intl.DurationFormat","aoid":null,"title":"Intl.DurationFormat ( [ locales [, options ] ] )","titleHTML":"Intl.DurationFormat ( [ <var>locales</var> [, <var>options</var> ] ] )","number":"1.2.1","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat ( [ locales [, options ] ] )"},{"type":"clause","id":"sec-intl-durationformat-constructor","aoid":null,"title":"The Intl.DurationFormat Constructor","titleHTML":"The Intl.DurationFormat Constructor","number":"1.2","namespace":"<no location>","location":"","referencingIds":["_ref_1","_ref_2"],"key":"The Intl.DurationFormat Constructor"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype","aoid":null,"title":"Intl.DurationFormat.prototype","titleHTML":"Intl.DurationFormat.prototype","number":"1.3.1","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype"},{"type":"clause","id":"sec-Intl.DurationFormat.supportedLocalesOf","aoid":null,"title":"Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )","titleHTML":"Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )","number":"1.3.2","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"},{"type":"clause","id":"sec-Intl.DurationFormat-internal-slots","aoid":null,"title":"Internal slots","titleHTML":"Internal slots","number":"1.3.3","namespace":"<no location>","location":"","referencingIds":[],"key":"Internal slots"},{"type":"clause","id":"sec-properties-of-intl-durationformat-constructor","aoid":null,"title":"Properties of the Intl.DurationFormat Constructor","titleHTML":"Properties of the Intl.DurationFormat Constructor","number":"1.3","namespace":"<no location>","location":"","referencingIds":[],"key":"Properties of the Intl.DurationFormat Constructor"},{"type":"term","term":"%DurationFormatPrototype%","refId":"sec-properties-of-intl-durationformat-prototype-object","referencingIds":[],"namespace":"<no location>","location":"","key":"%DurationFormatPrototype%"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.constructor","aoid":null,"title":"Intl.DurationFormat.prototype.constructor","titleHTML":"Intl.DurationFormat.prototype.constructor","number":"1.4.1","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype.constructor"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype-@@tostringtag","aoid":null,"title":"Intl.DurationFormat.prototype [ @@toStringTag ]","titleHTML":"Intl.DurationFormat.prototype [ @@toStringTag ]","number":"1.4.2","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype [ @@toStringTag ]"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.format","aoid":null,"title":"Intl.DurationFormat.prototype.format ( duration )","titleHTML":"Intl.DurationFormat.prototype.format ( <var>duration</var> )","number":"1.4.3","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype.format ( duration )"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.formatToParts","aoid":null,"title":"Intl.DurationFormat.prototype.formatToParts ( duration )","titleHTML":"Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )","number":"1.4.4","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype.formatToParts ( duration )"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.resolvedOptions","aoid":null,"title":"Intl.DurationFormat.prototype.resolvedOptions ()","titleHTML":"Intl.DurationFormat.prototype.resolvedOptions ()","number":"1.4.5","namespace":"<no location>","location":"","referencingIds":[],"key":"Intl.DurationFormat.prototype.resolvedOptions ()"},{"type":"clause","id":"sec-properties-of-intl-durationformat-prototype-object","aoid":null,"title":"Properties of the Intl.DurationFormat Prototype Object","titleHTML":"Properties of the Intl.DurationFormat Prototype Object","number":"1.4","namespace":"<no location>","location":"","referencingIds":["_ref_0","_ref_3"],"key":"Properties of the Intl.DurationFormat Prototype Object"},{"type":"clause","id":"sec-properties-of-intl-durationformat-instances","aoid":null,"title":"Properties of Intl.DurationFormat Instances","titleHTML":"Properties of Intl.DurationFormat Instances","number":"1.5","namespace":"<no location>","location":"","referencingIds":[],"key":"Properties of Intl.DurationFormat Instances"},{"type":"clause","id":"durationformat-objects","aoid":null,"title":"DurationFormat Objects","titleHTML":"DurationFormat Objects","number":"1","namespace":"<no location>","location":"","referencingIds":[],"key":"DurationFormat Objects"},{"type":"clause","id":"sec-copyright-and-software-license","aoid":null,"title":"Copyright & Software License","titleHTML":"Copyright &amp; Software License","number":"A","namespace":"<no location>","location":"","referencingIds":[],"key":"Copyright & Software License"}]</script><script>"use strict";
 
 function Search(menu) {
   this.menu = menu;
@@ -1814,13 +1814,108 @@ li.menu-search-result-term:before {
     display: none; 
   }
 }
-</style></head><body><div id="menu-toggle">☰</div><div id="menu-spacer"></div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-pins"><div class="menu-pane-header">Pins</div><ul id="menu-pins-list"></ul></div><div class="menu-pane-header">Table of Contents</div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-demo-clause" title="This is an emu-clause"><span class="secnum">1</span> This is an emu-clause</a></li><li><span class="item-toggle-none"></span><a href="#sec-copyright-and-software-license" title="Copyright &amp; Software License"><span class="secnum">A</span> Copyright &amp; Software License</a></li></ol></div></div><div id="spec-container"><h1 class="version first">Stage 1 Draft / May 15, 2020</h1><h1 class="title">Intl.DurationFormat</h1>
+</style></head><body><div id="menu-toggle">☰</div><div id="menu-spacer"></div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-pins"><div class="menu-pane-header">Pins</div><ul id="menu-pins-list"></ul></div><div class="menu-pane-header">Table of Contents</div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle">◢</span><a href="#durationformat-objects" title="DurationFormat Objects"><span class="secnum">1</span> DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-intl-durationformat-abstracts" title="Abstract Operations for DurationFormat Objects"><span class="secnum">1.1</span> Abstract Operations for DurationFormat Objects</a></li><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-constructor" title="The Intl.DurationFormat Constructor"><span class="secnum">1.2</span> The Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat" title="Intl.DurationFormat ( [ locales [, options ] ] )"><span class="secnum">1.2.1</span> Intl.DurationFormat ( [ <var>locales</var> [, <var>options</var> ] ] )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-constructor" title="Properties of the Intl.DurationFormat Constructor"><span class="secnum">1.3</span> Properties of the Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype" title="Intl.DurationFormat.prototype"><span class="secnum">1.3.1</span> Intl.DurationFormat.prototype</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.supportedLocalesOf" title="Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"><span class="secnum">1.3.2</span> Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat-internal-slots" title="Internal slots"><span class="secnum">1.3.3</span> Internal slots</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-prototype-object" title="Properties of the Intl.DurationFormat Prototype Object"><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.constructor" title="Intl.DurationFormat.prototype.constructor"><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype-@@tostringtag" title="Intl.DurationFormat.prototype [ @@toStringTag ]"><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.format" title="Intl.DurationFormat.prototype.format ( duration )"><span class="secnum">1.4.3</span> Intl.DurationFormat.prototype.format ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.formatToParts" title="Intl.DurationFormat.prototype.formatToParts ( duration )"><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.resolvedOptions" title="Intl.DurationFormat.prototype.resolvedOptions ()"><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ()</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-properties-of-intl-durationformat-instances" title="Properties of Intl.DurationFormat Instances"><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-copyright-and-software-license" title="Copyright &amp; Software License"><span class="secnum">A</span> Copyright &amp; Software License</a></li></ol></div></div><div id="spec-container"><h1 class="version first">Stage 1 Draft / May 15, 2020</h1><h1 class="title">Intl.DurationFormat</h1>
 
-<emu-clause id="sec-demo-clause">
-  <h1><span class="secnum">1</span> This is an emu-clause</h1>
-  <p>This is an algorithm:</p>
-  <emu-alg><ol><li>Let <var>proposal</var> be <emu-val>undefined</emu-val>.</li><li>If IsAccepted(<var>proposal</var>),<ol><li>Let <var>stage</var> be <emu-val>0</emu-val>.</li></ol></li><li>Else,<ol><li>Let <var>stage</var> be <emu-val>-1</emu-val>.</li></ol></li><li>Return ?&nbsp;<emu-xref aoid="ToString" id="_ref_0"><a href="https://tc39.es/ecma262/#sec-tostring">ToString</a></emu-xref>(<var>proposal</var>).
-  </li></ol></emu-alg>
+<emu-clause id="durationformat-objects">
+  <h1><span class="secnum">1</span> DurationFormat Objects</h1>
+
+  <emu-clause id="sec-intl-durationformat-abstracts">
+    <h1><span class="secnum">1.1</span> Abstract Operations for DurationFormat Objects</h1>
+  </emu-clause>
+
+  <emu-clause id="sec-intl-durationformat-constructor">
+    <h1><span class="secnum">1.2</span> The Intl.DurationFormat Constructor</h1>
+
+    <p>The DurationFormat <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref> is the  <dfn>%DurationFormat%</dfn> intrinsic object and a standard built-in property of the Intl object. Behaviour common to all service <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref> properties of the Intl object is specified in  <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
+
+    <emu-clause id="sec-Intl.DurationFormat">
+      <h1><span class="secnum">1.2.1</span> Intl.DurationFormat ( [ <var>locales</var> [, <var>options</var> ] ] )</h1>
+
+      <p>When the <code>Intl.DurationFormat</code> function is called with optional arguments <var>locales</var> and <var>options</var>, the following steps are taken:</p>
+
+      <emu-alg><p></p></emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-intl-durationformat-constructor">
+    <h1><span class="secnum">1.3</span> Properties of the Intl.DurationFormat Constructor</h1>
+
+    <p>The Intl.DurationFormat <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref> has the following properties:</p>
+
+    <emu-clause id="sec-Intl.DurationFormat.prototype">
+      <h1><span class="secnum">1.3.1</span> Intl.DurationFormat.prototype</h1>
+
+      <p>The value of <code>Intl.DurationFormat.prototype</code> is <emu-xref href="#sec-properties-of-intl-durationformat-prototype-object" id="_ref_0"><a href="#sec-properties-of-intl-durationformat-prototype-object">%DurationFormatPrototype%</a></emu-xref>.</p>
+
+      <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>false</emu-val> }.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-Intl.DurationFormat.supportedLocalesOf">
+      <h1><span class="secnum">1.3.2</span> Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )</h1>
+
+      <p>When the <code>supportedLocalesOf</code> method is called with arguments <var>locales</var> and <var>options</var>, the following steps are taken:</p>
+
+      <emu-alg><ol><li>Let <var>availableLocales</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_1"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[AvailableLocales]].</li><li>Let <var>requestedLocales</var> be ?&nbsp;CanonicalizeLocaleList(<var>locales</var>).</li><li>Return ?&nbsp;SupportedLocales(<var>availableLocales</var>, <var>requestedLocales</var>, <var>options</var>).
+      </li></ol></emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-Intl.DurationFormat-internal-slots">
+      <h1><span class="secnum">1.3.3</span> Internal slots</h1>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-intl-durationformat-prototype-object">
+    <h1><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</h1>
+
+    <p>The Intl.DurationFormat prototype object is itself an ordinary object.  <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
+
+    <emu-clause id="sec-Intl.DurationFormat.prototype.constructor">
+      <h1><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</h1>
+
+      <p>The initial value of <code>Intl.DurationFormat.prototype.constructor</code> is the intrinsic object <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_2"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-Intl.DurationFormat.prototype-@@tostringtag">
+      <h1><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</h1>
+
+      <p>The initial value of the @@toStringTag property is the string value <code>"Intl.DurationFormat"</code>.</p>
+      <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>true</emu-val> }.</p>
+    </emu-clause>
+
+    <emu-clause id="sec-Intl.DurationFormat.prototype.format">
+      <h1><span class="secnum">1.4.3</span> Intl.DurationFormat.prototype.format ( <var>duration</var> )</h1>
+
+      <p>When the <code>format</code> method is called with an argument <var>duration</var>, the following steps are taken:</p>
+
+      <emu-alg></emu-alg>
+    </emu-clause>
+    <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
+      <h1><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</h1>
+
+      <p>When the <code>formatToParts</code> method is called with an argument <var>duration</var>, the following steps are taken:</p>
+
+      <emu-alg></emu-alg>
+    </emu-clause>
+    <emu-clause id="sec-Intl.DurationFormat.prototype.resolvedOptions">
+      <h1><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ()</h1>
+
+      <p>This function provides access to the locale and options computed during initialization of the object.</p>
+
+      <emu-alg></emu-alg>
+    </emu-clause>
+  </emu-clause>
+
+  <emu-clause id="sec-properties-of-intl-durationformat-instances">
+    <h1><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</h1>
+
+    <p>Intl.DurationFormat instances inherit properties from <emu-xref href="#sec-properties-of-intl-durationformat-prototype-object" id="_ref_3"><a href="#sec-properties-of-intl-durationformat-prototype-object">%DurationFormatPrototype%</a></emu-xref>.</p>
+
+    <p>Intl.DurationFormat instances have an [[InitializedDurationFormat]] internal slot.</p>
+
+    <p>Intl.DurationFormat instances also have several internal slots that are computed by the <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref>:</p>
+
+    <ul></ul>
+  </emu-clause>
 </emu-clause><emu-annex id="sec-copyright-and-software-license">
       <h1><span class="secnum">A</span> Copyright &amp; Software License</h1>
       
