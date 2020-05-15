@@ -5,7 +5,7 @@ title: Intl.DurationFormat
 stage: 1
 contributors: Ujjwal Sharma
 </pre>
-
+<emu-biblio href="./biblio.json"></emu-biblio>
 <emu-clause id="durationformat-objects">
   <h1>DurationFormat Objects</h1>
 
