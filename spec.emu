@@ -24,6 +24,26 @@ contributors: Ujjwal Sharma
       <p>When the `Intl.DurationFormat` function is called with optional arguments _locales_ and _options_, the following steps are taken:</p>
 
       <emu-alg>
+        1. If NewTarget is *undefined*, throw a *TypeError* exception.
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[Style]], [[Fields]] &raquo;).
+        1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
+        1. If _options_ is *undefined*, then
+          1. Let _options_ be ObjectCreate(*null*).
+        1. Else
+          1. Let _options_ be ? ToObject(_options_).
+        1. Let _opt_ be a new Record.
+        1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
+        1. Set _opt_.[[localeMatcher]] to _matcher_.
+        1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
+        1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], _localeData_).
+        1. Set _durationFormat_.[[Locale]] to _r_.[[locale]].
+        1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"dotted"` &raquo;, `"long"`).
+        1. Set _durationFormat_.[[Style]] to _style_.
+        1. Let _fields_ be ? Get(_options_, `"fields"`).
+        1. If _fields_ is not *undefined* and IsArray(_fields_) is *false*, then
+          1. Throw a *TypeError* exception.
+        1. Set _durationFormat_.[[Fields]] to ? CreateListFromArrayLike(_fields_).
+        1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -55,6 +75,16 @@ contributors: Ujjwal Sharma
 
     <emu-clause id="sec-Intl.DurationFormat-internal-slots">
       <h1>Internal slots</h1>
+
+      <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
+
+      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; `"ca"`, `"tz"`, `"hc"`, `"nu"` &raquo;.</p>
+
+      <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
+
+      <ul>
+        <mark>TODO: actually specify the relevant locale constraints.</mark>
+      </ul>
     </emu-clause>
   </emu-clause>
 
@@ -95,7 +125,42 @@ contributors: Ujjwal Sharma
 
       <p>This function provides access to the locale and options computed during initialization of the object.</p>
 
-      <emu-alg></emu-alg>
+      <emu-alg>
+        1. Let _df_ be the *this* value.
+        1. If Type(_df_) is not Object, throw a *TypeError* exception.
+        1. If _df_ doesn't have an [[InitializedDurationFormat]] internal slot, throw a *TypeError* exception.
+        1. Let _options_ be ! ObjectCreate(%ObjectPrototype%).
+        1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
+          1. Let _p_ be the Property value of the current row.
+          1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
+          1. Assert: _v_ is not *undefined*.
+          1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
+        1. Return _options_.
+      </emu-alg>
+
+      <emu-table id="table-durationformat-resolvedoptions-properties">
+        <emu-caption>Resolved Options of DurationFormat Instances</emu-caption>
+        <table class="real-table">
+          <thead>
+            <tr>
+              <th>Internal Slot</th>
+              <th>Property</th>
+            </tr>
+          </thead>
+          <tr>
+            <td>[[Locale]]</td>
+            <td>`"locale"`</td>
+          </tr>
+          <tr>
+            <td>[[Style]]</td>
+            <td>`"style"`</td>
+          </tr>
+          <tr>
+            <td>[[Fields]]</td>
+            <td>`"fields"`</td>
+          </tr>
+        </table>
+      </emu-table>
     </emu-clause>
   </emu-clause>
 
@@ -108,6 +173,10 @@ contributors: Ujjwal Sharma
 
     <p>Intl.DurationFormat instances also have several internal slots that are computed by the constructor:</p>
 
-    <ul></ul>
+    <ul>
+      <li>[[Locale]] is a String value with the language tag of the locale whose localization is used by the duration format styles.</li>
+      <li>[[Style]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"dotted"` identifying the duration formatting style used.</li>
+      <li>[[Fields]] is a List value specifying which duration fields are required to be printed.</li>
+    </ul>
   </emu-clause>
 </emu-clause>

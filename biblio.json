@@ -1,9 +1,19 @@
 {
-  "https://tc39.github.io/ecma402/": [
-    {
-      "type": "clause",
-      "number": "9.1",
-      "id": "sec-internal-slots"
-    }
-  ]
+    "https://tc39.github.io/ecma402/": [
+        {
+            "type": "clause",
+            "number": "9.1",
+            "id": "sec-internal-slots"
+        },
+        {
+            "type": "op",
+            "aoid": "CanonicalizeLocaleList",
+            "id": "sec-canonicalizelocalelist"
+        },
+        {
+            "type": "op",
+            "aoid": "GetOption",
+            "id": "sec-getoption"
+        }
+    ]
 }
