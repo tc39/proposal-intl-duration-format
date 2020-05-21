@@ -78,13 +78,18 @@ contributors: Ujjwal Sharma
 
       <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
 
-      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; `"ca"`, `"tz"`, `"hc"`, `"nu"` &raquo;.</p>
+      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; `"nu"` &raquo;.</p>
 
       <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
 
       <ul>
-        <mark>TODO: actually specify the relevant locale constraints.</mark>
+        <li>[[LocaleData]].[[<_locale_>]].[[nu]] must be a List that does not include the values `"native"`, `"traditio"`, or `"finance"`.</li>
+        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of each of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`. Each of those fields must be records themselves, and each must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be a template string.</li>
       </ul>
+
+      <emu-note>
+        It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).
+</emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -127,8 +132,7 @@ contributors: Ujjwal Sharma
 
       <emu-alg>
         1. Let _df_ be the *this* value.
-        1. If Type(_df_) is not Object, throw a *TypeError* exception.
-        1. If _df_ doesn't have an [[InitializedDurationFormat]] internal slot, throw a *TypeError* exception.
+        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _options_ be ! ObjectCreate(%ObjectPrototype%).
         1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
           1. Let _p_ be the Property value of the current row.

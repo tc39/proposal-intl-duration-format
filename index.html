@@ -1862,13 +1862,19 @@ li.menu-search-result-term:before {
 
       <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in  <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref>.</p>
 
-      <p>The value of the [[RelevantExtensionKeys]] internal slot is « <code>"ca"</code>, <code>"tz"</code>, <code>"hc"</code>, <code>"nu"</code> ».</p>
+      <p>The value of the [[RelevantExtensionKeys]] internal slot is « <code>"nu"</code> ».</p>
 
       <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in  <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref> and the following additional constraints for all locale values <var>locale</var>:</p>
 
       <ul>
-        <mark>TODO: actually specify the relevant locale constraints.</mark>
+        <li>[[LocaleData]].[[&lt;<var>locale</var>&gt;]].[[nu]] must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> that does not include the values <code>"native"</code>, <code>"traditio"</code>, or <code>"finance"</code>.</li>
+        <li>[[LocaleData]].[[&lt;<var>locale</var>&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of each of the supported units: <code>nanonseconds</code>, <code>microseconds</code>, <code>milliseconds</code>, <code>seconds</code>, <code>minutes</code>, <code>hours</code>, <code>days</code>, <code>weeks</code>, <code>months</code>, and <code>years</code>. Each of those fields must be records themselves, and each must have fields with the names of the three formatting styles: <code>long</code>, <code>short</code>, and <code>narrow</code>. Each of those fields must be a template string.</li>
       </ul>
+
+      <emu-note><span class="note">Note</span><div class="note-contents">
+        It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at  <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).
+
+</div></emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -1909,7 +1915,7 @@ li.menu-search-result-term:before {
 
       <p>This function provides access to the locale and options computed during initialization of the object.</p>
 
-      <emu-alg><ol><li>Let <var>df</var> be the <emu-val>this</emu-val> value.</li><li>If <emu-xref aoid="Type" id="_ref_13"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>df</var>) is not Object, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <var>df</var> doesn't have an [[InitializedDurationFormat]] internal slot, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>options</var> be !&nbsp;<emu-xref aoid="ObjectCreate" id="_ref_14"><a href="https://tc39.es/ecma262/#sec-objectcreate">ObjectCreate</a></emu-xref>(<emu-xref href="#sec-properties-of-the-object-prototype-object"><a href="https://tc39.es/ecma262/#sec-properties-of-the-object-prototype-object">%ObjectPrototype%</a></emu-xref>).</li><li>For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties" id="_ref_0"><a href="#table-durationformat-resolvedoptions-properties">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>p</var> be the Property value of the current row.</li><li>Let <var>v</var> be the value of <var>df</var>'s internal slot whose name is the Internal Slot value of the current row.</li><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>v</var> is not <emu-val>undefined</emu-val>.</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_15"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>options</var>, <var>p</var>, <var>v</var>).</li></ol></li><li>Return <var>options</var>.
+      <emu-alg><ol><li>Let <var>df</var> be the <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot" id="_ref_13"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, [[InitializedDurationFormat]]).</li><li>Let <var>options</var> be !&nbsp;<emu-xref aoid="ObjectCreate" id="_ref_14"><a href="https://tc39.es/ecma262/#sec-objectcreate">ObjectCreate</a></emu-xref>(<emu-xref href="#sec-properties-of-the-object-prototype-object"><a href="https://tc39.es/ecma262/#sec-properties-of-the-object-prototype-object">%ObjectPrototype%</a></emu-xref>).</li><li>For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties" id="_ref_0"><a href="#table-durationformat-resolvedoptions-properties">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>p</var> be the Property value of the current row.</li><li>Let <var>v</var> be the value of <var>df</var>'s internal slot whose name is the Internal Slot value of the current row.</li><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>v</var> is not <emu-val>undefined</emu-val>.</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_15"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>options</var>, <var>p</var>, <var>v</var>).</li></ol></li><li>Return <var>options</var>.
       </li></ol></emu-alg>
 
       <emu-table id="table-durationformat-resolvedoptions-properties"><figure><figcaption>Table 1: Resolved Options of DurationFormat Instances</figcaption>
