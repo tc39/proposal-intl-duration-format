@@ -25,7 +25,7 @@ contributors: Ujjwal Sharma
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[Style]], [[Fields]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[NumberingSystem]], [[Style]], [[Fields]], [[Templates]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. If _options_ is *undefined*, then
           1. Let _options_ be ObjectCreate(*null*).
@@ -34,15 +34,29 @@ contributors: Ujjwal Sharma
         1. Let _opt_ be a new Record.
         1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
         1. Set _opt_.[[localeMatcher]] to _matcher_.
+        1. Let _numberingSystem_ be ? GetOption(_options_, `"numberingSystem"`, `"string"`, `undefined`, `undefined`).
+          1. If _numberingSystem_ does not match the Unicode Locale Identifier `type` nonterminal, throw a `RangeError` exception.
+        1. Set _opt_.[[nu]] to _numberingSystem_.
         1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
         1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], _localeData_).
         1. Set _durationFormat_.[[Locale]] to _r_.[[locale]].
+        1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"dotted"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
+        1. If _style_ is `"dotted"`, then
+          1. Set _durationFormat_.[[Templates]] to { }.
+        1. Else
+          1. Let _dataLocale_ be _r_.[[dateLocale]].
+          1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocaleData_&gt;]].
+          1. Let _templates_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].
+          1. Set _durationFormat_.[[Templates]] to _templates_.
         1. Let _fields_ be ? Get(_options_, `"fields"`).
-        1. If _fields_ is not *undefined* and IsArray(_fields_) is *false*, then
+        1. If _fields_ is *undefined*, then
+          1. Set _durationFormat_.[[Fields]] to &laquo; `"years"`, `"months"`,`"weeks"`,`"days"`,`"hours"`,`"minutes"`,`"seconds"`,`"milliseconds"`,`"microseconds"`, `"nanonseconds"` &raquo;.
+        1. Else if IsArray(_fields_) is *true*, then
+          1. Set _durationFormat_.[[Fields]] to ? CreateListFromArrayLike(_fields_).
+        1. Else
           1. Throw a *TypeError* exception.
-        1. Set _durationFormat_.[[Fields]] to ? CreateListFromArrayLike(_fields_).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
@@ -84,7 +98,7 @@ contributors: Ujjwal Sharma
 
       <ul>
         <li>[[LocaleData]].[[<_locale_>]].[[nu]] must be a List that does not include the values `"native"`, `"traditio"`, or `"finance"`.</li>
-        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of each of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`. Each of those fields must be records themselves, and each must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be a template string.</li>
+        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`. Each of those values must be a template string.</li>
       </ul>
 
       <emu-note>
@@ -156,6 +170,10 @@ contributors: Ujjwal Sharma
             <td>`"locale"`</td>
           </tr>
           <tr>
+            <td>[[NumberingSystem]]</td>
+            <td>`"numberingSystem"`</td>
+          </tr>
+          <tr>
             <td>[[Style]]</td>
             <td>`"style"`</td>
           </tr>
@@ -178,9 +196,11 @@ contributors: Ujjwal Sharma
     <p>Intl.DurationFormat instances also have several internal slots that are computed by the constructor:</p>
 
     <ul>
-      <li>[[Locale]] is a String value with the language tag of the locale whose localization is used by the duration format styles.</li>
+      <li>[[Locale]] is a String value with the language tag of the locale whose localization is used for formatting.</li>
+      <li>[[NumberingSystem]] is a String value with the `"type"` given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
       <li>[[Style]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"dotted"` identifying the duration formatting style used.</li>
       <li>[[Fields]] is a List value specifying which duration fields are required to be printed.</li>
+      <li>[[Templates]] is a Record value containing template strings for each of the supported units for duration formatting.</li>
     </ul>
   </emu-clause>
 </emu-clause>
