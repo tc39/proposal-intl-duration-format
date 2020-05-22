@@ -62,7 +62,7 @@ Users want to determine several types of the formatting width as following
 
 
 #### Design
-  * The user can determine the formatting width using a  parameter `style` and the value of this parameter take a ` string` as following:
+  * The user can determine the formatting width using a `style` parameter which accepts the following string values:
       * “wide” 
       * “short”
       * “narrow”
