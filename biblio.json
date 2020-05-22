@@ -14,6 +14,30 @@
             "type": "op",
             "aoid": "GetOption",
             "id": "sec-getoption"
+        },
+        {
+            "type": "op",
+            "aoid": "PartitionNumberPattern",
+            "id": "sec-partitionnumberpattern"
+        },
+        {
+            "type": "op",
+            "aoid": "ResolveLocale",
+            "id": "sec-resolvelocale"
+        }
+    ],
+    "https://tc39.github.io/proposal-temporal/": [
+        {
+            "type": "op",
+            "aoid": "ToPartialDuration",
+            "id": "sec-temporal-topartialduration"
+        }
+    ],
+    "https://tc39.github.io/proposal-intl-list-format/": [
+        {
+            "type": "op",
+            "aoid": "FormatList",
+            "id": "sec-formatlist"
         }
     ]
 }

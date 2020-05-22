@@ -11,6 +11,84 @@ contributors: Ujjwal Sharma
 
   <emu-clause id="sec-intl-durationformat-abstracts">
     <h1>Abstract Operations for DurationFormat Objects</h1>
+
+    <p>Several DurationFormat algorithms use values from the following table, which provides internal slots and property names for the components of date and time formats: </p>
+
+    <emu-table id="table-duration-components">
+      <emu-caption>Components of Duration Instances</emu-caption>
+        <table class="real-table">
+          <thead>
+            <tr>
+              <th>Internal Slot</th>
+              <th>Property</th>
+            </tr>
+          </thead>
+          <tr>
+            <td>[[Years]]</td>
+            <td>`"year"`</td>
+          </tr>
+          <tr>
+            <td>[[Months]]</td>
+            <td>`"months"`</td>
+          </tr>
+          <tr>
+            <td>[[Weeks]]</td>
+            <td>`"weeks"`</td>
+          </tr>
+          <tr>
+            <td>[[Days]]</td>
+            <td>`"days"`</td>
+          </tr>
+          <tr>
+            <td>[[Hours]]</td>
+            <td>`"hours"`</td>
+          </tr>
+          <tr>
+            <td>[[Minutes]]</td>
+            <td>`"minutes"`</td>
+          </tr>
+          <tr>
+            <td>[[Seconds]]</td>
+            <td>`"seconds"`</td>
+          </tr>
+          <tr>
+            <td>[[Milliseconds]]</td>
+            <td>`"milliseconds"`</td>
+          </tr>
+          <tr>
+            <td>[[Microseconds]]</td>
+            <td>`"microseconds"`</td>
+          </tr>
+          <tr>
+            <td>[[Nanoseconds]]</td>
+            <td>`"nanonseconds"`</td>
+          </tr>
+        </table>
+      </emu-table>
+    </emu-table>
+
+    <emu-clause id="sec-partitiondurationformatpattern" aoid="PartitionDurationFormatPattern">
+      <h1>PartitionDurationFormatPattern ( _durationFormat_, _duration_ )</h1>
+
+      <p>The PartitionDurationFormatPattern abstract operation is called with the arguments _durationFormat_ (which must be an object initialized as a DurationFormat) and _duration_ (which must be a Record), and creates the corresponding parts according to the effective locale and the formatting options of _durationFormat_. The following steps are taken:</p>
+
+      <emu-alg>
+        1. If _durationFormat_.[[Style]] is `"dotted"`, then
+          1. <mark>TODO: decide what to do for this style.</mark>
+        1. Let _result_ be a new empty Record.
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
+          1. Let _field_ be the Property value.
+          1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
+          1. If _val_ is *undefined* or _field_ does not exist in _durationFormat_.[[Fields]], then
+            1. Set _result_.[[&lt;_field_&gt;]] to `undefined`.
+          1. Else,
+            1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], val).
+            1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].
+            1. <mark>TODO: figure out an efficient way to apply _template_ onto _num_.</mark>
+            1. Set _result_.[[&lt;_field_&gt;]] to _applied_.
+        1. Return _result_.
+      </emu-alg>
+    </emu-clause>
   </emu-clause>
 
   <emu-clause id="sec-intl-durationformat-constructor">
@@ -39,12 +117,13 @@ contributors: Ujjwal Sharma
         1. Set _opt_.[[nu]] to _numberingSystem_.
         1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
         1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], _localeData_).
-        1. Set _durationFormat_.[[Locale]] to _r_.[[locale]].
+        1. Let _locale_ be r.[[locale]].
+        1. Set _durationFormat_.[[Locale]] to _locale_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"dotted"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. If _style_ is `"dotted"`, then
-          1. Set _durationFormat_.[[Templates]] to { }.
+          1. Set _durationFormat_.[[Templates]] to a new empty Record.
         1. Else
           1. Let _dataLocale_ be _r_.[[dateLocale]].
           1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocaleData_&gt;]].
@@ -52,11 +131,17 @@ contributors: Ujjwal Sharma
           1. Set _durationFormat_.[[Templates]] to _templates_.
         1. Let _fields_ be ? Get(_options_, `"fields"`).
         1. If _fields_ is *undefined*, then
-          1. Set _durationFormat_.[[Fields]] to &laquo; `"years"`, `"months"`,`"weeks"`,`"days"`,`"hours"`,`"minutes"`,`"seconds"`,`"milliseconds"`,`"microseconds"`, `"nanonseconds"` &raquo;.
+          1. Let _list_ be a new empty List.
+          1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
+            1. Let _field_ be the Property value.
+            1. Append _field_ as the last element of _list_.
+          1. Set _durationFormat_.[[Fields]] to _list_.
         1. Else if IsArray(_fields_) is *true*, then
           1. Set _durationFormat_.[[Fields]] to ? CreateListFromArrayLike(_fields_).
         1. Else
           1. Throw a *TypeError* exception.
+        1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_ &raquo;).
+        1. Set _durationFormat_.[[ListFormat]] to ! Construct(%ListFormat%, &laquo; _locale_ &raquo;).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
@@ -130,14 +215,39 @@ contributors: Ujjwal Sharma
 
       <p>When the `format` method is called with an argument _duration_, the following steps are taken:</p>
 
-      <emu-alg></emu-alg>
+      <emu-alg>
+        1. Let _df_ be *this* value.
+        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
+        1. Let _record_ be ? ToPartialDuration(_duration_).
+        1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
+        1. Let _list_ be an empty List.
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref> except the header row in table order, do
+          1. Let _field_ be the Property value.
+          1. Let _val_ be _formatted_.[[&lt;_field_&gt;]].
+          1. If _val_ is not *undefined*, then
+            1. Append _val_ as the last element of _list_.
+        1. Let _result_ be ? FormatList(_df_.[[ListFormat]], list).
+        1. Return _result_.
+      </emu-alg>
     </emu-clause>
     <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
       <h1>Intl.DurationFormat.prototype.formatToParts ( _duration_ )</h1>
 
       <p>When the `formatToParts` method is called with an argument _duration_, the following steps are taken:</p>
 
-      <emu-alg></emu-alg>
+      <emu-alg>
+        1. Let _df_ be *this* value.
+        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
+        1. Let _record_ be ? ToPartialDuration(_duration_).
+        1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
+        1. Let _list_ be an empty List.
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref> except the header row in table order, do
+          1. Let _field_ be the Property value.
+          1. Let _val_ be _formatted_.[[&lt;_field_&gt;]].
+          1. If _val_ is not *undefined*, then
+            1. Append a new Record { [[Type]]: _field_, [[Value]]: _val_ } as the last element of _list_.
+        1. Return _result_.
+      </emu-alg>
     </emu-clause>
     <emu-clause id="sec-Intl.DurationFormat.prototype.resolvedOptions">
       <h1>Intl.DurationFormat.prototype.resolvedOptions ()</h1>
@@ -201,6 +311,8 @@ contributors: Ujjwal Sharma
       <li>[[Style]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"dotted"` identifying the duration formatting style used.</li>
       <li>[[Fields]] is a List value specifying which duration fields are required to be printed.</li>
       <li>[[Templates]] is a Record value containing template strings for each of the supported units for duration formatting.</li>
+      <li>[[NumberFormat]] is an Intl.NumberFormat object used for formatting.</li>
+      <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
     </ul>
   </emu-clause>
 </emu-clause>
