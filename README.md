@@ -38,10 +38,7 @@ This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
 In this section, we are going to illustrate each user needs (requirements) and a design for each need (requirement)
 
 ### Input Value
-  * Users needs to identify the input values
-  * For example
-    * format( 100 seconds)
-    * format( 1 hour, 20 minutes)
+  - Users needs to identify how to input a duration value. For example, if a user needs to format `1000 seconds`, how could the user pass the value to the formatting function.
 
 #### Design
   * Input value will be an object from `Temporal.Duration`
@@ -57,17 +54,15 @@ Users want to determine several types of the formatting width as following
   |  Wide         |1 hour and 50 minutes  |
   |  Short        |1 hr, 50 min           |
   |  Narrow       |1h 50 m                |
-  |  Numeric      |                       |
   |  Dotted       |1: 50: 00              |
 
 
 #### Design
   * The user can determine the formatting width using a  parameter `style` and the value of this parameter take a ` string` as following:
-      * “wide” 
-      * “short”
-      * “narrow”
-      * “numeric” 
-      * “dotted”
+      * `“wide”`
+      * `“short”`
+      * `“narrow”`
+      * `“dotted”`
 
 ### Supported Time Fields
 Users need the following fields to be supported
@@ -116,7 +111,7 @@ Users need to determine the time fields,
          SmallestField: "second"
     ```
 ### Hide zero-value fields
-Users needs to hide zero-value fields depends in some criteria
+- Users needs to hide zero-value fields depends in some criteria
   * Hide all zero-value fields
     * Hours, Minutes, Seconds (without the `hide` option)
       * 1 hours, 0 minutes and 59 seconds.
@@ -131,13 +126,24 @@ Users needs to hide zero-value fields depends in some criteria
 
 #### Design
 - Users can set the `HidingZeroValuedOption` parameter  by one of the following values:
-    * “ALL”, // Hide all the fields that have a zero-valued.
-    * “LEADING_AND_TRAILING”, // Hide all the zero fields in the leading or the training
-    * “LEADING_ONLY”,
-    * “TRAILING_ONLY”, 
-    * “NONE”, // Do not hide any zero-valued fields.
+    * `"ALL"` // Hide all the fields that have a zero-valued.
+    * `“LEADING_AND_TRAILING”` // Hide all the zero fields in the leading or the training
+    * `“LEADING_ONLY”`
+    * `“TRAILING_ONLY”` 
+    * `“NONE”` // Do not hide any zero-valued fields.
 
-- Default Value: “NONE”
+- Default Value: `“NONE”`
+
+### Round 
+  - Users wants to decide if they are going to round the smallest field or not.
+  - for example: 
+    * Without rounding option
+      * 1 hour and 30.6 minutes.
+    * With rounding option
+      * 1 hour and 31 minutes.
+
+#### Design
+  - Users can give the `round`a `true` or `false` values in order to enable rounding the smallest field.
 
 ### Locale aware format
  - Users needs the formatting to be dependent on the locale
@@ -147,19 +153,20 @@ Users needs to hide zero-value fields depends in some criteria
     * fr-FR
       * 1 heure, 46 minutes et 40 secondes
 
+#### Design
+Adding the locale in `string` format as a first argument.
+
 ## API design
 I propose to have a class called `DurationFormat` 
 
-
   ```javascript
     const formatter =        
-        new Intl.DurationFormat({
-                              locale: 'en-US',
-		                		      largestField: 'hour',
-  					                  smallestField: 'second', 
-					                    style: 'short',
-					                    round: true,
-					                    HidingZeroValuedOption: NONE,
+        new Intl.DurationFormat('en-US' , {
+                                  largestField: 'hour',
+                                  smallestField: 'second', 
+                                  style: 'short',
+                                  round: true,
+                                  HidingZeroValuedOption: NONE,
                               });
 
     const duration = 
