@@ -44,7 +44,7 @@ In this section, we are going to illustrate each user needs (requirements) and a
     * format( 1 hour, 20 minutes)
 
 #### Design
-  * Input value will be an object from `Temporal.Duration`
+  * Input value will be an object of type `Temporal.Duration`
   * Example:
      * `const d = new DurationFormat();`
      * `d.format(new Temporal.Duration({hour: 3, minute: 4});`
