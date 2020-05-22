@@ -47,7 +47,7 @@ In this section, we are going to illustrate each user needs (requirements) and a
   * Input value will be an object of type `Temporal.Duration`
   * Example:
      * `const d = new DurationFormat();`
-     * `d.format(new Temporal.Duration({hour: 3, minute: 4});`
+     * `d.format(new Temporal.Duration.from({hours: 3, minutes: 4});`
 
 
 ### Formatting width
