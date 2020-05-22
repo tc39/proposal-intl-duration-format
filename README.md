@@ -41,10 +41,10 @@ In this section, we are going to illustrate each user needs (requirements) and a
   - Users needs to identify how to input a duration value. For example, if a user needs to format `1000 seconds`, how could the user pass the value to the formatting function.
 
 #### Design
-  * Input value will be an object from `Temporal.Duration`
+  * Input value will be an object of type `Temporal.Duration`
   * Example:
      * `const d = new DurationFormat();`
-     * `d.format(new Temporal.Duration({hour: 3, minute: 4});`
+     * `d.format(new Temporal.Duration.from({hours: 3, minutes: 4});`
 
 
 ### Formatting width
@@ -178,3 +178,4 @@ I propose to have a class called `DurationFormat`
       // output: 2 hr 46 min 40 sec
 
   ```
+  
