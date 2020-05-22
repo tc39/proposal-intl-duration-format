@@ -97,18 +97,18 @@ Users need to determine the time fields,
      * 100 minutes and 59 seconds.
  
 #### Design
-   * Users can determine the time fields using `LargestField` and `SmallestField` parameters.
+   * Users can determine the time fields using `largestField` and `smallestField` parameters.
    * Example: 
    ```javascript
     {
-      LargestField: "hour",
-      SmallestField: "second"
+      largestField: "hour",
+      smallestField: "second"
     }
   ```
    * Default values
     ```javascript
-         LargestField: "Day",
-         SmallestField: "second"
+         largestField: "Day",
+         smallestField: "second"
     ```
 ### Hide zero-value fields
 - Users needs to hide zero-value fields depends in some criteria
@@ -125,14 +125,14 @@ Users need to determine the time fields,
   * Hide-lower-limit with zero-valued.
 
 #### Design
-- Users can set the `HidingZeroValuedOption` parameter  by one of the following values:
-    * `"ALL"` // Hide all the fields that have a zero-valued.
-    * `“LEADING_AND_TRAILING”` // Hide all the zero fields in the leading or the training
-    * `“LEADING_ONLY”`
-    * `“TRAILING_ONLY”` 
-    * `“NONE”` // Do not hide any zero-valued fields.
+- Users can set the `hideZeroValues` parameter  by one of the following values:
+    * `"all"` // Hide all the fields that have a zero-valued.
+    * `"leadingAndTrailing"` // Hide all the zero fields in the leading or the training
+    * `"leadingOnly"`
+    * `"trailingOnly"` 
+    * `"none"` // Do not hide any zero-valued fields.
 
-- Default Value: `“NONE”`
+- Default Value: `"none"`
 
 ### Round 
   - Users wants to decide if they are going to round the smallest field or not.
@@ -157,7 +157,6 @@ Users need to determine the time fields,
 Adding the locale in `string` format as a first argument.
 
 ## API design
-I propose to have a class called `DurationFormat` 
 
   ```javascript
     const formatter =        
@@ -166,7 +165,7 @@ I propose to have a class called `DurationFormat`
                                   smallestField: 'second', 
                                   style: 'short',
                                   round: true,
-                                  HidingZeroValuedOption: NONE,
+                                  hideZeroValues: NONE,
                               });
 
     const duration = 
@@ -178,4 +177,3 @@ I propose to have a class called `DurationFormat`
       // output: 2 hr 46 min 40 sec
 
   ```
-  
