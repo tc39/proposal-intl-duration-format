@@ -1,4 +1,4 @@
-# Proposal for Int Duration Format
+# Proposal for Intl Duration Format
 
 **Stage**: 1
 
