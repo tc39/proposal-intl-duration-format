@@ -3,7 +3,7 @@
 <pre class="metadata">
 title: Intl.DurationFormat
 stage: 1
-contributors: Ujjwal Sharma
+contributors: Ujjwal Sharma, Younies Mahmoud
 </pre>
 <emu-biblio href="./biblio.json"></emu-biblio>
 <emu-clause id="durationformat-objects">
@@ -12,60 +12,61 @@ contributors: Ujjwal Sharma
   <emu-clause id="sec-intl-durationformat-abstracts">
     <h1>Abstract Operations for DurationFormat Objects</h1>
 
-    <p>Several DurationFormat algorithms use values from the following table, which provides internal slots and property names for the components of date and time formats: </p>
+    <p>Several DurationFormat algorithms use values from the following table, which provides internal slots and property names for Duration instances, and which is also used to key Records of templates to format individual Duration components: </p>
 
     <emu-table id="table-duration-components">
       <emu-caption>Components of Duration Instances</emu-caption>
-        <table class="real-table">
-          <thead>
-            <tr>
-              <th>Internal Slot</th>
-              <th>Property</th>
-            </tr>
-          </thead>
+      <table class="real-table">
+        <thead>
           <tr>
-            <td>[[Years]]</td>
-            <td>`"year"`</td>
+            <th>Internal Slot</th>
+            <th>Property</th>
           </tr>
-          <tr>
-            <td>[[Months]]</td>
-            <td>`"months"`</td>
-          </tr>
-          <tr>
-            <td>[[Weeks]]</td>
-            <td>`"weeks"`</td>
-          </tr>
-          <tr>
-            <td>[[Days]]</td>
-            <td>`"days"`</td>
-          </tr>
-          <tr>
-            <td>[[Hours]]</td>
-            <td>`"hours"`</td>
-          </tr>
-          <tr>
-            <td>[[Minutes]]</td>
-            <td>`"minutes"`</td>
-          </tr>
-          <tr>
-            <td>[[Seconds]]</td>
-            <td>`"seconds"`</td>
-          </tr>
-          <tr>
-            <td>[[Milliseconds]]</td>
-            <td>`"milliseconds"`</td>
-          </tr>
-          <tr>
-            <td>[[Microseconds]]</td>
-            <td>`"microseconds"`</td>
-          </tr>
-          <tr>
-            <td>[[Nanoseconds]]</td>
-            <td>`"nanonseconds"`</td>
-          </tr>
-        </table>
-      </emu-table>
+        </thead>
+        <tr>
+          <td>[[Years]]</td>
+          <td>`"year"`</td>
+        </tr>
+        <tr>
+          <td>[[Months]]</td>
+          <td>`"months"`</td>
+        </tr>
+        <tr>
+          <td>[[Weeks]]</td>
+          <td>`"weeks"`</td>
+        </tr>
+        <tr>
+          <td>[[Days]]</td>
+          <td>`"days"`</td>
+        </tr>
+        <tr>
+          <td>[[Hours]]</td>
+          <td>`"hours"`</td>
+        </tr>
+        <tr>
+          <td>[[Minutes]]</td>
+          <td>`"minutes"`</td>
+        </tr>
+        <tr>
+          <td>[[Seconds]]</td>
+          <td>`"seconds"`</td>
+        </tr>
+        <tr>
+          <td>[[Milliseconds]]</td>
+          <td>`"milliseconds"`</td>
+        </tr>
+        <tr>
+          <td>[[Microseconds]]</td>
+          <td>`"microseconds"`</td>
+        </tr>
+        <tr>
+          <td>[[Nanoseconds]]</td>
+          <td>`"nanonseconds"`</td>
+        </tr>
+      </table>
     </emu-table>
+
+    <emu-note>The [[Weeks]] field is still under discussion in Temporal. For more, check out the <a href="https://github.com/tc39/proposal-temporal/issues/532">Github thread</a> on the Temporal issue tracker.</emu-note>
 
     <emu-clause id="sec-partitiondurationformatpattern" aoid="PartitionDurationFormatPattern">
       <h1>PartitionDurationFormatPattern ( _durationFormat_, _duration_ )</h1>
@@ -75,17 +76,22 @@ contributors: Ujjwal Sharma
       <emu-alg>
         1. If _durationFormat_.[[Style]] is `"dotted"`, then
           1. <mark>TODO: decide what to do for this style.</mark>
-        1. Let _result_ be a new empty Record.
+        1. Let _result_ be a new empty List.
         1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
           1. Let _field_ be the Property value.
           1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
-          1. If _val_ is *undefined* or _field_ does not exist in _durationFormat_.[[Fields]], then
-            1. Set _result_.[[&lt;_field_&gt;]] to `undefined`.
-          1. Else,
+          1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
             1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], val).
-            1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].
-            1. <mark>TODO: figure out an efficient way to apply _template_ onto _num_.</mark>
-            1. Set _result_.[[&lt;_field_&gt;]] to _applied_.
+            1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], val).
+            1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
+            1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
+            1. Let _concat_ be an empty String.
+            1. For each _part_ in _parts_, do
+              1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
+              1. If _part_ has a [[Unit]] field, then
+                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
+            1. Append { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
+        1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
         1. Return _result_.
       </emu-alg>
     </emu-clause>
@@ -141,10 +147,13 @@ contributors: Ujjwal Sharma
         1. Else
           1. Throw a *TypeError* exception.
         1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_ &raquo;).
+        1. Set _durationFormat_.[[PluralRules]] to ! Construct(%PluralRules%, &laquo; _locale_ &raquo;).
         1. Set _durationFormat_.[[ListFormat]] to ! Construct(%ListFormat%, &laquo; _locale_ &raquo;).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
+
+    <emu-note>It's currently being discussed what the best strategy for field selection would be. For more information, check out the corresponding <a href="https://github.com/tc39/proposal-intl-duration-format/issues/3">Github thread</a>.</emu-note>
   </emu-clause>
 
   <emu-clause id="sec-properties-of-intl-durationformat-constructor">
@@ -183,7 +192,7 @@ contributors: Ujjwal Sharma
 
       <ul>
         <li>[[LocaleData]].[[<_locale_>]].[[nu]] must be a List that does not include the values `"native"`, `"traditio"`, or `"finance"`.</li>
-        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`. Each of those values must be a template string.</li>
+        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_. The value corresponding to those fields is a pattern which may contain "{0}" to be replaced by a formatted number.</li>
       </ul>
 
       <emu-note>
@@ -220,15 +229,13 @@ contributors: Ujjwal Sharma
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToPartialDuration(_duration_).
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
-        1. Let _list_ be an empty List.
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref> except the header row in table order, do
-          1. Let _field_ be the Property value.
-          1. Let _val_ be _formatted_.[[&lt;_field_&gt;]].
-          1. If _val_ is not *undefined*, then
-            1. Append _val_ as the last element of _list_.
-        1. Let _result_ be ? FormatList(_df_.[[ListFormat]], list).
+        1. Let _result_ be a new empty String.
+        1. For each _part_ in _formatted_, do
+          1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
         1. Return _result_.
       </emu-alg>
+
+      <emu-note>It's still being actively discussed if balancing should be done in DurationFormat. For more information, check out the <a href="https://github.com/tc39/proposal-intl-duration-format/issues/10">relevant github issue</a>.</emu-note>
     </emu-clause>
     <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
       <h1>Intl.DurationFormat.prototype.formatToParts ( _duration_ )</h1>
@@ -240,12 +247,14 @@ contributors: Ujjwal Sharma
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToPartialDuration(_duration_).
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
-        1. Let _list_ be an empty List.
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref> except the header row in table order, do
-          1. Let _field_ be the Property value.
-          1. Let _val_ be _formatted_.[[&lt;_field_&gt;]].
-          1. If _val_ is not *undefined*, then
-            1. Append a new Record { [[Type]]: _field_, [[Value]]: _val_ } as the last element of _list_.
+        1. Let _result_ be ArrayCreate(0).
+        1. Let _n_ be `0`.
+        1. For each _part_ in _formatted_, do
+          1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
+          1. Perform ! CreateDataPropertyOrThrow(_obj_, `"type"`, _part_.[[Type]]).
+          1. Perform ! CreateDataPropertyOrThrow(_obj_, `"value"`, _part_.[[Value]]).
+          1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
+          1. Increment _n_ by 1.
         1. Return _result_.
       </emu-alg>
     </emu-clause>
@@ -312,6 +321,7 @@ contributors: Ujjwal Sharma
       <li>[[Fields]] is a List value specifying which duration fields are required to be printed.</li>
       <li>[[Templates]] is a Record value containing template strings for each of the supported units for duration formatting.</li>
       <li>[[NumberFormat]] is an Intl.NumberFormat object used for formatting.</li>
+      <li>[[PluralRules]] is an Intl.PluralRules object used for formatting.</li>
       <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
     </ul>
   </emu-clause>

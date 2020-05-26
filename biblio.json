@@ -24,6 +24,16 @@
             "type": "op",
             "aoid": "ResolveLocale",
             "id": "sec-resolvelocale"
+        },
+        {
+            "type": "op",
+            "aoid": "ResolvePlural",
+            "id": "sec-resolveplural"
+        },
+        {
+            "type": "op",
+            "aoid": "MakePartsList",
+            "id": "sec-makepartslist"
         }
     ],
     "https://tc39.github.io/proposal-temporal/": [
@@ -36,8 +46,8 @@
     "https://tc39.github.io/proposal-intl-list-format/": [
         {
             "type": "op",
-            "aoid": "FormatList",
-            "id": "sec-formatlist"
+            "aoid": "CreatePartsFromList",
+            "id": "sec-createpartsfromlist"
         }
     ]
 }
