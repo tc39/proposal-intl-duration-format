@@ -74,24 +74,32 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <p>The PartitionDurationFormatPattern abstract operation is called with the arguments _durationFormat_ (which must be an object initialized as a DurationFormat) and _duration_ (which must be a Record), and creates the corresponding parts according to the effective locale and the formatting options of _durationFormat_. The following steps are taken:</p>
 
       <emu-alg>
-        1. If _durationFormat_.[[Style]] is `"dotted"`, then
-          1. <mark>TODO: decide what to do for this style.</mark>
         1. Let _result_ be a new empty List.
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
-          1. Let _field_ be the Property value.
-          1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
-          1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
-            1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], val).
-            1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], val).
-            1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
-            1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
-            1. Let _concat_ be an empty String.
-            1. For each _part_ in _parts_, do
-              1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
-              1. If _part_ has a [[Unit]] field, then
-                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
-            1. Append { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
-        1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
+        1. If _durationFormat_.[[Style]] is `"dotted"`, then
+          1. Let _patternParts_ be PartitionPattern(_durationFormat_.[[Templates]]).
+          1. For each _patternPart_ in _patternParts_, do
+            1. Let _p_ be _patternPart_.[[Type]].
+            1. If _p_ is `"literal"`, then
+              1. Append _patternPart_ to the end of _result_.
+            1. Else if _duration_[[&lt;_p_&gt;]] is not *undefined* and _p_ exists in _durationFormat_.[[Fields]], then
+              1. Let _num_ be FormatNumeric(_durationFormat_.[[NumberFormat]], _duration_[[&lt;_p_&gt;]]).
+              1. Append the new Record { [[Type]]: _p_, [[Value]]: _num_ } to the end of _result_.
+        1. Else,
+          1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
+            1. Let _field_ be the Property value.
+            1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
+            1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
+              1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], val).
+              1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], val).
+              1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
+              1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
+              1. Let _concat_ be an empty String.
+              1. For each _part_ in _parts_, do
+                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
+                1. If _part_ has a [[Unit]] field, then
+                  1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
+              1. Append the new Record { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
+          1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
         1. Return _result_.
       </emu-alg>
     </emu-clause>
@@ -192,7 +200,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <ul>
         <li>[[LocaleData]].[[<_locale_>]].[[nu]] must be a List that does not include the values `"native"`, `"traditio"`, or `"finance"`.</li>
-        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the three formatting styles: `long`, `short`, and `narrow`. Each of those fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_. The value corresponding to those fields is a pattern which may contain "{0}" to be replaced by a formatted number.</li>
+        <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, `narrow`, and `dotted`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain "{0}" to be replaced by a formatted number. The value of the fourth field, corresponding to the `dotted` style, on the other hand, should be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with `"{"`, followed by the name of the field, followed by `"}"`.</li>
       </ul>
 
       <emu-note>

@@ -34,6 +34,16 @@
             "type": "op",
             "aoid": "MakePartsList",
             "id": "sec-makepartslist"
+        },
+        {
+            "type": "op",
+            "aoid": "PartitionPattern",
+            "id": "sec-partitionpattern"
+        },
+        {
+            "type": "op",
+            "aoid": "FormatNumeric",
+            "id": "sec-formatnumber"
         }
     ],
     "https://tc39.github.io/proposal-temporal/": [
