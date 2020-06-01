@@ -2,9 +2,9 @@
 
 **Stage**: 1
 
-**Champion**: Younies Mahmoud [@younies](https://github.com/younies)
+**Champion**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
 
-**Authors**: Younies Mahmoud [@younies](https://github.com/younies)
+**Authors**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
 
 **[slide](https://docs.google.com/presentation/d/1QmrhwsYwlsfe8FJqgGarCIAySWxeZzDqCrVN3-DWiGk/edit?usp=sharing)**
 
