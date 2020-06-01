@@ -76,6 +76,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _durationFormat_.[[Style]] is `"dotted"`, then
+          1. <mark>TODO: [[Templates]] needs to be keyed by which fields are available in this case.</mark>
           1. Let _patternParts_ be PartitionPattern(_durationFormat_.[[Templates]]).
           1. For each _patternPart_ in _patternParts_, do
             1. Let _p_ be _patternPart_.[[Type]].
@@ -201,12 +202,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
 
       <ul>
-
         <li>[[LocaleData]].[[<_locale_>]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
         <li>[[LocaleData]].[[<_locale_>]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, `narrow`, and `dotted`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanonseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain "{0}" to be replaced by a formatted number. The value of the fourth field, corresponding to the `dotted` style, on the other hand, should be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with `"{"`, followed by the name of the field, followed by `"}"`.</li>
       </ul>
 
-      <emu-note type=editor>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
+      <emu-note type=editor>TODO: [[formats]].[[dotted]] need to be keyed by the available fields.</emu-note>
+      <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -333,5 +334,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <li>[[PluralRules]] is an Intl.PluralRules object used for formatting.</li>
       <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
     </ul>
+    <emu-note type=editor>[[Templates]] needs to be keyed by the available fields when [[Style]] is "dotted"</emu-note>
   </emu-clause>
 </emu-clause>
