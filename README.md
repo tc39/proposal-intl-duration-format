@@ -105,13 +105,14 @@ Users need to determine the time fields,
       smallestField: "second"
     }
   ```
-   * Default values
-    ```javascript
+   * Default values:
+  ```javascript
     {
       largestField: "Day",
       smallestField: "second"
     }
-    ```
+  ```
+
 ## Hide zero-value fields
 - Users needs to hide zero-value fields depends in some criteria
   * Hide all zero-value fields
