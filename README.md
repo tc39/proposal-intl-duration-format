@@ -39,7 +39,7 @@ In this section, we are going to illustrate each user needs (requirements) and a
 
 ## Input Value
 
-  + Users needs to identify how to input a duration value. For example, if a user needs to format `1000 seconds` , how could the user pass the value to the formatting function.
+  + Users need to identify how to input a duration value. For example, if a user needs to format `1000 seconds` , how could the user pass the value to the formatting function.
 
 ### Design
 
