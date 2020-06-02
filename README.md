@@ -1,4 +1,4 @@
-# Proposal for Intl Duration Format
+# Proposal for Intl.DurationFormat
 
 **Stage**: 1
 
@@ -84,6 +84,7 @@ Users want to determine several types of the formatting width as following
 * We are going to support the same fields as in [ `Temporal.Duration` ](https://github.com/tc39/proposal-temporal/blob/main/docs/duration.md), which contains:
   + years
   + months
+  + weeks
   + days
   + hours
   + minutes
