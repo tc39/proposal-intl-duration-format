@@ -1,0 +1,68 @@
+{
+    "https://tc39.github.io/ecma402/": [
+        {
+            "type": "clause",
+            "number": "9.1",
+            "id": "sec-internal-slots"
+        },
+        {
+            "type": "op",
+            "aoid": "CanonicalizeLocaleList",
+            "id": "sec-canonicalizelocalelist"
+        },
+        {
+            "type": "op",
+            "aoid": "GetOption",
+            "id": "sec-getoption"
+        },
+        {
+            "type": "op",
+            "aoid": "PartitionNumberPattern",
+            "id": "sec-partitionnumberpattern"
+        },
+        {
+            "type": "op",
+            "aoid": "ResolveLocale",
+            "id": "sec-resolvelocale"
+        },
+        {
+            "type": "op",
+            "aoid": "ResolvePlural",
+            "id": "sec-resolveplural"
+        },
+        {
+            "type": "op",
+            "aoid": "MakePartsList",
+            "id": "sec-makepartslist"
+        },
+        {
+            "type": "op",
+            "aoid": "PartitionPattern",
+            "id": "sec-partitionpattern"
+        },
+        {
+            "type": "op",
+            "aoid": "FormatNumeric",
+            "id": "sec-formatnumber"
+        },
+        {
+            "type": "clause",
+            "number": "12.3.3",
+            "id": "sec-intl.numberformat-internal-slots"
+        }
+    ],
+    "https://tc39.github.io/proposal-temporal/": [
+        {
+            "type": "op",
+            "aoid": "ToPartialDuration",
+            "id": "sec-temporal-topartialduration"
+        }
+    ],
+    "https://tc39.github.io/proposal-intl-list-format/": [
+        {
+            "type": "op",
+            "aoid": "CreatePartsFromList",
+            "id": "sec-createpartsfromlist"
+        }
+    ]
+}
