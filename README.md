@@ -1,10 +1,16 @@
 # Proposal for Intl.DurationFormat
 
-**Stage**: 1
+**Stage**: 2
 
 **Champion**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
 
 **Authors**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
+
+**Stage 3 Reviewers**
+
+- Michael Ficarra [@michaelficarra](https://github.com/michaelficarra)
+- Ron Buckton [@rbuckton](https://github.com/rbuckton)
+- Ross Kirsling [@rkirsling](https://github.com/rkirsling)
 
 **[slide](https://docs.google.com/presentation/d/1QmrhwsYwlsfe8FJqgGarCIAySWxeZzDqCrVN3-DWiGk/edit?usp=sharing)**
 
