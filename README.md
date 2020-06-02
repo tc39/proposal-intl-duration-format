@@ -10,7 +10,7 @@
 
 This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
 
-## Overview
+# Overview
 
 * Time Duration is how long something lasts, from the start to end. It can be represented by a single time unit or multiple ones. 
   - For example,
@@ -27,27 +27,27 @@ This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
     - 1 hour, 46 minutes and 40 seconds → Wide
     - 1 hr, 46 min, 40 sec → Short
 
-## Motivation
+# Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
   - 1 hr 40 min 60 sec → Short 
   - 1 h 40 m 60 sec  → Narrow
 
-## Requirements & Design
+# Requirements & Design
 
 In this section, we are going to illustrate each user needs (requirements) and a design for each need (requirement)
 
-### Input Value
+## Input Value
   - Users needs to identify how to input a duration value. For example, if a user needs to format `1000 seconds`, how could the user pass the value to the formatting function.
 
-#### Design
+### Design
   * Input value will be an object of type `Temporal.Duration`
   * Example:
      * `const d = new DurationFormat();`
      * `d.format(new Temporal.Duration.from({hours: 3, minutes: 4});`
 
 
-### Formatting width
+## Formatting width
 Users want to determine several types of the formatting width as following
   | Format width  | Example               |
   | -----------   | -----------           |
@@ -57,14 +57,14 @@ Users want to determine several types of the formatting width as following
   |  Dotted       |1: 50: 00              |
 
 
-#### Design
+### Design
   * The user can determine the formatting width using a  parameter `style` and the value of this parameter take a ` string` as following:
       * `“wide”`
       * `“short”`
       * `“narrow”`
       * `“dotted”`
 
-### Supported Time Fields
+## Supported Time Fields
 Users need the following fields to be supported
   * Year
   * Month
@@ -77,7 +77,7 @@ Users need the following fields to be supported
   * Microsecond
   * Nano Second
 
-#### Design
+### Design
 We are going to support the following fields as a beginning
   * Week
   * Day
@@ -88,7 +88,7 @@ We are going to support the following fields as a beginning
   * Microsecond
   * Nano Second
 
-### Determining Time Fields
+## Determining Time Fields
 Users need to determine the time fields,
  * For example: 6059 seconds
    * Hours, Minutes, Seconds
@@ -96,7 +96,7 @@ Users need to determine the time fields,
    * Minutes and Seconds
      * 100 minutes and 59 seconds.
  
-#### Design
+### Design
    * Users can determine the time fields using `largestField` and `smallestField` parameters.
    * Example: 
    ```javascript
@@ -107,10 +107,12 @@ Users need to determine the time fields,
   ```
    * Default values
     ```javascript
-         largestField: "Day",
-         smallestField: "second"
+    {
+      largestField: "Day",
+      smallestField: "second"
+    }
     ```
-### Hide zero-value fields
+## Hide zero-value fields
 - Users needs to hide zero-value fields depends in some criteria
   * Hide all zero-value fields
     * Hours, Minutes, Seconds (without the `hide` option)
@@ -124,7 +126,7 @@ Users need to determine the time fields,
       * 20 min, 0 sec, 100 msec.
   * Hide-lower-limit with zero-valued.
 
-#### Design
+### Design
 - Users can set the `hideZeroValues` parameter  by one of the following values:
     * `"all"` // Hide all the fields that have a zero-valued.
     * `"leadingAndTrailing"` // Hide all the zero fields in the leading or the training
@@ -134,7 +136,7 @@ Users need to determine the time fields,
 
 - Default Value: `"none"`
 
-### Round 
+## Round 
   - Users wants to decide if they are going to round the smallest field or not.
   - for example: 
     * Without rounding option
@@ -142,10 +144,10 @@ Users need to determine the time fields,
     * With rounding option
       * 1 hour and 31 minutes.
 
-#### Design
+### Design
   - Users can give the `round`a `true` or `false` values in order to enable rounding the smallest field.
 
-### Locale aware format
+## Locale aware format
  - Users needs the formatting to be dependent on the locale
  - For example:
     * en-US
@@ -153,10 +155,10 @@ Users need to determine the time fields,
     * fr-FR
       * 1 heure, 46 minutes et 40 secondes
 
-#### Design
+### Design
 Adding the locale in `string` format as a first argument.
 
-## API design
+# API design
 
   ```javascript
     const formatter =        
