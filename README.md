@@ -1,6 +1,6 @@
 # Proposal for Intl.DurationFormat
 
-**Stage**: 1
+**Stage**: 2
 
 **Champion**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
 
