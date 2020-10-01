@@ -31,6 +31,17 @@ This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
     - 1 hour, 46 minutes and 40 seconds → Wide
     - 1 hr, 46 min, 40 sec → Short
 
+# Quick Start Example
+
+```javascript
+new Intl.DurationFormat("fr-FR", { style: "long" }).format({
+    hours: 1,
+    minutes: 46,
+    seconds: 40,
+});
+// "1 heure, 46 minutes et 40 secondes"
+```
+
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
