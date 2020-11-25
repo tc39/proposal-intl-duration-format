@@ -78,7 +78,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _durationFormat_.[[Style]] is `"dotted"`, then
           1. <mark>TODO: [[Templates]] needs to be keyed by which fields are available in this case.</mark>
           1. Let _patternParts_ be PartitionPattern(_durationFormat_.[[Templates]]).
-          1. For each _patternPart_ in _patternParts_, do
+          1. For each element _patternPart_ in _patternParts_, in List order, do
             1. Let _p_ be _patternPart_.[[Type]].
             1. If _p_ is `"literal"`, then
               1. Append _patternPart_ to the end of _result_.
@@ -86,7 +86,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _num_ be FormatNumeric(_durationFormat_.[[NumberFormat]], _duration_.[[&lt;_p_&gt;]]).
               1. Append the new Record { [[Type]]: _p_, [[Value]]: _num_ } to the end of _result_.
         1. Else,
-          1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
+          1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
             1. Let _field_ be the Property value.
             1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
             1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
@@ -95,7 +95,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
               1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
               1. Let _concat_ be an empty String.
-              1. For each _part_ in _parts_, do
+              1. For each element _part_ in _parts_, in List order, do
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
                 1. If _part_ has a [[Unit]] field, then
                   1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
@@ -144,13 +144,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _fields_ be ? Get(_options_, `"fields"`).
         1. If _fields_ is *undefined*, then
           1. Let _list_ be a new empty List.
-          1. For each row in <emu-xref href="#table-duration-components"></emu-xref> except the header row, do
+          1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
             1. Let _field_ be the Property value.
             1. Append _field_ as the last element of _list_.
           1. Set _durationFormat_.[[Fields]] to _list_.
         1. Else if IsArray(_fields_) is *true*, then
           1. Set _fields_ to ? CreateListFromArrayLike(_fields_).
-          1. For each _field_ in _fields_, do
+          1. For each element _field_ in _fields_, in List order, do
             1. If _field_ isn't in <emu-xref href="#table-duration-components"></emu-xref>, then
               1. Throw a *RangeError* exception.
           1. Set _durationFormat_.[[Fields]] to _fields_.
@@ -240,7 +240,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _record_ be ? ToPartialDuration(_duration_).
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
         1. Let _result_ be a new empty String.
-        1. For each _part_ in _formatted_, do
+        1. For each element _part_ in _formatted_, in List order, do
           1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
         1. Return _result_.
       </emu-alg>
@@ -259,7 +259,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _duration_).
         1. Let _result_ be ArrayCreate(0).
         1. Let _n_ be `0`.
-        1. For each _part_ in _formatted_, do
+        1. For each element _part_ in _formatted_, in List order, do
           1. Let _obj_ be ObjectCreate(%ObjectPrototype%).
           1. Perform ! CreateDataPropertyOrThrow(_obj_, `"type"`, _part_.[[Type]]).
           1. Perform ! CreateDataPropertyOrThrow(_obj_, `"value"`, _part_.[[Value]]).
