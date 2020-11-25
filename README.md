@@ -61,7 +61,7 @@ In this section, we are going to illustrate each user needs (requirements) and a
 * Input value will be an object of type `Temporal.Duration`
 * Example:
     - `const d = new DurationFormat();`
-    - `d.format(new Temporal.Duration.from({hours: 3, minutes: 4});`
+    - `d.format(Temporal.Duration.from({hours: 3, minutes: 4});`
 
 ## Formatting width
 
@@ -77,10 +77,10 @@ Users want to determine several types of the formatting width as following
 ### Design
 
   + The user can determine the formatting width using a parameter `style` and the value of this parameter may be one of the following `string` s:
-    - `“wide”`
-    - `“short”`
-    - `“narrow”`
-    - `“dotted”`
+    - `"wide"`
+    - `"short"`
+    - `"narrow"`
+    - `"dotted"`
 
 ## Supported Time Fields
 
@@ -94,7 +94,7 @@ Users want to determine several types of the formatting width as following
   + Second
   + Millisecond
   + Microsecond
-  + Nano Second
+  + Nanosecond
 
 ### Design
 
