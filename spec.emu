@@ -88,7 +88,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Else,
           1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
             1. Let _field_ be the Property value.
-            1. Let _val_ be _duration_.[[&lt;_field_&gt;]]
+            1. Let _val_ be _duration_.[[&lt;_field_&gt;]].
             1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
               1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
               1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
@@ -122,7 +122,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. If _options_ is *undefined*, then
           1. Let _options_ be ObjectCreate(*null*).
-        1. Else
+        1. Else,
           1. Let _options_ be ? ToObject(_options_).
         1. Let _opt_ be a new Record.
         1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
@@ -154,7 +154,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. If _field_ isn't in <emu-xref href="#table-duration-components"></emu-xref>, then
               1. Throw a *RangeError* exception.
           1. Set _durationFormat_.[[Fields]] to _fields_.
-        1. Else
+        1. Else,
           1. Throw a *TypeError* exception.
         1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_ &raquo;).
         1. Set _durationFormat_.[[PluralRules]] to ! Construct(%PluralRules%, &laquo; _locale_ &raquo;).
