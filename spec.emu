@@ -68,15 +68,42 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
     <emu-note type=editor>The [[Weeks]] field is still under discussion in Temporal. For more, check out the <a href="https://github.com/tc39/proposal-temporal/issues/532">Github thread</a> on the Temporal issue tracker.</emu-note>
 
+    <emu-clause id="sec-partitiondurationpattern" aoid="PartitionDurationPattern">
+      <h1>PartitionDurationPattern ( _duration_, _dataLocale_, _style_, _numberFormat_, _pluralRules_, _listFormat_ [ , _fields_ ] )</h1>
+
+      <p>The PartitionDurationPattern abstract operation is called with the arguments _duration_ (which must be a Record with the fields enumerated in <emu-xref href="#table-duration-components"></emu-xref>), _dataLocale_ (a locale), _style_ (one of *"long"*, *"short"*, *"narrow"*), _numberFormat_ (an `Intl.NumberFormat` object), _pluralRules_ (an `Intl.PluralRules` object), _listFormat_ (an `Intl.ListFormat` object, and optionally _fields_ (a List of Strings), and creates the corresponding parts. The following steps are taken:</p>
+
+      <emu-alg>
+        1. If _fields_ is *undefined*, then
+          1. Set _fields_ to « *"years"*, *"months"*, *"weeks"*, *"days"*, *"hours"*, *"minutes"*, *"seconds"*, *"milliseconds"*, *"microseconds"*, *"nanoseconds"* ».
+        1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
+        1. Let _patterns_ be _localeData_.[[&lt;_dataLocale_&gt;]].[[formats]].[[&lt;_style_&gt;]].
+        1. Let _list_ be « ».
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+          1. Let _value_ be the value of _duration_'s field whose name is the Internal Slot value of the current row.
+          1. Let _field_ be the Property value of the current row.
+          1. If _value_ is not *undefined* and _fields_ contains _field_, then
+            1. Let _unit_ be ! SingularRelativeTimeUnit(_field_).
+            1. Let _pr_ be ! ResolvePlural(_pluralRules_, _value_).
+            1. Let _pattern_ be _patterns_.[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
+            1. Let _formattedValue_ be ! PartitionNumberPattern(_numberFormat_, _value_).
+            1. Let _parts_ be ! MakePartsList(_pattern_, _unit_, _formattedValue_).
+            1. Append _parts_ to _list_.
+        1. Let _result_ be ! CreatePartsFromList(_listFormat_, _list_).
+        1. <mark>TODO: Perhaps we want to merge adjacent literals.</mark>
+        1. Return _result_.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-partitiondurationformatpattern" aoid="PartitionDurationFormatPattern">
       <h1>PartitionDurationFormatPattern ( _durationFormat_, _duration_ )</h1>
 
       <p>The PartitionDurationFormatPattern abstract operation is called with the arguments _durationFormat_ (which must be an object initialized as a DurationFormat) and _duration_ (which must be a Record with the fields enumerated in <emu-xref href="#table-duration-components"></emu-xref>), and creates the corresponding parts according to the effective locale and the formatting options of _durationFormat_. The following steps are taken:</p>
 
       <emu-alg>
-        1. Let _result_ be a new empty List.
         1. If _durationFormat_.[[Style]] is `"dotted"`, then
           1. <mark>TODO: [[formats]].[[dotted]] needs to be keyed by which fields are available in this case.</mark>
+          1. Let _result_ be a new empty List.
           1. Let _template_ be _dataLocaleData_.[[formats]].[[dotted]].[[&lt;_pr_&gt;]].
           1. Let _patternParts_ be PartitionPattern(_pattern_).
           1. For each element _patternPart_ in _patternParts_, in List order, do
@@ -86,26 +113,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Else if _duration_.[[&lt;_p_&gt;]] is not *undefined* and _p_ exists in _durationFormat_.[[Fields]], then
               1. Let _num_ be FormatNumeric(_durationFormat_.[[NumberFormat]], _duration_.[[&lt;_p_&gt;]]).
               1. Append the new Record { [[Type]]: _p_, [[Value]]: _num_ } to the end of _result_.
-        1. Else,
-          1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-            1. Let _field_ be the Property value.
-            1. Let _val_ be _duration_.[[&lt;_field_&gt;]].
-            1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
-              1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
-              1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
-              1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-              1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
-              1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
-              1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
-              1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
-              1. Let _concat_ be an empty String.
-              1. For each element _part_ in _parts_, in List order, do
-                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
-                1. If _part_ has a [[Unit]] field, then
-                  1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
-              1. Append the new Record { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
-          1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
-        1. Return _result_.
+          1. Return _result_.
+        1. Return ! PartitionDurationPattern(_duration_, _durationFormat_.[[DataLocale]], _durationFormat_.[[Style]], _durationFormat_.[[NumberFormat]], _durationFormat_.[[PluralRules]], _durationFormat_.[[ListFormat]], _durationFormat_.[[Fields]]).
       </emu-alg>
     </emu-clause>
   </emu-clause>

@@ -51,6 +51,11 @@
             "id": "sec-formatnumber"
         },
         {
+            "type": "op",
+            "aoid": "SingularRelativeTimeUnit",
+            "id": "sec-singularrelativetimeunit"
+        },
+        {
             "type": "clause",
             "number": "12.3.3",
             "id": "sec-intl.numberformat-internal-slots"
