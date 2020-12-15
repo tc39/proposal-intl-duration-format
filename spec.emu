@@ -76,8 +76,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _durationFormat_.[[Style]] is `"dotted"`, then
-          1. <mark>TODO: [[Templates]] needs to be keyed by which fields are available in this case.</mark>
-          1. Let _patternParts_ be PartitionPattern(_durationFormat_.[[Templates]]).
+          1. <mark>TODO: [[formats]].[[dotted]] needs to be keyed by which fields are available in this case.</mark>
+          1. Let _template_ be _dataLocaleData_.[[formats]].[[dotted]].[[&lt;_pr_&gt;]].
+          1. Let _patternParts_ be PartitionPattern(_pattern_).
           1. For each element _patternPart_ in _patternParts_, in List order, do
             1. Let _p_ be _patternPart_.[[Type]].
             1. If _p_ is `"literal"`, then
@@ -92,7 +93,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
               1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
               1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
-              1. Let _template_ be _durationFormat_.[[Templates]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
+              1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+              1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
+              1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
+              1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
               1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
               1. Let _concat_ be an empty String.
               1. For each element _part_ in _parts_, in List order, do
@@ -118,7 +122,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[NumberingSystem]], [[Style]], [[Fields]], [[Templates]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[Fields]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. If _options_ is *undefined*, then
           1. Let _options_ be ObjectCreate(*null*).
@@ -137,10 +141,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"dotted"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
-        1. Let _dataLocale_ be _r_.[[dataLocale]].
-        1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
-        1. Let _templates_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].
-        1. Set _durationFormat_.[[Templates]] to _templates_.
+        1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _fields_ be ? Get(_options_, `"fields"`).
         1. If _fields_ is *undefined*, then
           1. Let _list_ be a new empty List.
@@ -326,14 +327,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
     <ul>
       <li>[[Locale]] is a String value with the language tag of the locale whose localization is used for formatting.</li>
+      <li>[[DataLocale]] is a String value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of [[Locale]].</li>
       <li>[[NumberingSystem]] is a String value with the `"type"` given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
       <li>[[Style]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"dotted"` identifying the duration formatting style used.</li>
       <li>[[Fields]] is a List value specifying which duration fields are required to be printed.</li>
-      <li>[[Templates]] is a Record value with fields representing each of the plural rules for the current [[Locale]], each of which has the fields enumerated in <emu-xref href="#table-duration-components"></emu-xref>, each containing template strings for each of the supported units for duration formatting if the value of [[Style]] is either *"long"*, *"short"* or *"narrow"*. If the value of [[Style]] is *"dotted"*, it instead contains a single pattern string.</li>
       <li>[[NumberFormat]] is an Intl.NumberFormat object used for formatting.</li>
       <li>[[PluralRules]] is an Intl.PluralRules object used for formatting.</li>
       <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
     </ul>
-    <emu-note type=editor>[[Templates]] needs to be keyed by the available fields when [[Style]] is "dotted"</emu-note>
   </emu-clause>
 </emu-clause>
