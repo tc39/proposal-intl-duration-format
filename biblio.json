@@ -12,6 +12,11 @@
         },
         {
             "type": "op",
+            "aoid": "CreatePartsFromList",
+            "id": "sec-createpartsfromlist"
+        },
+        {
+            "type": "op",
             "aoid": "GetOption",
             "id": "sec-getoption"
         },
@@ -56,13 +61,6 @@
             "type": "op",
             "aoid": "ToPartialDuration",
             "id": "sec-temporal-topartialduration"
-        }
-    ],
-    "https://tc39.github.io/proposal-intl-list-format/": [
-        {
-            "type": "op",
-            "aoid": "CreatePartsFromList",
-            "id": "sec-createpartsfromlist"
         }
     ]
 }
