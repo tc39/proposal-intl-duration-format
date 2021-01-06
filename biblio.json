@@ -12,8 +12,8 @@
         },
         {
             "type": "op",
-            "aoid": "CreatePartsFromList",
-            "id": "sec-createpartsfromlist"
+            "aoid": "DeconstructPattern",
+            "id": "sec-deconstructpattern"
         },
         {
             "type": "op",
