@@ -150,7 +150,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Append _field_ as the last element of _list_.
           1. Set _durationFormat_.[[Fields]] to _list_.
         1. Else if IsArray(_fields_) is *true*, then
-          1. Set _fields_ to ? CreateListFromArrayLike(_fields_).
+          1. Set _fields_ to ? CreateListFromArrayLike(_fields_, « String »).
           1. For each element _field_ in _fields_, in List order, do
             1. If _field_ isn't in <emu-xref href="#table-duration-components"></emu-xref>, then
               1. Throw a *RangeError* exception.
