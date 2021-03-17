@@ -44,7 +44,7 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 
 # V8 Prototype
 * CL https://chromium-review.googlesource.com/c/v8/v8/+/2762664
-* Sync with "Stage 1 Draft / June 1, 2020" version of spec
+* Sync with ["Stage 1 Draft / June 1, 2020" version of spec](https://github.com/tc39/proposal-intl-duration-format/commit/fc8ff131cf7e688810b38d7e95d6fa44b1f1964e)
 * Flag --harmony_intl_duration_format
 * Not yet implment formatToParts
 * Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
