@@ -42,6 +42,9 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 // "1 heure, 46 minutes et 40 secondes"
 ```
 
+# V8 Prototype
+Sync with "Stage 1 Draft / June 1, 2020" version of spec https://chromium-review.googlesource.com/c/v8/v8/+/2762664 with flag --harmony_intl_duration_format
+
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
