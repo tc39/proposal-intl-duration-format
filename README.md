@@ -47,8 +47,9 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 * Sync with "Stage 1 Draft / June 1, 2020" version of spec
 * Flag --harmony_intl_duration_format
 * Not yet implment formatToParts
-* Implementation of  Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] ) need to be improved.
-
+* Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
+  * hideZeroValued
+  * smallestUnit / largestUnit
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
