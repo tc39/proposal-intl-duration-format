@@ -43,7 +43,11 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 ```
 
 # V8 Prototype
-Sync with "Stage 1 Draft / June 1, 2020" version of spec https://chromium-review.googlesource.com/c/v8/v8/+/2762664 with flag --harmony_intl_duration_format
+* CL https://chromium-review.googlesource.com/c/v8/v8/+/2762664
+* Sync with "Stage 1 Draft / June 1, 2020" version of spec
+* Flag --harmony_intl_duration_format
+* Not yet implment formatToParts
+* Implementation of  Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] ) need to be improved.
 
 # Motivation
 
