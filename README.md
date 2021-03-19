@@ -48,15 +48,14 @@ Two v8 prototypes (try to use two different possible ICU classes) were made, BOT
 * Flag --harmony_intl_duration_format
 * Not yet implment formatToParts
 * Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
-  * hideZeroValued
-  * smallestUnit / largestUnit
+  + hideZeroValued
+  + smallestUnit / largestUnit
 
 1. Base the implementation on MeasureFormat
-  * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
-
+   * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
 2. Based on LocalizedNumberFormatter
-  * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
-  * Not yet implement style:"dotted"
+   * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
+   * Not yet implement style:"dotted"
    
 # Motivation
 
