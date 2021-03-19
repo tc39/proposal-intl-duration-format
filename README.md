@@ -42,14 +42,22 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 // "1 heure, 46 minutes et 40 secondes"
 ```
 
-# V8 Prototype
-* CL https://chromium-review.googlesource.com/c/v8/v8/+/2762664
+# V8 Prototypes
+Two v8 prototypes (try to use two different possible ICU classes) were made, BOTH are
 * Sync with ["Stage 1 Draft / June 1, 2020" version of spec](https://github.com/tc39/proposal-intl-duration-format/commit/fc8ff131cf7e688810b38d7e95d6fa44b1f1964e)
 * Flag --harmony_intl_duration_format
 * Not yet implment formatToParts
 * Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
   * hideZeroValued
   * smallestUnit / largestUnit
+
+1. Base the implementation on MeasureFormat
+  * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
+
+2. Based on LocalizedNumberFormatter
+  * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
+  * Not yet implement style:"dotted"
+   
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
