@@ -42,6 +42,25 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 // "1 heure, 46 minutes et 40 secondes"
 ```
 
+# V8 Prototypes
+Two v8 prototypes (try to use two different possible ICU classes) were made, BOTH are
+* Sync with ["Stage 1 Draft / June 1, 2020" version of spec](https://github.com/tc39/proposal-intl-duration-format/commit/fc8ff131cf7e688810b38d7e95d6fa44b1f1964e)
+* Flag --harmony_intl_duration_format
+* Not yet implment formatToParts
+* Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
+  + hideZeroValued
+  + smallestUnit / largestUnit
+
+1. Base the implementation on [icu::MeasureFormat::formatMeasures()](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/classicu_1_1MeasureFormat.html#ade104d40578223bd194050914b090904)
+   * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
+   * Need solution of [ICU-21543 "Add methods to return FormattedValue to MeasureFormat "](https://unicode-org.atlassian.net/browse/ICU-21543) to implement formatToParts().
+2. Based on [the support of "-and-" unit in LocalizedNumberFormatter](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/classicu_1_1number_1_1LocalizedNumberFormatter.html)
+   * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
+   * Not yet implement style:"dotted"
+   * Need solution of the following to implement formatToParts():
+     + [ICU-21544 "unit format in number formatter return U_INTERNAL_PROGRAM_ERROR with "year-and-" (except month) and  "month-and-""](https://unicode-org.atlassian.net/browse/ICU-21544)
+     + [ICU-21547 "nextPosition() of FormattedNumber of unit with "-and-" is buggy"](https://unicode-org.atlassian.net/browse/ICU-21547)
+
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
