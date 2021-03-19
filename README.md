@@ -53,10 +53,14 @@ Two v8 prototypes (try to use two different possible ICU classes) were made, BOT
 
 1. Base the implementation on MeasureFormat
    * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
+   * Need solution of [ICU-21543 "Add methods to return FormattedValue to MeasureFormat "](https://unicode-org.atlassian.net/browse/ICU-21543) to implement formatToParts().
 2. Based on LocalizedNumberFormatter
    * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
    * Not yet implement style:"dotted"
-   
+   * Need solution of the following to implement formatToParts():
+     + [ICU-21544 "unit format in number formatter return U_INTERNAL_PROGRAM_ERROR with "year-and-" (except month) and  "month-and-""](https://unicode-org.atlassian.net/browse/ICU-21544)
+     + [ICU-21547 "nextPosition() of FormattedNumber of unit with "-and-" is buggy"](https://unicode-org.atlassian.net/browse/ICU-21547)
+
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
