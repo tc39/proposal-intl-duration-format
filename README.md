@@ -51,10 +51,10 @@ Two v8 prototypes (try to use two different possible ICU classes) were made, BOT
   + hideZeroValued
   + smallestUnit / largestUnit
 
-1. Base the implementation on MeasureFormat
+1. Base the implementation on [icu::MeasureFormat::formatMeasures()](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/classicu_1_1MeasureFormat.html#ade104d40578223bd194050914b090904)
    * https://chromium-review.googlesource.com/c/v8/v8/+/2762664
    * Need solution of [ICU-21543 "Add methods to return FormattedValue to MeasureFormat "](https://unicode-org.atlassian.net/browse/ICU-21543) to implement formatToParts().
-2. Based on LocalizedNumberFormatter
+2. Based on [the support of "-and-" unit in LocalizedNumberFormatter](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/classicu_1_1number_1_1LocalizedNumberFormatter.html)
    * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
    * Not yet implement style:"dotted"
    * Need solution of the following to implement formatToParts():
