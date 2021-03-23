@@ -19,26 +19,29 @@ This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
 # Overview
 
 * Time Duration is how long something lasts, from the start to end. It can be represented by a single time unit or multiple ones.
-  + For example,
+  + For example, 10,000 seconds could be represented as:
     - 10000 seconds
-    - 2 hours 46 minutes 40 seconds
+    - 2 hours, 46 minutes and 40 seconds
+
 * Every locale has its own way to format duration.
   + For example:
     - en-US: 1 hour, 46 minutes and 40 seconds
     - fr-FR: 1 heure, 46 minutes et 40 secondes
-* There are multiple widths for the time duration.
-  + For example, wide and short
-    - 1 hour, 46 minutes and 40 seconds → Wide
-    - 1 hr, 46 min, 40 sec → Short
+
+* There are different formatting widths for durations.
+  + For example:
+    - wide: 1 hour, 46 minutes and 40 seconds
+    - short: 1 hr, 46 min, 40 sec
 
 # Quick Start Example
 
 ```javascript
-new Intl.DurationFormat("fr-FR", { style: "long" }).format({
+result = new Intl.DurationFormat("fr-FR", { style: "long" }).format({
     hours: 1,
     minutes: 46,
     seconds: 40,
 });
+
 // "1 heure, 46 minutes et 40 secondes"
 ```
 
@@ -95,7 +98,7 @@ Users want to determine several types of the formatting width as following
 | Wide         | 1 hour and 50 minutes |
 | Short        | 1 hr, 50 min          |
 | Narrow       | 1h 50 m               |
-| Dotted       | 1: 50: 00             |
+| digital      | 1: 50: 00             |
 
 ### Design
 
@@ -103,7 +106,7 @@ Users want to determine several types of the formatting width as following
     - `"wide"`
     - `"short"`
     - `"narrow"`
-    - `"dotted"`
+    - `"digital"`
 
 ## Supported Time Fields
 
@@ -144,7 +147,10 @@ Users want to determine several types of the formatting width as following
 
 ### Design
 
-* Users can determine the time fields in array.
+* Users can determine the time fields by determining two arguments
+  * `largestUnit`: determine the largest unit could be displayed.
+  * `smallestUnit`: determine the smallest unit could be displayed. 
+
 * Example:
 
 ``` javascript
