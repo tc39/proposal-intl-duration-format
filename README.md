@@ -46,7 +46,7 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 Three v8 prototypes (try to use two different possible ICU classes) were made, ALL are
 * Sync with ["Stage 1 Draft / June 1, 2020" version of spec](https://github.com/tc39/proposal-intl-duration-format/commit/fc8ff131cf7e688810b38d7e95d6fa44b1f1964e)
 * Flag --harmony_intl_duration_format
-* Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as 
+* Have not implement any changes not yet spec out in https://tc39.es/proposal-intl-duration-format/ such as
   + hideZeroValued
   + smallestUnit / largestUnit
 
@@ -57,14 +57,14 @@ Three v8 prototypes (try to use two different possible ICU classes) were made, A
 2. Based on [the support of "-and-" unit in LocalizedNumberFormatter](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/classicu_1_1number_1_1LocalizedNumberFormatter.html)
    * https://chromium-review.googlesource.com/c/v8/v8/+/2775300
    * Not yet implment formatToParts
-   * Not yet implement style:"dotted"
+   * Not yet implement style:"digital"
    * Need solution of the following to implement formatToParts():
      + [ICU-21544 "unit format in number formatter return U_INTERNAL_PROGRAM_ERROR with "year-and-" (except month) and  "month-and-""](https://unicode-org.atlassian.net/browse/ICU-21544)
      + [ICU-21547 "nextPosition() of FormattedNumber of unit with "-and-" is buggy"](https://unicode-org.atlassian.net/browse/ICU-21547)
 3. Based on icu::ListFormatter and icu::number::LocalizedNumberFormatter w/o depend on the "X-and-Y" units.
    * https://chromium-review.googlesource.com/c/v8/v8/+/2776518
    * Implements formatToParts
-    * Not yet implement style:"dotted"
+    * Not yet implement style:"digital"
 # Motivation
 
 * Users need all types of duration format depending on the requirements of their application. For example, to show how long a flight takes, the duration should be in Short or Narrow format
@@ -95,7 +95,7 @@ Users want to determine several types of the formatting width as following
 | Wide         | 1 hour and 50 minutes |
 | Short        | 1 hr, 50 min          |
 | Narrow       | 1h 50 m               |
-| Dotted       | 1: 50: 00             |
+| Digital      | 1: 50: 00             |
 
 ### Design
 
@@ -103,7 +103,7 @@ Users want to determine several types of the formatting width as following
     - `"wide"`
     - `"short"`
     - `"narrow"`
-    - `"dotted"`
+    - `"digital"`
 
 ## Supported Time Fields
 
