@@ -180,17 +180,19 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"digital"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
-        1. Let _smallestUnit_ be ? ToSmallestTemporalDurationUnit(_options_, &laquo; &raquo; `undefined`).
-        1. Set _durationFormat_.[[SmallestUnit]] to _smallestUnit_.
-        1. Let _largestUnit_ be ? ToTemporalDurationUnit(_options_, `"largestUnit"`, `undefined`).
+        1. Let _smallestUnit_ be ? ToSmallestTemporalDurationUnit(_options_, &laquo; &raquo; `"nanoseconds"`).
+        1. Let _largestUnit_ be ? ToTemporalDurationUnit(_options_, `"largestUnit"`, `"years"`).
         1. If _smallestUnit_ is listed above _largestUnit_ in <emu-xref href="#table-duration-components"></emu-xref>,
           1. Throw a *RangeError* exception.
+        1. Set _durationFormat_.[[SmallestUnit]] to _smallestUnit_.
         1. Set _durationFormat_.[[LargestUnit]] to _largestUnit_.
-        1. Let _durationFormat_.[[TrailingZeroFields]] be ? GetOption(_options_, `"trailingZeroFields"`, &laquo; `"show"`, `"hide"` &raquo;, `"hide"`).
-        1. Let _durationFormat_.[[LeadingZeroFields]] be ? GetOption(_options_, `"leadingZeroFields"`, &laquo; `"show"`, `"hide"` &raquo;, `"hide"`).
+        1. Let _trailingZeroFields_ be ? GetOption(_options_, `"trailingZeroFields"`, &laquo; `"show"`, `"hide"` &raquo;, `"hide"`).
+        1. Let _leadingZeroFields_ be ? GetOption(_options_, `"leadingZeroFields"`, &laquo; `"show"`, `"hide"` &raquo;, `"hide"`).
         1. Let _internalZeroFields_ be ? GetOption(_options_, `"internalZeroFields"`, &laquo; `"show"`, `"hide"` &raquo;, `"hide"`).
         1. If _style_ is `"digital"` and _internalZeroFields_ is `"hide"`,
           1. Throw a *RangeError* exception.
+        1. Set _durationFormat_.[[TrailingZeroFields]] to _trailingZeroFields_.
+        1. Set _durationFormat_.[[LeadingZeroFields]] to _leadingZeroFields_.
         1. Set _durationFormat_.[[InternalZeroFields]] to _internalZeroFields_.
         1. <mark>TODO: consider if `"auto"` should be available here.</mark>
         1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_ &raquo;).
