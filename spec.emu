@@ -68,8 +68,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     </emu-table>
 
     <emu-clause id="sec-getunitoptions" aoid="GetUnitOptions">
-      <h1>GetUnitOptions ( _unit_, _options_, _baseStyle_ )</h1>
-      <p>The GetUnitOptions abstract operation is called with the arguments _unit_ (which must be a String), _options_ (which must be an Object) and _baseStyle_ (which must be a String) and returns a Record containing the relevant options for that unit. The following steps are taken:</p>
+      <h1>GetUnitOptions ( _unit_, _options_, _baseStyle_, _prevStyle_ )</h1>
+      <p>The GetUnitOptions abstract operation is called with the arguments _unit_ (which must be a String), _options_ (which must be an Object), _baseStyle_ (which must be a String), and _prevStyle_ (which must be a String) and returns a Record containing the relevant options for that unit. The following steps are taken:</p>
 
       <emu-alg>
         1. Let _stylesList_ be the List &laquo; `"long"`, `"short"`, `"narrow"` &raquo;.
@@ -85,6 +85,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _displayDefault_ to `"always"`.
         1. Let _displayField_ be the string-concatenation of _unit_ and `"Display"`.
         1. Let _display_ be ? GetOption(_options_, _displayField_, &laquo; `"auto"`, `"always"` &raquo;, _displayDefault_).
+        1. If _prevStyle_ is `"numeric` or `"2-digit`, then
+          1. If _style_ is not `"numeric` or `"2-digit"`, then
+            1. Throw a *RangeError* exception.
+          1. Else if _unit_ is `"minutes"` or `"seconds"`, then
+            1. Set _style_ to `"2-digit"`.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
@@ -181,19 +186,19 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _hoursOptions_ be ? GetUnitOptions(`"hours"`, _options_, _style_).
         1. Set _durationFormat_.[[HoursStyle]] to _hoursOptions_.[[Style]].
         1. Set _durationFormat_.[[HoursDisplay]] to _hoursOptions_.[[Display]].
-        1. Let _minutesOptions_ be ? GetUnitOptions(`"minutes"`, _options_, _style_).
+        1. Let _minutesOptions_ be ? GetUnitOptions(`"minutes"`, _options_, _style_, _durationFormat_.[[HoursStyle]]).
         1. Set _durationFormat_.[[MinutesStyle]] to _minutesOptions_.[[Style]].
         1. Set _durationFormat_.[[MinutesDisplay]] to _minutesOptions_.[[Display]].
-        1. Let _secondsOptions_ be ? GetUnitOptions(`"seconds"`, _options_, _style_).
+        1. Let _secondsOptions_ be ? GetUnitOptions(`"seconds"`, _options_, _style_, _durationFormat_.[[MinutesStyle]]).
         1. Set _durationFormat_.[[SecondsStyle]] to _secondsOptions_.[[Style]].
         1. Set _durationFormat_.[[SecondsDisplay]] to _secondsOptions_.[[Display]].
-        1. Let _millisecondsOptions_ be ? GetUnitOptions(`"milliseconds"`, _options_, _style_).
+        1. Let _millisecondsOptions_ be ? GetUnitOptions(`"milliseconds"`, _options_, _style_, _durationFormat_.[[SecondsStyle]]).
         1. Set _durationFormat_.[[MillisecondsStyle]] to _millisecondsOptions_.[[Style]].
         1. Set _durationFormat_.[[MillisecondsDisplay]] to _millisecondsOptions_.[[Display]].
-        1. Let _microsecondsOptions_ be ? GetUnitOptions(`"microseconds"`, _options_, _style_).
+        1. Let _microsecondsOptions_ be ? GetUnitOptions(`"microseconds"`, _options_, _style, _durationFormat_.[[MicrosecondsStyle]]_).
         1. Set _durationFormat_.[[MicrosecondsStyle]] to _microsecondsOptions_.[[Style]].
         1. Set _durationFormat_.[[MicrosecondsDisplay]] to _microsecondsOptions_.[[Display]].
-        1. Let _nanosecondsOptions_ be ? GetUnitOptions(`"nanoseconds"`, _options_, _style_).
+        1. Let _nanosecondsOptions_ be ? GetUnitOptions(`"nanoseconds"`, _options_, _style_, _durationFormat_.[[NanosecondsStyle]]).
         1. Set _durationFormat_.[[NanosecondsStyle]] to _nanosecondsOptions_.[[Style]].
         1. Set _durationFormat_.[[NanosecondsDisplay]] to _nanosecondsOptions_.[[Display]].
         1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, `undefined`).
