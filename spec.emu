@@ -79,7 +79,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Set _stylesList_ to the list-concatenation of _stylesList_ and &laquo; "2-digit" &raquo;.
         1. Let _style_ be ? GetOption(_options_, _unit_, _stylesList_, *undefined*).
         1. If _style_ is *undefined*, then
-          1. Set _style_ to _baseStyle_.
+          1. If _baseStyle_ is `"digital"`, then
+            1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds"`, or `"nanoseconds"`, then
+              1. Set _style_ to `"numeric"`.
+            1. Else,
+              1. Set _style_ to `"narrow"`.
+          1. Else,
+            1. Set _style_ to _baseStyle_.
           1. Let _displayDefault_ to `"auto"`.
         1. Else,
           1. Let _displayDefault_ to `"always"`.
