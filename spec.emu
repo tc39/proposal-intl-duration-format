@@ -68,7 +68,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     </emu-table>
 
     <emu-clause id="sec-getunitoptions" aoid="GetUnitOptions">
-      <h1>GetUnitOptions ( _unit_, _options_, _baseStyle_, _timeUnit_ )</h1>
+      <h1>GetUnitOptions ( _unit_, _options_, _baseStyle_ )</h1>
       <p>The GetUnitOptions abstract operation is called with the arguments _unit_ (which must be a String), _options_ (which must be an Object) and _baseStyle_ (which must be a String) and returns a Record containing the relevant options for that unit. The following steps are taken:</p>
 
       <emu-alg>
