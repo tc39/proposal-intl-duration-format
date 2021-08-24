@@ -146,7 +146,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]]  &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]]  &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. If _options_ is *undefined*, then
           1. Let _options_ be ObjectCreate(*null*).
@@ -196,6 +196,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _nanosecondsOptions_ be ? GetUnitOptions(`"nanoseconds"`, _options_, _style_).
         1. Set _durationFormat_.[[NanosecondsStyle]] to _nanosecondsOptions_.[[Style]].
         1. Set _durationFormat_.[[NanosecondsDisplay]] to _nanosecondsOptions_.[[Display]].
+        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, `undefined`).
         1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_ &raquo;).
         1. Set _durationFormat_.[[PluralRules]] to ! Construct(%PluralRules%, &laquo; _locale_ &raquo;).
         1. If _style_ is not `"digital"`, then
@@ -426,6 +427,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <td>[[NanosecondsDisplay]]</td>
             <td>`"nanosecondsDisplay"`</td>
           </tr>
+          <tr>
+            <td>[[FractionalDigits]]</td>
+            <td>`"fractionalDigits"`</td>
+          </tr>
         </table>
       </emu-table>
     </emu-clause>
@@ -465,6 +470,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <li>[[MicrosecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the microseconds field.</li>
       <li>[[NanosecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"numeric"` identifying the formatting style used for the nanoseconds field.</li>
       <li>[[NanosecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the nanoseconds field.</li>
+      <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
       <li>[[NumberFormat]] is an Intl.NumberFormat object used for formatting.</li>
       <li>[[PluralRules]] is an Intl.PluralRules object used for formatting.</li>
       <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
