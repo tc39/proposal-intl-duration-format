@@ -20,48 +20,70 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <table class="real-table">
         <thead>
           <tr>
-            <th>Internal Slot</th>
-            <th>Property</th>
+            <th>Value Slot</th>
+            <th>Style Slot</th>
+            <th>Display Slot</th>
+            <th>Unit</th>
           </tr>
         </thead>
         <tr>
           <td>[[Years]]</td>
+          <td>[[YearsStyle]]</td>
+          <td>[[YearsDisplay]]</td>
           <td>`"years"`</td>
         </tr>
         <tr>
           <td>[[Months]]</td>
+          <td>[[MonthsStyle]]</td>
+          <td>[[MonthsDisplay]]</td>
           <td>`"months"`</td>
         </tr>
         <tr>
           <td>[[Weeks]]</td>
+          <td>[[WeeksStyle]]</td>
+          <td>[[WeeksDisplay]]</td>
           <td>`"weeks"`</td>
         </tr>
         <tr>
           <td>[[Days]]</td>
+          <td>[[DaysStyle]]</td>
+          <td>[[DaysDisplay]]</td>
           <td>`"days"`</td>
         </tr>
         <tr>
           <td>[[Hours]]</td>
+          <td>[[HoursStyle]]</td>
+          <td>[[HoursDisplay]]</td>
           <td>`"hours"`</td>
         </tr>
         <tr>
           <td>[[Minutes]]</td>
+          <td>[[MinutesStyle]]</td>
+          <td>[[MinutesDisplay]]</td>
           <td>`"minutes"`</td>
         </tr>
         <tr>
           <td>[[Seconds]]</td>
+          <td>[[SecondsStyle]]</td>
+          <td>[[SecondsDisplay]]</td>
           <td>`"seconds"`</td>
         </tr>
         <tr>
           <td>[[Milliseconds]]</td>
+          <td>[[MillisecondsStyle]]</td>
+          <td>[[MillisecondsDisplay]]</td>
           <td>`"milliseconds"`</td>
         </tr>
         <tr>
           <td>[[Microseconds]]</td>
+          <td>[[MicrosecondsStyle]]</td>
+          <td>[[MicrosecondsDisplay]]</td>
           <td>`"microseconds"`</td>
         </tr>
         <tr>
           <td>[[Nanoseconds]]</td>
+          <td>[[NanosecondsStyle]]</td>
+          <td>[[NanosecondsDisplay]]</td>
           <td>`"nanoseconds"`</td>
         </tr>
       </table>
@@ -103,6 +125,34 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-clipduration" aoid="ClipDuration">
+      <h1>ClipDuration ( _duration_, _upper_, _lower_ )</h1>
+      <p>The ClipDuration abstract operation is called with the arguments _duration_ (which must be an object initialized as a Temporal.Duration), _upper- (which must be a string), and _lower_ (which must be a string), and returns the _duration_ clipped at between the specified units. The following steps are taken:</p>
+      <emu-alg>
+        1. Let _clipped_ be ? CreateTemporalDuration(0, 0, 0, 0, 0, 0, 0, 0, 0, 0).
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, starting from _unit_, in table order, do
+          1. If _unit_ is _lower_, then
+            1. Return _clipped_.
+          1. Let _valueSlot_ be the Value Slot property.
+          1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
+          1. Set _clipped_.[[&lt;_valueSlot_&gt;]] to _value_.
+        1. Return _clipped_.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-numericlimit" aoid="NumericLimit">
+      <h1>NumericLimit (_durationFormat_, _start_)</h1>
+      <p>The NumericLimit abstract operation is called with the arguments _duration_ (which must be an object initialized as a DurationFormat), and _start_ (which must be a string), and returns a string. The following steps are taken:</p>
+      <emu-alg>
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, starting from the row next after _unit_, in table order, do
+          1. Let _unit_ be the Field property.
+          1. Let _styleSlot_ be the Style Slot property.
+          1. If _durationFormat_.[[&lt;_styleSlot_&gt;]] is not `"numeric"`, then
+            1. Return _unit_.
+        1. Return `"nanoseconds"`.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-partitiondurationformatpattern" aoid="PartitionDurationFormatPattern">
       <h1>PartitionDurationFormatPattern ( _durationFormat_, _duration_ )</h1>
 
@@ -110,36 +160,44 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. Let _result_ be a new empty List.
-        1. If _durationFormat_.[[Style]] is `"digital"`, then
-          1. <mark>TODO: [[formats]].[[digital]] needs to be keyed by which fields are available in this case.</mark>
-          1. Let _template_ be _dataLocaleData_.[[formats]].[[digital]].[[&lt;_pr_&gt;]].
-          1. Let _patternParts_ be PartitionPattern(_pattern_).
-          1. For each element _patternPart_ in _patternParts_, in List order, do
-            1. Let _p_ be _patternPart_.[[Type]].
-            1. If _p_ is `"literal"`, then
-              1. Append _patternPart_ to the end of _result_.
-            1. Else if _duration_.[[&lt;_p_&gt;]] is not *undefined* and _p_ exists in _durationFormat_.[[Fields]], then
-              1. Let _num_ be FormatNumeric(_durationFormat_.[[NumberFormat]], _duration_.[[&lt;_p_&gt;]]).
-              1. Append the new Record { [[Type]]: _p_, [[Value]]: _num_ } to the end of _result_.
-        1. Else,
-          1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-            1. Let _field_ be the Property value.
-            1. Let _val_ be _duration_.[[&lt;_field_&gt;]].
-            1. If _val_ is not *undefined* and _field_ exists in _durationFormat_.[[Fields]], then
-              1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
-              1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
-              1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-              1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
-              1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
-              1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
-              1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
-              1. Let _concat_ be an empty String.
-              1. For each element _part_ in _parts_, in List order, do
-                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
-                1. If _part_ has a [[Unit]] field, then
-                  1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
-              1. Append the new Record { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
-          1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+          1. Let _styleSlot_ be the Style Slot value.
+          1. Let _displaySlot_ be the Display Slot value.
+          1. Let _valueSlot_ be the Value Slot value.
+          1. Let _unit_ be the Unit value.
+          1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
+          1. If _style_ is `"numeric"`, then
+            1. Skip to the next iteration.
+          1. Let _value_ be `0`.
+          1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds", then
+            1. Let _next_ be ! NumericLimit(_durationFormat_, _unit_).
+            1. Let _clipped_ be ! ClipDuration(_duration_, _unit_, _next_).
+            1. Let _totalOpts_ be ! OrdinaryObjectCreate(`null`).
+            1. Perform ? OrdinarySet(_totalOpts_, `"unit"`, _unit_).
+            1. Set _value_ to ? Call(_duration_, `"total"`, _totalOpts_).
+          1.  Else,
+            1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]]
+          1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
+          1. If _value_ is not `0` and _display_ is `"auto"`, then
+            1. Skip to the next iteration.
+          1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
+          1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+          1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
+          1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
+          1. If _style_ is `"2-digit"`, then
+            1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
+            1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
+          1. Else,
+            1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
+            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
+            1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
+            1. Let _concat_ be an empty String.
+            1. For each element _part_ in _parts_, in List order, do
+              1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
+              1. If _part_ has a [[Unit]] field, then
+                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
+            1. Append the new Record { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
+        1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
         1. Return _result_.
       </emu-alg>
     </emu-clause>
@@ -255,10 +313,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, `narrow`, and `digital`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain *"{0}"* to be replaced by a formatted number. The value of the fourth field, corresponding to the `digital` style, on the other hand, must be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with `"{"`, followed by the name of the field, followed by `"}"`.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, and `narrow`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain *"{0}"* to be replaced by a formatted number. The value of the fourth field, corresponding to the `digital` style, on the other hand, must be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with `"{"`, followed by the name of the field, followed by `"}"`.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[formats]] should have an additional [[digital]] field which is a record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
       </ul>
 
-      <emu-note type=editor>TODO: [[formats]].[[digital]] need to be keyed by the available fields.</emu-note>
       <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
     </emu-clause>
   </emu-clause>
