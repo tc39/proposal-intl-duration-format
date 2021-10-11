@@ -172,8 +172,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds", then
             1. Let _next_ be ! NumericLimit(_durationFormat_, _unit_).
             1. Let _clipped_ be ! ClipDuration(_duration_, _unit_, _next_).
-            1. Let _totalOpts_ be ! OrdinaryObjectCreate(`null`).
-            1. Perform ? OrdinarySet(_totalOpts_, `"unit"`, _unit_).
+            1. Let _totalOpts_ be ! ObjectCreate(%ObjectPrototype%).
+            1. Perform ! CreateDataPropertyOrThrow(_totalOpts_, `"unit"`, _unit_).
             1. Set _value_ to ? Call(_duration_, `"total"`, _totalOpts_).
           1.  Else,
             1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]]
