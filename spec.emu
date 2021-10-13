@@ -176,8 +176,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
               1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
           1. Else,
-            1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
-            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_pr_&gt;]].
+            1. Let _pr_ be ? Construct(%PluralRules&, &laquo; _durationFormat_.[[Locale]] &raquo;).
+            1. Let _prv_ be ! ResolvePlural(_pr_, _value_).
+            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_prv_&gt;]].
             1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
             1. Let _concat_ be an empty String.
             1. For each element _part_ in _parts_, in List order, do
@@ -185,7 +186,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. If _part_ has a [[Unit]] field, then
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
             1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
-        1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
+        1. Let _lf_ be ? Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]] &raquo;).
+        1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
         1. Return _result_.
       </emu-alg>
     </emu-clause>
@@ -254,12 +256,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _durationFormat_.[[NanosecondsStyle]] to _nanosecondsOptions_.[[Style]].
         1. Set _durationFormat_.[[NanosecondsDisplay]] to _nanosecondsOptions_.[[Display]].
         1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, `undefined`).
-        1. Let _nfOpts_ be ! ObjectCreate(%ObjectPrototype%).
-        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
-        1. Set _durationFormat_.[[NumberFormat]] to ! Construct(%NumberFormat%, &laquo; _locale_, _nfOpts_ &raquo;).
-        1. Set _durationFormat_.[[PluralRules]] to ! Construct(%PluralRules%, &laquo; _locale_ &raquo;).
-        1. If _style_ is not `"digital"`, then
-          1. Set _durationFormat_.[[ListFormat]] to ! Construct(%ListFormat%, &laquo; _locale_ &raquo;).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
@@ -528,9 +524,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <li>[[NanosecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"numeric"` identifying the formatting style used for the nanoseconds field.</li>
       <li>[[NanosecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the nanoseconds field.</li>
       <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
-      <li>[[NumberFormat]] is an Intl.NumberFormat object used for formatting.</li>
-      <li>[[PluralRules]] is an Intl.PluralRules object used for formatting.</li>
-      <li>[[ListFormat]] is an Intl.ListFormat object used for formatting.</li>
     </ul>
   </emu-clause>
 </emu-clause>
