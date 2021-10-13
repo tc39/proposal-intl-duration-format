@@ -275,8 +275,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
-
-    <emu-note type=editor>It's currently being discussed what the best API for field selection would be. For more information, check out the corresponding <a href="https://github.com/tc39/proposal-intl-duration-format/issues/3">Github thread</a>.</emu-note>
   </emu-clause>
 
   <emu-clause id="sec-properties-of-intl-durationformat-constructor">
