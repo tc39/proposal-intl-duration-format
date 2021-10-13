@@ -126,30 +126,15 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     </emu-clause>
 
     <emu-clause id="sec-clipduration" aoid="ClipDuration">
-      <h1>ClipDuration ( _duration_, _upper_, _lower_ )</h1>
-      <p>The ClipDuration abstract operation is called with the arguments _duration_ (which must be an object initialized as a Temporal.Duration), _upper- (which must be a string), and _lower_ (which must be a string), and returns the _duration_ clipped at between the specified units. The following steps are taken:</p>
+      <h1>ClipDuration ( _duration_, _upper_ )</h1>
+      <p>The ClipDuration abstract operation is called with the arguments _duration_ (which must be an object initialized as a Temporal.Duration), and _upper_ (which must be a string) and returns the _duration_ clipped at the specified unit. The following steps are taken:</p>
       <emu-alg>
         1. Let _clipped_ be ? CreateTemporalDuration(0, 0, 0, 0, 0, 0, 0, 0, 0, 0).
         1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, starting from _unit_, in table order, do
-          1. If _unit_ is _lower_, then
-            1. Return _clipped_.
           1. Let _valueSlot_ be the Value Slot property.
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
           1. Set _clipped_.[[&lt;_valueSlot_&gt;]] to _value_.
         1. Return _clipped_.
-      </emu-alg>
-    </emu-clause>
-
-    <emu-clause id="sec-numericlimit" aoid="NumericLimit">
-      <h1>NumericLimit (_durationFormat_, _start_)</h1>
-      <p>The NumericLimit abstract operation is called with the arguments _duration_ (which must be an object initialized as a DurationFormat), and _start_ (which must be a string), and returns a string. The following steps are taken:</p>
-      <emu-alg>
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, starting from the row next after _unit_, in table order, do
-          1. Let _unit_ be the Field property.
-          1. Let _styleSlot_ be the Style Slot property.
-          1. If _durationFormat_.[[&lt;_styleSlot_&gt;]] is not `"numeric"`, then
-            1. Return _unit_.
-        1. Return `"nanoseconds"`.
       </emu-alg>
     </emu-clause>
 
@@ -166,37 +151,40 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
-          1. If _style_ is `"numeric"`, then
-            1. Skip to the next iteration.
+          1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
           1. Let _value_ be `0`.
-          1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds", then
-            1. Let _next_ be ! NumericLimit(_durationFormat_, _unit_).
-            1. Let _clipped_ be ! ClipDuration(_duration_, _unit_, _next_).
-            1. Let _totalOpts_ be ! ObjectCreate(%ObjectPrototype%).
-            1. Perform ! CreateDataPropertyOrThrow(_totalOpts_, `"unit"`, _unit_).
-            1. Set _value_ to ? Call(_duration_, `"total"`, _totalOpts_).
-          1.  Else,
+          1. If _style_ is `"2-digit"` or `"numeric"` and _unit_ is `"seconds"` or below, then
+              1. Let _clipped_ be ! ClipDuration(_duration_, _unit_).
+              1. Let _totalOpts_ be ! ObjectCreate(`null`).
+              1. Perform ! CreateDataPropertyOrThrow(_totalOpts_, `"unit"`, _unit_).
+              1. Set _value_ to ? Call(_clipped_, `"total"`, _totalOpts_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
+          1. Else,
             1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]]
-          1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
-          1. If _value_ is not `0` and _display_ is `"auto"`, then
+          1. If _style_ is `"2-digit"`, then
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
+          1. If _value_ is `0` or `-0` and _display_ is `"auto"`, then
             1. Skip to the next iteration.
-          1. Let _num_ be ! PartitionNumberPattern(_durationFormat_.[[NumberFormat]], _val_).
+          1. Let _nf_ be ? Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+          1. Let _num_ be ! FormatNumeric(_durationFormat_.[[NumberFormat]], _value_).
           1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
           1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
           1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
-          1. If _style_ is `"2-digit"`, then
-            1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
-            1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
+          1. If _style_ is `"2-digit"` or `"numeric"`, then
+            1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
+            1. If _unit_ is `"hours"` or `"minutes"`, then
+              1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
+              1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
           1. Else,
             1. Let _pr_ be ! ResolvePlural(_durationFormat_.[[PluralRules]], _val_).
-            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_field_&gt;]].[[&lt;_pr_&gt;]].
-            1. Let _parts_ be ! MakePartsList(_template_, _field_, _num_).
+            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_pr_&gt;]].
+            1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
             1. Let _concat_ be an empty String.
             1. For each element _part_ in _parts_, in List order, do
               1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
               1. If _part_ has a [[Unit]] field, then
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
-            1. Append the new Record { [[Type]]: _field_, [[Value]]: _concat_ } to the end of _result_.
+            1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
         1. Set _result_ to ! CreatePartsFromList(_durationFormat_.[[ListFormat]], _result_).
         1. Return _result_.
       </emu-alg>
