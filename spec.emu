@@ -222,36 +222,16 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"digital"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
-        1. Let _yearsOptions_ be ? GetUnitOptions(`"years"`, _options_, _style_).
-        1. Set _durationFormat_.[[YearsStyle]] to _yearsOptions_.[[Style]].
-        1. Set _durationFormat_.[[YearsDisplay]] to _yearsOptions_.[[Display]].
-        1. Let _monthsOptions_ be ? GetUnitOptions(`"months"`, _options_, _style_).
-        1. Set _durationFormat_.[[MonthsStyle]] to _monthsOptions_.[[Style]].
-        1. Set _durationFormat_.[[MonthsDisplay]] to _monthsOptions_.[[Display]].
-        1. Let _weeksOptions_ be ? GetUnitOptions(`"weeks"`, _options_, _style_).
-        1. Set _durationFormat_.[[WeeksStyle]] to _weeksOptions_.[[Style]].
-        1. Set _durationFormat_.[[WeeksDisplay]] to _weeksOptions_.[[Display]].
-        1. Let _daysOptions_ be ? GetUnitOptions(`"days"`, _options_, _style_).
-        1. Set _durationFormat_.[[DaysStyle]] to _daysOptions_.[[Style]].
-        1. Set _durationFormat_.[[DaysDisplay]] to _daysOptions_.[[Display]].
-        1. Let _hoursOptions_ be ? GetUnitOptions(`"hours"`, _options_, _style_).
-        1. Set _durationFormat_.[[HoursStyle]] to _hoursOptions_.[[Style]].
-        1. Set _durationFormat_.[[HoursDisplay]] to _hoursOptions_.[[Display]].
-        1. Let _minutesOptions_ be ? GetUnitOptions(`"minutes"`, _options_, _style_, _durationFormat_.[[HoursStyle]]).
-        1. Set _durationFormat_.[[MinutesStyle]] to _minutesOptions_.[[Style]].
-        1. Set _durationFormat_.[[MinutesDisplay]] to _minutesOptions_.[[Display]].
-        1. Let _secondsOptions_ be ? GetUnitOptions(`"seconds"`, _options_, _style_, _durationFormat_.[[MinutesStyle]]).
-        1. Set _durationFormat_.[[SecondsStyle]] to _secondsOptions_.[[Style]].
-        1. Set _durationFormat_.[[SecondsDisplay]] to _secondsOptions_.[[Display]].
-        1. Let _millisecondsOptions_ be ? GetUnitOptions(`"milliseconds"`, _options_, _style_, _durationFormat_.[[SecondsStyle]]).
-        1. Set _durationFormat_.[[MillisecondsStyle]] to _millisecondsOptions_.[[Style]].
-        1. Set _durationFormat_.[[MillisecondsDisplay]] to _millisecondsOptions_.[[Display]].
-        1. Let _microsecondsOptions_ be ? GetUnitOptions(`"microseconds"`, _options_, _style, _durationFormat_.[[MicrosecondsStyle]]_).
-        1. Set _durationFormat_.[[MicrosecondsStyle]] to _microsecondsOptions_.[[Style]].
-        1. Set _durationFormat_.[[MicrosecondsDisplay]] to _microsecondsOptions_.[[Display]].
-        1. Let _nanosecondsOptions_ be ? GetUnitOptions(`"nanoseconds"`, _options_, _style_, _durationFormat_.[[NanosecondsStyle]]).
-        1. Set _durationFormat_.[[NanosecondsStyle]] to _nanosecondsOptions_.[[Style]].
-        1. Set _durationFormat_.[[NanosecondsDisplay]] to _nanosecondsOptions_.[[Display]].
+        1. Let _prevStyle_ be *undefined*.
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+          1. Let _styleSlot_ be the Style Slot value.
+          1. Let _displaySlot_ be the Display Slot value.
+          1. Let _unit_ be the Unit value.
+          1. Let _unitOptions_ be ? GetUnitOptions(_unit_, _options_, _style_, _prevStyle_).
+          1. Set _durationFormat_.[[&lt;_styleSlot_&gt;]] to _unitOptions_.[[Style]].
+          1. Set _durationFormat_.[[&lt;_displaySlot_&gt;]] to _unitOptions_.[[Display]].
+          1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
+             1. Set _prevStyle_ to _unitOptions_.[[Style]].
         1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, `undefined`).
         1. Return _durationFormat_.
       </emu-alg>
