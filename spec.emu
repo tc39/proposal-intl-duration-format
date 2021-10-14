@@ -155,7 +155,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _value_ be `0`.
           1. If _style_ is `"2-digit"` or `"numeric"` and _unit_ is `"seconds"` or below, then
               1. Let _clipped_ be ! ClipDuration(_duration_, _unit_).
-              1. Let _totalOpts_ be ! ObjectCreate(`null`).
+              1. Let _totalOpts_ be ! OrdinaryObjectCreate(`null`).
               1. Perform ! CreateDataPropertyOrThrow(_totalOpts_, `"unit"`, _unit_).
               1. Set _value_ to ? Call(_clipped_, `"total"`, _totalOpts_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
