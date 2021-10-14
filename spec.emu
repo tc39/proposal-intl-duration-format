@@ -125,19 +125,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-clipduration" aoid="ClipDuration">
-      <h1>ClipDuration ( _duration_, _upper_ )</h1>
-      <p>The ClipDuration abstract operation is called with the arguments _duration_ (which must be an object initialized as a Temporal.Duration), and _upper_ (which must be a string) and returns the _duration_ clipped at the specified unit. The following steps are taken:</p>
-      <emu-alg>
-        1. Let _clipped_ be ? CreateTemporalDuration(0, 0, 0, 0, 0, 0, 0, 0, 0, 0).
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, starting from _unit_, in table order, do
-          1. Let _valueSlot_ be the Value Slot property.
-          1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
-          1. Set _clipped_.[[&lt;_valueSlot_&gt;]] to _value_.
-        1. Return _clipped_.
-      </emu-alg>
-    </emu-clause>
-
     <emu-clause id="sec-partitiondurationformatpattern" aoid="PartitionDurationFormatPattern">
       <h1>PartitionDurationFormatPattern ( _durationFormat_, _duration_ )</h1>
 
@@ -157,10 +144,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _value_ be `0`.
           1. Let _done_ be `false`.
           1. If _unit_ is `"seconds"`, `"milliseconds"` or `"microseconds"` and _nextStyle_ is `"numeric"`, then
-              1. Let _clipped_ be ! ClipDuration(_duration_, _unit_).
-              1. Let _totalOpts_ be ! ObjectCreate(`null`).
-              1. Perform ! CreateDataPropertyOrThrow(_totalOpts_, `"unit"`, _unit_).
-              1. Set _value_ to ? Call(_clipped_, `"total"`, _totalOpts_).
+              1. Set _value_ to _duration_.[[Microseconds]] + _duration_.[[Nanoseconds]] / 1000.
+              1. If _unit_ is `"seconds"` or `"milliseconds"`, then
+                1. Set _value_ to _duration_.[[Milliseconds]] + _value_ / 1000.
+                1. If _unit_ is `"seconds"`, then
+                  1. Set _value_ to _duration_.[[Seconds]] + _value_ / 1000.
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to `true`.
           1. Else,
