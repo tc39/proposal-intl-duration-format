@@ -187,7 +187,7 @@ function relevance(result) {
     relevance += 2048;
   }
 
-  relevance += Math.max(0, 255 - result.entry.key.length);
+  relevance += Math.max(0, 255 - result.key.length);
 
   return relevance;
 }
@@ -217,14 +217,15 @@ Search.prototype.search = function (searchString) {
 
     for (let i = 0; i < this.biblio.entries.length; i++) {
       let entry = this.biblio.entries[i];
-      if (!entry.key) {
+      let key = getKey(entry);
+      if (!key) {
         // biblio entries without a key aren't searchable
         continue;
       }
 
-      let match = fuzzysearch(searchString, entry.key);
+      let match = fuzzysearch(searchString, key);
       if (match) {
-        results.push({ entry, match });
+        results.push({ key, entry, match });
       }
     }
 
@@ -273,6 +274,7 @@ Search.prototype.displayResults = function (results) {
     let html = '<ul>';
 
     results.forEach(result => {
+      let key = result.key;
       let entry = result.entry;
       let id = entry.id;
       let cssClass = '';
@@ -280,19 +282,19 @@ Search.prototype.displayResults = function (results) {
 
       if (entry.type === 'clause') {
         let number = entry.number ? entry.number + ' ' : '';
-        text = number + entry.key;
+        text = number + key;
         cssClass = 'clause';
         id = entry.id;
       } else if (entry.type === 'production') {
-        text = entry.key;
+        text = key;
         cssClass = 'prod';
         id = entry.id;
       } else if (entry.type === 'op') {
-        text = entry.key;
+        text = key;
         cssClass = 'op';
         id = entry.id || entry.refId;
       } else if (entry.type === 'term') {
-        text = entry.key;
+        text = key;
         cssClass = 'term';
         id = entry.id || entry.refId;
       }
@@ -311,6 +313,31 @@ Search.prototype.displayResults = function (results) {
     this.$searchResults.classList.add('no-results');
   }
 };
+
+function getKey(item) {
+  if (item.key) {
+    return item.key;
+  }
+  switch (item.type) {
+    case 'clause':
+      return item.title || item.titleHTML;
+    case 'production':
+      return item.name;
+    case 'op':
+      return item.aoid;
+    case 'term':
+      return item.term;
+    case 'table':
+    case 'figure':
+    case 'example':
+    case 'note':
+      return item.caption;
+    case 'step':
+      return item.id;
+    default:
+      throw new Error("Can't get key for " + item.type);
+  }
+}
 
 function Menu() {
   this.$toggle = document.getElementById('menu-toggle');
@@ -567,24 +594,6 @@ Menu.prototype.selectPin = function (num) {
 };
 
 let menu;
-function init() {
-  menu = new Menu();
-  let $container = document.getElementById('spec-container');
-  $container.addEventListener(
-    'mouseover',
-    debounce(e => {
-      Toolbox.activateIfMouseOver(e);
-    })
-  );
-  document.addEventListener(
-    'keydown',
-    debounce(e => {
-      if (e.code === 'Escape' && Toolbox.active) {
-        Toolbox.deactivate();
-      }
-    })
-  );
-}
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -607,18 +616,17 @@ function debounce(fn, opts) {
 }
 
 let CLAUSE_NODES = ['EMU-CLAUSE', 'EMU-INTRO', 'EMU-ANNEX'];
-function findLocalReferences($elem) {
-  let name = $elem.innerHTML;
-  let references = [];
-
+function findContainer($elem) {
   let parentClause = $elem.parentNode;
   while (parentClause && CLAUSE_NODES.indexOf(parentClause.nodeName) === -1) {
     parentClause = parentClause.parentNode;
   }
+  return parentClause;
+}
 
-  if (!parentClause) return;
-
+function findLocalReferences(parentClause, name) {
   let vars = parentClause.querySelectorAll('var');
+  let references = [];
 
   for (let i = 0; i < vars.length; i++) {
     let $var = vars[i];
@@ -631,15 +639,32 @@ function findLocalReferences($elem) {
   return references;
 }
 
+let REFERENCED_CLASSES = Array.from({ length: 7 }, (x, i) => `referenced${i}`);
+function chooseHighlightIndex(parentClause) {
+  let counts = REFERENCED_CLASSES.map($class => parentClause.getElementsByClassName($class).length);
+  // Find the earliest index with the lowest count.
+  let minCount = Infinity;
+  let index = null;
+  for (let i = 0; i < counts.length; i++) {
+    if (counts[i] < minCount) {
+      minCount = counts[i];
+      index = i;
+    }
+  }
+  return index;
+}
+
 function toggleFindLocalReferences($elem) {
-  let references = findLocalReferences($elem);
+  let parentClause = findContainer($elem);
+  let references = findLocalReferences(parentClause, $elem.innerHTML);
   if ($elem.classList.contains('referenced')) {
     references.forEach($reference => {
-      $reference.classList.remove('referenced');
+      $reference.classList.remove('referenced', ...REFERENCED_CLASSES);
     });
   } else {
+    let index = chooseHighlightIndex(parentClause);
     references.forEach($reference => {
-      $reference.classList.add('referenced');
+      $reference.classList.add('referenced', `referenced${index}`);
     });
   }
 }
@@ -718,126 +743,6 @@ function fuzzysearch(searchString, haystack, caseInsensitive) {
 
   return { caseMatch: !caseInsensitive, chunks, prefix: j <= qlen };
 }
-
-let Toolbox = {
-  init() {
-    this.$outer = document.createElement('div');
-    this.$outer.classList.add('toolbox-container');
-    this.$container = document.createElement('div');
-    this.$container.classList.add('toolbox');
-    this.$outer.appendChild(this.$container);
-    this.$permalink = document.createElement('a');
-    this.$permalink.textContent = 'Permalink';
-    this.$pinLink = document.createElement('a');
-    this.$pinLink.textContent = 'Pin';
-    this.$pinLink.setAttribute('href', '#');
-    this.$pinLink.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      menu.togglePinEntry(this.entry.id);
-    });
-
-    this.$refsLink = document.createElement('a');
-    this.$refsLink.setAttribute('href', '#');
-    this.$refsLink.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      referencePane.showReferencesFor(this.entry);
-    });
-    this.$container.appendChild(this.$permalink);
-    this.$container.appendChild(this.$pinLink);
-    this.$container.appendChild(this.$refsLink);
-    document.body.appendChild(this.$outer);
-  },
-
-  activate(el, entry, target) {
-    if (el === this._activeEl) return;
-    sdoBox.deactivate();
-    this.active = true;
-    this.entry = entry;
-    this.$outer.classList.add('active');
-    this.top = el.offsetTop - this.$outer.offsetHeight;
-    this.left = el.offsetLeft - 10;
-    this.$outer.setAttribute('style', 'left: ' + this.left + 'px; top: ' + this.top + 'px');
-    this.updatePermalink();
-    this.updateReferences();
-    this._activeEl = el;
-    if (this.top < document.body.scrollTop && el === target) {
-      // don't scroll unless it's a small thing (< 200px)
-      this.$outer.scrollIntoView();
-    }
-  },
-
-  updatePermalink() {
-    this.$permalink.setAttribute('href', makeLinkToId(this.entry.id));
-  },
-
-  updateReferences() {
-    this.$refsLink.textContent = `References (${this.entry.referencingIds.length})`;
-  },
-
-  activateIfMouseOver(e) {
-    let ref = this.findReferenceUnder(e.target);
-    if (ref && (!this.active || e.pageY > this._activeEl.offsetTop)) {
-      let entry = menu.search.biblio.byId[ref.id];
-      this.activate(ref.element, entry, e.target);
-    } else if (
-      this.active &&
-      (e.pageY < this.top || e.pageY > this._activeEl.offsetTop + this._activeEl.offsetHeight)
-    ) {
-      this.deactivate();
-    }
-  },
-
-  findReferenceUnder(el) {
-    while (el) {
-      let parent = el.parentNode;
-      if (el.nodeName === 'EMU-RHS' || el.nodeName === 'EMU-PRODUCTION') {
-        return null;
-      }
-      if (
-        el.nodeName === 'H1' &&
-        parent.nodeName.match(/EMU-CLAUSE|EMU-ANNEX|EMU-INTRO/) &&
-        parent.id
-      ) {
-        return { element: el, id: parent.id };
-      } else if (el.nodeName === 'EMU-NT') {
-        if (
-          parent.nodeName === 'EMU-PRODUCTION' &&
-          parent.id &&
-          parent.id[0] !== '_' &&
-          parent.firstElementChild === el
-        ) {
-          // return the LHS non-terminal element
-          return { element: el, id: parent.id };
-        }
-        return null;
-      } else if (
-        el.nodeName.match(/EMU-(?!CLAUSE|XREF|ANNEX|INTRO)|DFN/) &&
-        el.id &&
-        el.id[0] !== '_'
-      ) {
-        if (
-          el.nodeName === 'EMU-FIGURE' ||
-          el.nodeName === 'EMU-TABLE' ||
-          el.nodeName === 'EMU-EXAMPLE'
-        ) {
-          // return the figcaption element
-          return { element: el.children[0].children[0], id: el.id };
-        } else {
-          return { element: el, id: el.id };
-        }
-      }
-      el = parent;
-    }
-  },
-
-  deactivate() {
-    this.$outer.classList.remove('active');
-    this._activeEl = null;
-    this.active = false;
-  },
-};
 
 let referencePane = {
   init() {
@@ -978,6 +883,126 @@ let referencePane = {
   },
 };
 
+let Toolbox = {
+  init() {
+    this.$outer = document.createElement('div');
+    this.$outer.classList.add('toolbox-container');
+    this.$container = document.createElement('div');
+    this.$container.classList.add('toolbox');
+    this.$outer.appendChild(this.$container);
+    this.$permalink = document.createElement('a');
+    this.$permalink.textContent = 'Permalink';
+    this.$pinLink = document.createElement('a');
+    this.$pinLink.textContent = 'Pin';
+    this.$pinLink.setAttribute('href', '#');
+    this.$pinLink.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      menu.togglePinEntry(this.entry.id);
+    });
+
+    this.$refsLink = document.createElement('a');
+    this.$refsLink.setAttribute('href', '#');
+    this.$refsLink.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      referencePane.showReferencesFor(this.entry);
+    });
+    this.$container.appendChild(this.$permalink);
+    this.$container.appendChild(this.$pinLink);
+    this.$container.appendChild(this.$refsLink);
+    document.body.appendChild(this.$outer);
+  },
+
+  activate(el, entry, target) {
+    if (el === this._activeEl) return;
+    sdoBox.deactivate();
+    this.active = true;
+    this.entry = entry;
+    this.$outer.classList.add('active');
+    this.top = el.offsetTop - this.$outer.offsetHeight;
+    this.left = el.offsetLeft - 10;
+    this.$outer.setAttribute('style', 'left: ' + this.left + 'px; top: ' + this.top + 'px');
+    this.updatePermalink();
+    this.updateReferences();
+    this._activeEl = el;
+    if (this.top < document.body.scrollTop && el === target) {
+      // don't scroll unless it's a small thing (< 200px)
+      this.$outer.scrollIntoView();
+    }
+  },
+
+  updatePermalink() {
+    this.$permalink.setAttribute('href', makeLinkToId(this.entry.id));
+  },
+
+  updateReferences() {
+    this.$refsLink.textContent = `References (${this.entry.referencingIds.length})`;
+  },
+
+  activateIfMouseOver(e) {
+    let ref = this.findReferenceUnder(e.target);
+    if (ref && (!this.active || e.pageY > this._activeEl.offsetTop)) {
+      let entry = menu.search.biblio.byId[ref.id];
+      this.activate(ref.element, entry, e.target);
+    } else if (
+      this.active &&
+      (e.pageY < this.top || e.pageY > this._activeEl.offsetTop + this._activeEl.offsetHeight)
+    ) {
+      this.deactivate();
+    }
+  },
+
+  findReferenceUnder(el) {
+    while (el) {
+      let parent = el.parentNode;
+      if (el.nodeName === 'EMU-RHS' || el.nodeName === 'EMU-PRODUCTION') {
+        return null;
+      }
+      if (
+        el.nodeName === 'H1' &&
+        parent.nodeName.match(/EMU-CLAUSE|EMU-ANNEX|EMU-INTRO/) &&
+        parent.id
+      ) {
+        return { element: el, id: parent.id };
+      } else if (el.nodeName === 'EMU-NT') {
+        if (
+          parent.nodeName === 'EMU-PRODUCTION' &&
+          parent.id &&
+          parent.id[0] !== '_' &&
+          parent.firstElementChild === el
+        ) {
+          // return the LHS non-terminal element
+          return { element: el, id: parent.id };
+        }
+        return null;
+      } else if (
+        el.nodeName.match(/EMU-(?!CLAUSE|XREF|ANNEX|INTRO)|DFN/) &&
+        el.id &&
+        el.id[0] !== '_'
+      ) {
+        if (
+          el.nodeName === 'EMU-FIGURE' ||
+          el.nodeName === 'EMU-TABLE' ||
+          el.nodeName === 'EMU-EXAMPLE'
+        ) {
+          // return the figcaption element
+          return { element: el.children[0].children[0], id: el.id };
+        } else {
+          return { element: el, id: el.id };
+        }
+      }
+      el = parent;
+    }
+  },
+
+  deactivate() {
+    this.$outer.classList.remove('active');
+    this._activeEl = null;
+    this.active = false;
+  },
+};
+
 function sortByClauseNumber(clause1, clause2) {
   let c1c = clause1.number.split('.');
   let c2c = clause2.number.split('.');
@@ -1024,6 +1049,8 @@ function makeLinkToId(id) {
   return (targetSec === 'index' ? './' : targetSec + '.html') + hash;
 }
 
+let stylesheetWorkaroundForCanCallUserCodeAnnotation;
+
 function doShortcut(e) {
   if (!(e.target instanceof HTMLElement)) {
     return;
@@ -1033,7 +1060,10 @@ function doShortcut(e) {
   if (name === 'textarea' || name === 'input' || name === 'select' || target.isContentEditable) {
     return;
   }
-  if (e.key === 'm' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && usesMultipage) {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) {
+    return;
+  }
+  if (e.key === 'm' && usesMultipage) {
     let pathParts = location.pathname.split('/');
     let hash = location.hash;
     if (pathParts[pathParts.length - 2] === 'multipage') {
@@ -1050,7 +1080,33 @@ function doShortcut(e) {
     } else {
       location = 'multipage/' + hash;
     }
+  } else if (e.key === 'u') {
+    if (stylesheetWorkaroundForCanCallUserCodeAnnotation.innerText === '') {
+      stylesheetWorkaroundForCanCallUserCodeAnnotation.textContent =
+        'a.e-user-code::before { display: block !important; }';
+    } else {
+      stylesheetWorkaroundForCanCallUserCodeAnnotation.textContent = '';
+    }
   }
+}
+
+function init() {
+  menu = new Menu();
+  let $container = document.getElementById('spec-container');
+  $container.addEventListener(
+    'mouseover',
+    debounce(e => {
+      Toolbox.activateIfMouseOver(e);
+    })
+  );
+  document.addEventListener(
+    'keydown',
+    debounce(e => {
+      if (e.code === 'Escape' && Toolbox.active) {
+        Toolbox.deactivate();
+      }
+    })
+  );
 }
 
 document.addEventListener('keypress', doShortcut);
@@ -1058,6 +1114,8 @@ document.addEventListener('keypress', doShortcut);
 document.addEventListener('DOMContentLoaded', () => {
   Toolbox.init();
   referencePane.init();
+  stylesheetWorkaroundForCanCallUserCodeAnnotation = document.createElement('style');
+  document.head.appendChild(stylesheetWorkaroundForCanCallUserCodeAnnotation);
 });
 
 'use strict';
@@ -1092,8 +1150,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let sdoMap = JSON.parse(`{}`);
-let biblio = JSON.parse(`{"refsByClause":{"sec-partitiondurationformatpattern":["_ref_0","_ref_1","_ref_3","_ref_4","_ref_5","_ref_6","_ref_7","_ref_8"],"sec-Intl.DurationFormat.prototype.resolvedOptions":["_ref_2","_ref_35","_ref_36"],"sec-Intl.DurationFormat":["_ref_9","_ref_10","_ref_11","_ref_12","_ref_13","_ref_14","_ref_15","_ref_16","_ref_17","_ref_18","_ref_19","_ref_20","_ref_21","_ref_22"],"sec-Intl.DurationFormat.prototype":["_ref_23"],"sec-Intl.DurationFormat.supportedLocalesOf":["_ref_24"],"sec-Intl.DurationFormat.prototype.constructor":["_ref_25"],"sec-Intl.DurationFormat.prototype.format":["_ref_26","_ref_27"],"sec-Intl.DurationFormat.prototype.formatToParts":["_ref_28","_ref_29","_ref_30","_ref_31","_ref_32","_ref_33","_ref_34"],"sec-properties-of-intl-durationformat-instances":["_ref_37"]},"entries":[{"type":"table","id":"table-duration-components","node":{},"number":1,"caption":"Table 1: Components of Duration Instances","referencingIds":["_ref_0","_ref_1"],"key":"Table 1: Components of Duration Instances"},{"type":"op","aoid":"GetUnitOptions","refId":"sec-getunitoptions","referencingIds":[],"key":"GetUnitOptions"},{"type":"clause","id":"sec-getunitoptions","aoid":"GetUnitOptions","titleHTML":"\\n        GetUnitOptions (\\n          <var>unit</var>: a String,\\n          <var>options</var>: an ECMAScript language value,\\n          <var>baseStyle</var>: a String,\\n          <var>prevStyle</var>: a String,\\n        ): a Record with [[Style]] and [[Display]] fields\\n      ","number":"1.1.1","referencingIds":["_ref_13","_ref_14","_ref_15","_ref_16","_ref_17","_ref_18","_ref_19","_ref_20","_ref_21","_ref_22"],"key":"\\n        GetUnitOptions (\\n          unit: a String,\\n          options: an ECMAScript language value,\\n          baseStyle: a String,\\n          prevStyle: a String,\\n        ): a Record with [[Style]] and [[Display]] fields\\n      "},{"type":"op","aoid":"PartitionDurationFormatPattern","refId":"sec-partitiondurationformatpattern","referencingIds":[],"key":"PartitionDurationFormatPattern"},{"type":"clause","id":"sec-partitiondurationformatpattern","aoid":"PartitionDurationFormatPattern","titleHTML":"PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )","number":"1.1.2","referencingIds":["_ref_27","_ref_29"],"key":"PartitionDurationFormatPattern ( durationFormat, duration )"},{"type":"clause","id":"sec-intl-durationformat-abstracts","aoid":null,"titleHTML":"Abstract Operations for DurationFormat Objects","number":"1.1","referencingIds":[],"key":"Abstract Operations for DurationFormat Objects"},{"type":"term","term":"%DurationFormat%","refId":"sec-intl-durationformat-constructor","referencingIds":[],"key":"%DurationFormat%"},{"type":"clause","id":"sec-Intl.DurationFormat","aoid":null,"titleHTML":"Intl.DurationFormat ( [ <var>locales</var> [ , <var>options</var> ] ] )","number":"1.2.1","referencingIds":[],"key":"Intl.DurationFormat ( [ locales [ , options ] ] )"},{"type":"clause","id":"sec-intl-durationformat-constructor","aoid":null,"titleHTML":"The Intl.DurationFormat Constructor","number":"1.2","referencingIds":["_ref_6","_ref_10","_ref_11","_ref_12","_ref_24","_ref_25"],"key":"The Intl.DurationFormat Constructor"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype","aoid":null,"titleHTML":"Intl.DurationFormat.prototype","number":"1.3.1","referencingIds":[],"key":"Intl.DurationFormat.prototype"},{"type":"clause","id":"sec-Intl.DurationFormat.supportedLocalesOf","aoid":null,"titleHTML":"Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )","number":"1.3.2","referencingIds":[],"key":"Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"},{"type":"clause","id":"sec-Intl.DurationFormat-internal-slots","aoid":null,"titleHTML":"Internal slots","number":"1.3.3","referencingIds":[],"key":"Internal slots"},{"type":"clause","id":"sec-properties-of-intl-durationformat-constructor","aoid":null,"titleHTML":"Properties of the Intl.DurationFormat Constructor","number":"1.3","referencingIds":[],"key":"Properties of the Intl.DurationFormat Constructor"},{"type":"term","term":"%DurationFormatPrototype%","refId":"sec-properties-of-intl-durationformat-prototype-object","referencingIds":[],"key":"%DurationFormatPrototype%"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.constructor","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.constructor","number":"1.4.1","referencingIds":[],"key":"Intl.DurationFormat.prototype.constructor"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype-@@tostringtag","aoid":null,"titleHTML":"Intl.DurationFormat.prototype [ @@toStringTag ]","number":"1.4.2","referencingIds":[],"key":"Intl.DurationFormat.prototype [ @@toStringTag ]"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.format","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.format ( <var>duration</var> )","number":"1.4.3","referencingIds":[],"key":"Intl.DurationFormat.prototype.format ( duration )"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.formatToParts","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )","number":"1.4.4","referencingIds":[],"key":"Intl.DurationFormat.prototype.formatToParts ( duration )"},{"type":"table","id":"table-durationformat-resolvedoptions-properties","node":{},"number":2,"caption":"Table 2: Resolved Options of DurationFormat Instances","referencingIds":["_ref_2"],"key":"Table 2: Resolved Options of DurationFormat Instances"},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.resolvedOptions","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.resolvedOptions ( )","number":"1.4.5","referencingIds":[],"key":"Intl.DurationFormat.prototype.resolvedOptions ( )"},{"type":"clause","id":"sec-properties-of-intl-durationformat-prototype-object","aoid":null,"titleHTML":"Properties of the Intl.DurationFormat Prototype Object","number":"1.4","referencingIds":["_ref_23","_ref_37"],"key":"Properties of the Intl.DurationFormat Prototype Object"},{"type":"clause","id":"sec-properties-of-intl-durationformat-instances","aoid":null,"titleHTML":"Properties of Intl.DurationFormat Instances","number":"1.5","referencingIds":[],"key":"Properties of Intl.DurationFormat Instances"},{"type":"clause","id":"durationformat-objects","aoid":null,"titleHTML":"DurationFormat Objects","number":"1","referencingIds":[],"key":"DurationFormat Objects"},{"type":"clause","id":"sec-copyright-and-software-license","aoid":null,"titleHTML":"Copyright &amp; Software License","number":"A","referencingIds":[],"key":"Copyright & Software License"}]}`);
-;let usesMultipage = false</script><style>body {
+let biblio = JSON.parse(`{"refsByClause":{"sec-partitiondurationformatpattern":["_ref_0","_ref_1","_ref_3","_ref_4","_ref_5","_ref_6","_ref_7","_ref_8"],"sec-Intl.DurationFormat.prototype.resolvedOptions":["_ref_2","_ref_35","_ref_36"],"sec-Intl.DurationFormat":["_ref_9","_ref_10","_ref_11","_ref_12","_ref_13","_ref_14","_ref_15","_ref_16","_ref_17","_ref_18","_ref_19","_ref_20","_ref_21","_ref_22"],"sec-Intl.DurationFormat.prototype":["_ref_23"],"sec-Intl.DurationFormat.supportedLocalesOf":["_ref_24"],"sec-Intl.DurationFormat.prototype.constructor":["_ref_25"],"sec-Intl.DurationFormat.prototype.format":["_ref_26","_ref_27"],"sec-Intl.DurationFormat.prototype.formatToParts":["_ref_28","_ref_29","_ref_30","_ref_31","_ref_32","_ref_33","_ref_34"],"sec-properties-of-intl-durationformat-instances":["_ref_37"]},"entries":[{"type":"table","id":"table-duration-components","node":{},"number":1,"caption":"Table 1: Components of Duration Instances","referencingIds":["_ref_0","_ref_1"]},{"type":"op","aoid":"GetUnitOptions","refId":"sec-getunitoptions","referencingIds":[]},{"type":"clause","id":"sec-getunitoptions","aoid":"GetUnitOptions","title":"GetUnitOptions ( unit, options, baseStyle, prevStyle )","titleHTML":"GetUnitOptions ( <var>unit</var>, <var>options</var>, <var>baseStyle</var>, <var>prevStyle</var> )","number":"1.1.1","referencingIds":["_ref_13","_ref_14","_ref_15","_ref_16","_ref_17","_ref_18","_ref_19","_ref_20","_ref_21","_ref_22"]},{"type":"op","aoid":"PartitionDurationFormatPattern","refId":"sec-partitiondurationformatpattern","referencingIds":[]},{"type":"clause","id":"sec-partitiondurationformatpattern","aoid":"PartitionDurationFormatPattern","title":"PartitionDurationFormatPattern ( durationFormat, duration )","titleHTML":"PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )","number":"1.1.2","referencingIds":["_ref_27","_ref_29"]},{"type":"clause","id":"sec-intl-durationformat-abstracts","aoid":null,"titleHTML":"Abstract Operations for DurationFormat Objects","number":"1.1","referencingIds":[]},{"type":"term","term":"%DurationFormat%","refId":"sec-intl-durationformat-constructor","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat","aoid":null,"title":"Intl.DurationFormat ( [ locales [ , options ] ] )","titleHTML":"Intl.DurationFormat ( [ <var>locales</var> [ , <var>options</var> ] ] )","number":"1.2.1","referencingIds":[]},{"type":"clause","id":"sec-intl-durationformat-constructor","aoid":null,"titleHTML":"The Intl.DurationFormat Constructor","number":"1.2","referencingIds":["_ref_6","_ref_10","_ref_11","_ref_12","_ref_24","_ref_25"]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype","aoid":null,"titleHTML":"Intl.DurationFormat.prototype","number":"1.3.1","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat.supportedLocalesOf","aoid":null,"title":"Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )","titleHTML":"Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )","number":"1.3.2","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat-internal-slots","aoid":null,"titleHTML":"Internal slots","number":"1.3.3","referencingIds":[]},{"type":"clause","id":"sec-properties-of-intl-durationformat-constructor","aoid":null,"titleHTML":"Properties of the Intl.DurationFormat Constructor","number":"1.3","referencingIds":[]},{"type":"term","term":"%DurationFormatPrototype%","refId":"sec-properties-of-intl-durationformat-prototype-object","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.constructor","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.constructor","number":"1.4.1","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype-@@tostringtag","aoid":null,"titleHTML":"Intl.DurationFormat.prototype [ @@toStringTag ]","number":"1.4.2","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.format","aoid":null,"title":"Intl.DurationFormat.prototype.format ( duration )","titleHTML":"Intl.DurationFormat.prototype.format ( <var>duration</var> )","number":"1.4.3","referencingIds":[]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.formatToParts","aoid":null,"title":"Intl.DurationFormat.prototype.formatToParts ( duration )","titleHTML":"Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )","number":"1.4.4","referencingIds":[]},{"type":"table","id":"table-durationformat-resolvedoptions-properties","node":{},"number":2,"caption":"Table 2: Resolved Options of DurationFormat Instances","referencingIds":["_ref_2"]},{"type":"clause","id":"sec-Intl.DurationFormat.prototype.resolvedOptions","aoid":null,"titleHTML":"Intl.DurationFormat.prototype.resolvedOptions ( )","number":"1.4.5","referencingIds":[]},{"type":"clause","id":"sec-properties-of-intl-durationformat-prototype-object","aoid":null,"titleHTML":"Properties of the Intl.DurationFormat Prototype Object","number":"1.4","referencingIds":["_ref_23","_ref_37"]},{"type":"clause","id":"sec-properties-of-intl-durationformat-instances","aoid":null,"titleHTML":"Properties of Intl.DurationFormat Instances","number":"1.5","referencingIds":[]},{"type":"clause","id":"durationformat-objects","aoid":null,"titleHTML":"DurationFormat Objects","number":"1","referencingIds":[]},{"type":"clause","id":"sec-copyright-and-software-license","aoid":null,"title":"Copyright & Software License","titleHTML":"Copyright &amp; Software License","number":"A","referencingIds":[]}]}`);
+;let usesMultipage = false</script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.1/styles/base16/solarized-light.min.css"><style>body {
   display: flex;
   font-size: 18px;
   line-height: 1.5;
@@ -1130,6 +1188,22 @@ a:hover {
   color: #239dee;
 }
 
+a.e-user-code {
+  position: relative;
+}
+
+a.e-user-code::before {
+  display: none;
+  color: brown;
+  position: absolute;
+  bottom: -0.9em;
+  left: 0;
+  content: 'UC';
+  font-style: italic;
+  font-weight: bold;
+  font-size: small;
+}
+
 code {
   font-weight: bold;
   font-family: Consolas, Monaco, monospace;
@@ -1162,8 +1236,40 @@ var {
   cursor: pointer;
 }
 
-var.referenced {
+var.referenced0 {
+  color: inherit;
   background-color: #ffff33;
+  box-shadow: 0 0 0 2px #ffff33;
+}
+var.referenced1 {
+  color: inherit;
+  background-color: #ff87a2;
+  box-shadow: 0 0 0 2px #ff87a2;
+}
+var.referenced2 {
+  color: inherit;
+  background-color: #96e885;
+  box-shadow: 0 0 0 2px #96e885;
+}
+var.referenced3 {
+  color: inherit;
+  background-color: #3eeed2;
+  box-shadow: 0 0 0 2px #3eeed2;
+}
+var.referenced4 {
+  color: inherit;
+  background-color: #eacfb6;
+  box-shadow: 0 0 0 2px #eacfb6;
+}
+var.referenced5 {
+  color: inherit;
+  background-color: #82ddff;
+  box-shadow: 0 0 0 2px #82ddff;
+}
+var.referenced6 {
+  color: inherit;
+  background-color: #ffbcf2;
+  box-shadow: 0 0 0 2px #ffbcf2;
 }
 
 emu-const {
@@ -2222,36 +2328,26 @@ li.menu-search-result-term:before {
   }
 }
 
-[normative-optional] {
+[normative-optional],
+[legacy] {
   border-left: 5px solid #ff6600;
   padding: 0.5em;
   display: block;
   background: #ffeedd;
 }
 
-.normative-optional-tag {
+.clause-attributes-tag {
   text-transform: uppercase;
   color: #884400;
 }
 
-.normative-optional-tag a {
+.clause-attributes-tag a {
   color: #884400;
 }
-</style></head><body><div id="menu-toggle">☰</div><div id="menu-spacer"></div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-pins"><div class="menu-pane-header">Pins</div><ul id="menu-pins-list"></ul></div><div class="menu-pane-header">Table of Contents</div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle">◢</span><a href="#durationformat-objects" title="DurationFormat Objects"><span class="secnum">1</span> DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-abstracts" title="Abstract Operations for DurationFormat Objects"><span class="secnum">1.1</span> Abstract Operations for DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-getunitoptions" title="
-        GetUnitOptions (
-          unit: a String,
-          options: an ECMAScript language value,
-          baseStyle: a String,
-          prevStyle: a String,
-        ): a Record with [[Style]] and [[Display]] fields
-      "><span class="secnum">1.1.1</span> 
-        GetUnitOptions (
-          <var>unit</var>: a String,
-          <var>options</var>: an ECMAScript language value,
-          <var>baseStyle</var>: a String,
-          <var>prevStyle</var>: a String,
-        ): a Record with [[Style]] and [[Display]] fields
-      </a></li><li><span class="item-toggle-none"></span><a href="#sec-partitiondurationformatpattern" title="PartitionDurationFormatPattern ( durationFormat, duration )"><span class="secnum">1.1.2</span> PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-constructor" title="The Intl.DurationFormat Constructor"><span class="secnum">1.2</span> The Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat" title="Intl.DurationFormat ( [ locales [ , options ] ] )"><span class="secnum">1.2.1</span> Intl.DurationFormat ( [ <var>locales</var> [ , <var>options</var> ] ] )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-constructor" title="Properties of the Intl.DurationFormat Constructor"><span class="secnum">1.3</span> Properties of the Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype" title="Intl.DurationFormat.prototype"><span class="secnum">1.3.1</span> Intl.DurationFormat.prototype</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.supportedLocalesOf" title="Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"><span class="secnum">1.3.2</span> Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat-internal-slots" title="Internal slots"><span class="secnum">1.3.3</span> Internal slots</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-prototype-object" title="Properties of the Intl.DurationFormat Prototype Object"><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.constructor" title="Intl.DurationFormat.prototype.constructor"><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype-@@tostringtag" title="Intl.DurationFormat.prototype [ @@toStringTag ]"><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.format" title="Intl.DurationFormat.prototype.format ( duration )"><span class="secnum">1.4.3</span> Intl.DurationFormat.prototype.format ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.formatToParts" title="Intl.DurationFormat.prototype.formatToParts ( duration )"><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.resolvedOptions" title="Intl.DurationFormat.prototype.resolvedOptions ( )"><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ( )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-properties-of-intl-durationformat-instances" title="Properties of Intl.DurationFormat Instances"><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-copyright-and-software-license" title="Copyright &amp; Software License"><span class="secnum">A</span> Copyright &amp; Software License</a></li></ol></div></div><div id="spec-container"><h1 class="version">Stage 2 Draft / October 15, 2021</h1><h1 class="title">Intl.DurationFormat</h1>
+</style></head><body><div id="menu-toggle"><svg xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; stroke:currentColor" viewBox="0 0 120 120">
+      <title>Menu</title>
+      <path stroke-width="10" stroke-linecap="round" d="M30,60 h60  M30,30 m0,5 h60  M30,90 m0,-5 h60"></path>
+    </svg></div><div id="menu-spacer"></div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-pins"><div class="menu-pane-header">Pins</div><ul id="menu-pins-list"></ul></div><div class="menu-pane-header">Table of Contents</div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle">◢</span><a href="#durationformat-objects" title="DurationFormat Objects"><span class="secnum">1</span> DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-abstracts" title="Abstract Operations for DurationFormat Objects"><span class="secnum">1.1</span> Abstract Operations for DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-getunitoptions" title="GetUnitOptions ( unit, options, baseStyle, prevStyle )"><span class="secnum">1.1.1</span> GetUnitOptions ( <var>unit</var>, <var>options</var>, <var>baseStyle</var>, <var>prevStyle</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-partitiondurationformatpattern" title="PartitionDurationFormatPattern ( durationFormat, duration )"><span class="secnum">1.1.2</span> PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-constructor" title="The Intl.DurationFormat Constructor"><span class="secnum">1.2</span> The Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat" title="Intl.DurationFormat ( [ locales [ , options ] ] )"><span class="secnum">1.2.1</span> Intl.DurationFormat ( [ <var>locales</var> [ , <var>options</var> ] ] )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-constructor" title="Properties of the Intl.DurationFormat Constructor"><span class="secnum">1.3</span> Properties of the Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype" title="Intl.DurationFormat.prototype"><span class="secnum">1.3.1</span> Intl.DurationFormat.prototype</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.supportedLocalesOf" title="Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"><span class="secnum">1.3.2</span> Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat-internal-slots" title="Internal slots"><span class="secnum">1.3.3</span> Internal slots</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-prototype-object" title="Properties of the Intl.DurationFormat Prototype Object"><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.constructor" title="Intl.DurationFormat.prototype.constructor"><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype-@@tostringtag" title="Intl.DurationFormat.prototype [ @@toStringTag ]"><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.format" title="Intl.DurationFormat.prototype.format ( duration )"><span class="secnum">1.4.3</span> Intl.DurationFormat.prototype.format ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.formatToParts" title="Intl.DurationFormat.prototype.formatToParts ( duration )"><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.resolvedOptions" title="Intl.DurationFormat.prototype.resolvedOptions ( )"><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ( )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-properties-of-intl-durationformat-instances" title="Properties of Intl.DurationFormat Instances"><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-copyright-and-software-license" title="Copyright &amp; Software License"><span class="secnum">A</span> Copyright &amp; Software License</a></li></ol></div></div><div id="spec-container"><h1 class="version">Stage 2 Draft / October 19, 2021</h1><h1 class="title">Intl.DurationFormat</h1>
 <emu-biblio href="./biblio.json"></emu-biblio>
 <emu-clause id="durationformat-objects">
   <h1><span class="secnum">1</span> DurationFormat Objects</h1>
@@ -2336,16 +2432,8 @@ li.menu-search-result-term:before {
     </figure></emu-table>
 
     <emu-clause id="sec-getunitoptions" aoid="GetUnitOptions">
-      <h1><span class="secnum">1.1.1</span> 
-        GetUnitOptions (
-          <var>unit</var>: a String,
-          <var>options</var>: an ECMAScript language value,
-          <var>baseStyle</var>: a String,
-          <var>prevStyle</var>: a String,
-        ): a Record with [[Style]] and [[Display]] fields
-      </h1>
-      <dl class="header">
-      </dl>
+      <h1><span class="secnum">1.1.1</span> GetUnitOptions ( <var>unit</var>, <var>options</var>, <var>baseStyle</var>, <var>prevStyle</var> )</h1>
+      <p> takes arguments <var>unit</var> (a String), <var>options</var> (an <emu-xref href="#sec-ecmascript-language-types"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types">ECMAScript language value</a></emu-xref>), <var>baseStyle</var> (a String), and <var>prevStyle</var> (a String) and returns a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with [[Style]] and [[Display]] fields. It performs the following steps when called:</p>
 
       <emu-alg><ol><li>Let <var>stylesList</var> be « <code>"long"</code>, <code>"short"</code>, <code>"narrow"</code> ».</li><li>If <var>unit</var> is one of <code>"hours"</code>, <code>"minutes"</code>, <code>"seconds"</code>, <code>"milliseconds"</code>, <code>"microseconds"</code>, or <code>"nanoseconds"</code>, then<ol><li>Append <code>"numeric"</code> to <var>stylesList</var>.</li><li>If <var>unit</var> is one of <code>"hours"</code>, <code>"minutes"</code>, or <code>"seconds"</code>, then<ol><li>Append <code>"2-digit"</code> to <var>stylesList</var>.</li></ol></li></ol></li><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>unit</var>, <code>"string"</code>, <var>stylesList</var>, <emu-val>undefined</emu-val>).</li><li>Let <var>displayDefault</var> be <code>"always"</code>.</li><li>If <var>style</var> is <emu-val>undefined</emu-val>, then<ol><li>Set <var>displayDefault</var> to <code>"auto"</code>.</li><li>If <var>baseStyle</var> is <code>"digital"</code>, then<ol><li>If <var>unit</var> is one of <code>"hours"</code>, <code>"minutes"</code>, <code>"seconds"</code>, <code>"milliseconds"</code>, <code>"microseconds"</code>, or <code>"nanoseconds"</code>, then<ol><li>Set <var>style</var> to <code>"numeric"</code>.</li></ol></li><li>Else,<ol><li>Set <var>style</var> to <code>"narrow"</code>.</li></ol></li></ol></li><li>Else,<ol><li>Set <var>style</var> to <var>baseStyle</var>.</li></ol></li></ol></li><li>Let <var>displayField</var> be the <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">string-concatenation</a></emu-xref> of <var>unit</var> and <code>"Display"</code>.</li><li>Let <var>display</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>displayField</var>, <code>"string"</code>, « <code>"auto"</code>, <code>"always"</code> », <var>displayDefault</var>).</li><li>If <var>prevStyle</var> is <code>"numeric</code> or <code>"2-digit</code>, then<ol><li>If <var>style</var> is not <code>"numeric</code> or <code>"2-digit"</code>, then<ol><li>Throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Else if <var>unit</var> is <code>"minutes"</code> or <code>"seconds"</code>, then<ol><li>Set <var>style</var> to <code>"2-digit"</code>.</li></ol></li></ol></li><li>Return the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {
           [[Style]]: <var>style</var>,
@@ -2358,7 +2446,7 @@ li.menu-search-result-term:before {
 
       <p>The PartitionDurationFormatPattern abstract operation is called with the arguments <var>durationFormat</var> (which must be an object initialized as a DurationFormat) and <var>duration</var> (which must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with the fields enumerated in <emu-xref href="#table-duration-components" id="_ref_0"><a href="#table-duration-components">Table 1</a></emu-xref>), and creates the corresponding parts according to the effective locale and the formatting options of <var>durationFormat</var>. The following steps are taken:</p>
 
-      <emu-alg><ol><li>Let <var>result</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each row in <emu-xref href="#table-duration-components" id="_ref_1"><a href="#table-duration-components">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>styleSlot</var> be the Style Slot value.</li><li>Let <var>nextStyleSlot</var> be the Style Slot value of the next row.</li><li>Let <var>displaySlot</var> be the Display Slot value.</li><li>Let <var>valueSlot</var> be the Value Slot value.</li><li>Let <var>unit</var> be the Unit value.</li><li>Let <var>style</var> be <var>durationFormat</var>.[[&lt;<var>styleSlot</var>&gt;]].</li><li>Let <var>nextStyle</var> be <var>durationFormat</var>[[&lt;<var>nextStyleSlot</var>&gt;]].</li><li>Let <var>nfOpts</var> be !&nbsp;OrdinaryObjectCreate(<code>null</code>).</li><li>Let <var>value</var> be <code>0</code>.</li><li>Let <var>done</var> be <code>false</code>.</li><li>If <var>unit</var> is <code>"seconds"</code>, <code>"milliseconds"</code> or <code>"microseconds"</code> and <var>nextStyle</var> is <code>"numeric"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Microseconds]] + <var>duration</var>.[[Nanoseconds]] / 1000.</li><li>If <var>unit</var> is <code>"seconds"</code> or <code>"milliseconds"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Milliseconds]] + <var>value</var> / 1000.</li><li>If <var>unit</var> is <code>"seconds"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Seconds]] + <var>value</var> / 1000.</li></ol></li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_3"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <code>"maximumFractionDigits"</code>, <var>durationFormat</var>.[[FractionalDigits]]).</li><li>Set <var>done</var> to <code>true</code>.</li></ol></li><li>Else,<ol><li>Set <var>value</var> to <var>duration</var>.[[&lt;<var>valueSlot</var>&gt;]]</li></ol></li><li>If <var>style</var> is <code>"2-digit"</code>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_4"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <code>"minimumIntegerDigits"</code>, <code>2</code>).</li></ol></li><li>If <var>value</var> is <code>0</code> or <code>-0</code> and <var>display</var> is <code>"auto"</code>, then<ol><li>Skip to the next iteration.</li></ol></li><li>Let <var>nf</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_5"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%NumberFormat%, « <var>durationFormat</var>.[[Locale]], <var>nfOpts</var> »).</li><li>Let <var>num</var> be !&nbsp;<emu-xref aoid="FormatNumeric"><a href="https://tc39.github.io/ecma402/#sec-formatnumber">FormatNumeric</a></emu-xref>(<var>durationFormat</var>.[[NumberFormat]], <var>value</var>).</li><li>Let <var>dataLocale</var> be <var>durationFormat</var>.[[DataLocale]].</li><li>Let <var>dataLocaleData</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_6"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]].[[&lt;<var>dataLocale</var>&gt;]].</li><li>If <var>style</var> is <code>"2-digit"</code> or <code>"numeric"</code>, then<ol><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>unit</var>, [[Value]]: <var>num</var>} to the end of <var>result</var>.</li><li>If <var>unit</var> is <code>"hours"</code> or <code>"minutes"</code>, then<ol><li>Let <var>separator</var> be <var>dataLocaleData</var>.[[formats]].[[digital]].[[separator]].</li><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <code>"literal"</code>, [[Value]]: <var>separator</var>} to the end of <var>result</var>.</li></ol></li></ol></li><li>Else,<ol><li>Let <var>pr</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_7"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%PluralRules%, « <var>durationFormat</var>.[[Locale]] »).</li><li>Let <var>prv</var> be !&nbsp;<emu-xref aoid="ResolvePlural"><a href="https://tc39.github.io/ecma402/#sec-resolveplural">ResolvePlural</a></emu-xref>(<var>pr</var>, <var>value</var>).</li><li>Let <var>template</var> be <var>dataLocaleData</var>.[[formats]].[[&lt;<var>style</var>&gt;]].[[&lt;<var>unit</var>&gt;]].[[&lt;<var>prv</var>&gt;]].</li><li>Let <var>parts</var> be !&nbsp;<emu-xref aoid="MakePartsList"><a href="https://tc39.github.io/ecma402/#sec-makepartslist">MakePartsList</a></emu-xref>(<var>template</var>, <var>unit</var>, <var>num</var>).</li><li>Let <var>concat</var> be an empty String.</li><li>For each element <var>part</var> in <var>parts</var>, in <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> order, do<ol><li>Set <var>concat</var> to the <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">string-concatenation</a></emu-xref> of <var>concat</var> and <var>part</var>.[[Value]].</li><li>If <var>part</var> has a [[Unit]] field, then<ol><li>Set <var>concat</var> to the <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">string-concatenation</a></emu-xref> of <var>concat</var> and <var>part</var>.[[Unit]].</li></ol></li></ol></li><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>unit</var>, [[Value]]: <var>concat</var> } to the end of <var>result</var>.</li></ol></li><li>If <var>done</var> is <code>true</code>, then<ol><li>Stop iteration.</li></ol></li></ol></li><li>Let <var>lf</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_8"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%ListFormat%, « <var>durationFormat</var>.[[Locale]] »).</li><li>Set <var>result</var> to !&nbsp;<emu-xref aoid="CreatePartsFromList"><a href="https://tc39.github.io/ecma402/#sec-createpartsfromlist">CreatePartsFromList</a></emu-xref>(<var>lf</var>, <var>result</var>).</li><li>Return <var>result</var>.</li></ol></emu-alg>
+      <emu-alg><ol><li>Let <var>result</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each row in <emu-xref href="#table-duration-components" id="_ref_1"><a href="#table-duration-components">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>styleSlot</var> be the Style Slot value.</li><li>Let <var>nextStyleSlot</var> be the Style Slot value of the next row.</li><li>Let <var>displaySlot</var> be the Display Slot value.</li><li>Let <var>valueSlot</var> be the Value Slot value.</li><li>Let <var>unit</var> be the Unit value.</li><li>Let <var>style</var> be <var>durationFormat</var>.[[&lt;<var>styleSlot</var>&gt;]].</li><li>Let <var>nextStyle</var> be <var>durationFormat</var>[[&lt;<var>nextStyleSlot</var>&gt;]].</li><li>Let <var>nfOpts</var> be !&nbsp;OrdinaryObjectCreate(<code>null</code>).</li><li>Let <var>value</var> be <code>0</code>.</li><li>Let <var>done</var> be <code>false</code>.</li><li>If <var>unit</var> is <code>"seconds"</code>, <code>"milliseconds"</code> or <code>"microseconds"</code> and <var>nextStyle</var> is <code>"numeric"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Microseconds]] + <var>duration</var>.[[Nanoseconds]] / 1000.</li><li>If <var>unit</var> is <code>"seconds"</code> or <code>"milliseconds"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Milliseconds]] + <var>value</var> / 1000.</li><li>If <var>unit</var> is <code>"seconds"</code>, then<ol><li>Set <var>value</var> to <var>duration</var>.[[Seconds]] + <var>value</var> / 1000.</li></ol></li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_3"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <code>"maximumFractionDigits"</code>, <var>durationFormat</var>.[[FractionalDigits]]).</li><li>Set <var>done</var> to <code>true</code>.</li></ol></li><li>Else,<ol><li>Set <var>value</var> to <var>duration</var>.[[&lt;<var>valueSlot</var>&gt;]].</li></ol></li><li>If <var>style</var> is <code>"2-digit"</code>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow" id="_ref_4"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <code>"minimumIntegerDigits"</code>, <code>2</code>).</li></ol></li><li>If <var>value</var> is <code>0</code> or <code>-0</code> and <var>display</var> is <code>"auto"</code>, then<ol><li>Skip to the next iteration.</li></ol></li><li>Let <var>nf</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_5"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%NumberFormat%, « <var>durationFormat</var>.[[Locale]], <var>nfOpts</var> »).</li><li>Let <var>num</var> be !&nbsp;<emu-xref aoid="FormatNumeric"><a href="https://tc39.github.io/ecma402/#sec-formatnumber">FormatNumeric</a></emu-xref>(<var>durationFormat</var>.[[NumberFormat]], <var>value</var>).</li><li>Let <var>dataLocale</var> be <var>durationFormat</var>.[[DataLocale]].</li><li>Let <var>dataLocaleData</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_6"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]].[[&lt;<var>dataLocale</var>&gt;]].</li><li>If <var>style</var> is <code>"2-digit"</code> or <code>"numeric"</code>, then<ol><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>unit</var>, [[Value]]: <var>num</var>} to the end of <var>result</var>.</li><li>If <var>unit</var> is <code>"hours"</code> or <code>"minutes"</code>, then<ol><li>Let <var>separator</var> be <var>dataLocaleData</var>.[[formats]].[[digital]].[[separator]].</li><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <code>"literal"</code>, [[Value]]: <var>separator</var>} to the end of <var>result</var>.</li></ol></li></ol></li><li>Else,<ol><li>Let <var>pr</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_7"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%PluralRules%, « <var>durationFormat</var>.[[Locale]] »).</li><li>Let <var>prv</var> be !&nbsp;<emu-xref aoid="ResolvePlural"><a href="https://tc39.github.io/ecma402/#sec-resolveplural">ResolvePlural</a></emu-xref>(<var>pr</var>, <var>value</var>).</li><li>Let <var>template</var> be <var>dataLocaleData</var>.[[formats]].[[&lt;<var>style</var>&gt;]].[[&lt;<var>unit</var>&gt;]].[[&lt;<var>prv</var>&gt;]].</li><li>Let <var>parts</var> be !&nbsp;<emu-xref aoid="MakePartsList"><a href="https://tc39.github.io/ecma402/#sec-makepartslist">MakePartsList</a></emu-xref>(<var>template</var>, <var>unit</var>, <var>num</var>).</li><li>Let <var>concat</var> be an empty String.</li><li>For each element <var>part</var> in <var>parts</var>, in <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> order, do<ol><li>Set <var>concat</var> to the <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">string-concatenation</a></emu-xref> of <var>concat</var> and <var>part</var>.[[Value]].</li><li>If <var>part</var> has a [[Unit]] field, then<ol><li>Set <var>concat</var> to the <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">string-concatenation</a></emu-xref> of <var>concat</var> and <var>part</var>.[[Unit]].</li></ol></li></ol></li><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>unit</var>, [[Value]]: <var>concat</var> } to the end of <var>result</var>.</li></ol></li><li>If <var>done</var> is <code>true</code>, then<ol><li>Stop iteration.</li></ol></li></ol></li><li>Let <var>lf</var> be ?&nbsp;<emu-xref aoid="Construct" id="_ref_8"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%ListFormat%, « <var>durationFormat</var>.[[Locale]] »).</li><li>Set <var>result</var> to !&nbsp;<emu-xref aoid="CreatePartsFromList"><a href="https://tc39.github.io/ecma402/#sec-createpartsfromlist">CreatePartsFromList</a></emu-xref>(<var>lf</var>, <var>result</var>).</li><li>Return <var>result</var>.</li></ol></emu-alg>
     </emu-clause>
   </emu-clause>
 
@@ -2372,7 +2460,7 @@ li.menu-search-result-term:before {
 
       <p>When the <code>Intl.DurationFormat</code> function is called with optional arguments <var>locales</var> and <var>options</var>, the following steps are taken:</p>
 
-      <emu-alg><ol><li>If NewTarget is <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>durationFormat</var> be ?&nbsp;<emu-xref aoid="OrdinaryCreateFromConstructor" id="_ref_9"><a href="https://tc39.es/ecma262/#sec-ordinarycreatefromconstructor">OrdinaryCreateFromConstructor</a></emu-xref>(NewTarget, <code>"%DurationFormatPrototype%"</code>, « [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]]  »).</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Let <var>options</var> be GetOptionsObject(<var>options</var>).</li><li>Let <var>matcher</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"localeMatcher"</code>, <code>"string"</code>, « <code>"lookup"</code>, <code>"best fit"</code> », <code>"best fit"</code>).</li><li>Let <var>numberingSystem</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"numberingSystem"</code>, <code>"string"</code>, <code>undefined</code>, <code>undefined</code>).</li><li>If <var>numberingSystem</var> does not match the Unicode Locale Identifier <code>type</code> nonterminal, throw a <code>RangeError</code> exception.</li><li>Let <var>opt</var> be the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[localeMatcher]]: <var>matcher</var>, [[nu]]: <var>numberingSystem</var> }.</li><li>Let <var>r</var> be <emu-xref aoid="ResolveLocale"><a href="https://tc39.github.io/ecma402/#sec-resolvelocale">ResolveLocale</a></emu-xref>(<emu-xref href="#sec-intl-durationformat-constructor" id="_ref_10"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[AvailableLocales]], <var>requestedLocales</var>, <var>opt</var>, <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_11"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[RelevantExtensionKeys]], <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_12"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]]).</li><li>Let <var>locale</var> be r.[[locale]].</li><li>Set <var>durationFormat</var>.[[Locale]] to <var>locale</var>.</li><li>Set <var>durationFormat</var>.[[NumberingSystem]] to <var>r</var>.[[nu]].</li><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"style"</code>, <code>"string"</code>, « <code>"long"</code>, <code>"short"</code>, <code>"narrow"</code>, <code>"digital"</code> », <code>"long"</code>).</li><li>Set <var>durationFormat</var>.[[Style]] to <var>style</var>.</li><li>Set <var>durationFormat</var>.[[DataLocale]] to <var>r</var>.[[dataLocale]].</li><li>Let <var>yearsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_13"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"years"</code>, <var>options</var>, <var>style</var>, <var>style</var>).</li><li>Set <var>durationFormat</var>.[[YearsStyle]] to <var>yearsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[YearsDisplay]] to <var>yearsOptions</var>.[[Display]].</li><li>Let <var>monthsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_14"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"months"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[YearsStyle]]).</li><li>Set <var>durationFormat</var>.[[MonthsStyle]] to <var>monthsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MonthsDisplay]] to <var>monthsOptions</var>.[[Display]].</li><li>Let <var>weeksOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_15"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"weeks"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[MonthsStyle]]).</li><li>Set <var>durationFormat</var>.[[WeeksStyle]] to <var>weeksOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[WeeksDisplay]] to <var>weeksOptions</var>.[[Display]].</li><li>Let <var>daysOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_16"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"days"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[WeeksStyle]]).</li><li>Set <var>durationFormat</var>.[[DaysStyle]] to <var>daysOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[DaysDisplay]] to <var>daysOptions</var>.[[Display]].</li><li>Let <var>hoursOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_17"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"hours"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[DaysStyle]]).</li><li>Set <var>durationFormat</var>.[[HoursStyle]] to <var>hoursOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[HoursDisplay]] to <var>hoursOptions</var>.[[Display]].</li><li>Let <var>minutesOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_18"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"minutes"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[HoursStyle]]).</li><li>Set <var>durationFormat</var>.[[MinutesStyle]] to <var>minutesOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MinutesDisplay]] to <var>minutesOptions</var>.[[Display]].</li><li>Let <var>secondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_19"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"seconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[MinutesStyle]]).</li><li>Set <var>durationFormat</var>.[[SecondsStyle]] to <var>secondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[SecondsDisplay]] to <var>secondsOptions</var>.[[Display]].</li><li>Let <var>millisecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_20"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"milliseconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[SecondsStyle]]).</li><li>Set <var>durationFormat</var>.[[MillisecondsStyle]] to <var>millisecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MillisecondsDisplay]] to <var>millisecondsOptions</var>.[[Display]].</li><li>Let <var>microsecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_21"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"microseconds"</code>, <var>options</var>, _style, <var>durationFormat</var>.[[MicrosecondsStyle]]_).</li><li>Set <var>durationFormat</var>.[[MicrosecondsStyle]] to <var>microsecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MicrosecondsDisplay]] to <var>microsecondsOptions</var>.[[Display]].</li><li>Let <var>nanosecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_22"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"nanoseconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[NanosecondsStyle]]).</li><li>Set <var>durationFormat</var>.[[NanosecondsStyle]] to <var>nanosecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[NanosecondsDisplay]] to <var>nanosecondsOptions</var>.[[Display]].</li><li>Set <var>durationFormat</var>.[[FractionalDigits]] to ?&nbsp;GetNumberOption(<var>options</var>, <code>"fractionalDigits"</code>, 0, 9, <code>undefined</code>).</li><li>Return <var>durationFormat</var>.</li></ol></emu-alg>
+      <emu-alg><ol><li>If NewTarget is <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>durationFormat</var> be ?&nbsp;<emu-xref aoid="OrdinaryCreateFromConstructor" id="_ref_9"><a href="https://tc39.es/ecma262/#sec-ordinarycreatefromconstructor">OrdinaryCreateFromConstructor</a></emu-xref>(NewTarget, <code>"%DurationFormatPrototype%"</code>, « [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] »).</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Let <var>options</var> be GetOptionsObject(<var>options</var>).</li><li>Let <var>matcher</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"localeMatcher"</code>, <code>"string"</code>, « <code>"lookup"</code>, <code>"best fit"</code> », <code>"best fit"</code>).</li><li>Let <var>numberingSystem</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"numberingSystem"</code>, <code>"string"</code>, <code>undefined</code>, <code>undefined</code>).</li><li>If <var>numberingSystem</var> does not match the Unicode Locale Identifier <code>type</code> nonterminal, throw a <code>RangeError</code> exception.</li><li>Let <var>opt</var> be the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[localeMatcher]]: <var>matcher</var>, [[nu]]: <var>numberingSystem</var> }.</li><li>Let <var>r</var> be <emu-xref aoid="ResolveLocale"><a href="https://tc39.github.io/ecma402/#sec-resolvelocale">ResolveLocale</a></emu-xref>(<emu-xref href="#sec-intl-durationformat-constructor" id="_ref_10"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[AvailableLocales]], <var>requestedLocales</var>, <var>opt</var>, <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_11"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[RelevantExtensionKeys]], <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_12"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]]).</li><li>Let <var>locale</var> be r.[[locale]].</li><li>Set <var>durationFormat</var>.[[Locale]] to <var>locale</var>.</li><li>Set <var>durationFormat</var>.[[NumberingSystem]] to <var>r</var>.[[nu]].</li><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <code>"style"</code>, <code>"string"</code>, « <code>"long"</code>, <code>"short"</code>, <code>"narrow"</code>, <code>"digital"</code> », <code>"long"</code>).</li><li>Set <var>durationFormat</var>.[[Style]] to <var>style</var>.</li><li>Set <var>durationFormat</var>.[[DataLocale]] to <var>r</var>.[[dataLocale]].</li><li>Let <var>yearsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_13"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"years"</code>, <var>options</var>, <var>style</var>, <var>style</var>).</li><li>Set <var>durationFormat</var>.[[YearsStyle]] to <var>yearsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[YearsDisplay]] to <var>yearsOptions</var>.[[Display]].</li><li>Let <var>monthsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_14"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"months"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[YearsStyle]]).</li><li>Set <var>durationFormat</var>.[[MonthsStyle]] to <var>monthsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MonthsDisplay]] to <var>monthsOptions</var>.[[Display]].</li><li>Let <var>weeksOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_15"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"weeks"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[MonthsStyle]]).</li><li>Set <var>durationFormat</var>.[[WeeksStyle]] to <var>weeksOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[WeeksDisplay]] to <var>weeksOptions</var>.[[Display]].</li><li>Let <var>daysOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_16"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"days"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[WeeksStyle]]).</li><li>Set <var>durationFormat</var>.[[DaysStyle]] to <var>daysOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[DaysDisplay]] to <var>daysOptions</var>.[[Display]].</li><li>Let <var>hoursOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_17"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"hours"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[DaysStyle]]).</li><li>Set <var>durationFormat</var>.[[HoursStyle]] to <var>hoursOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[HoursDisplay]] to <var>hoursOptions</var>.[[Display]].</li><li>Let <var>minutesOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_18"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"minutes"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[HoursStyle]]).</li><li>Set <var>durationFormat</var>.[[MinutesStyle]] to <var>minutesOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MinutesDisplay]] to <var>minutesOptions</var>.[[Display]].</li><li>Let <var>secondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_19"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"seconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[MinutesStyle]]).</li><li>Set <var>durationFormat</var>.[[SecondsStyle]] to <var>secondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[SecondsDisplay]] to <var>secondsOptions</var>.[[Display]].</li><li>Let <var>millisecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_20"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"milliseconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[SecondsStyle]]).</li><li>Set <var>durationFormat</var>.[[MillisecondsStyle]] to <var>millisecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MillisecondsDisplay]] to <var>millisecondsOptions</var>.[[Display]].</li><li>Let <var>microsecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_21"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"microseconds"</code>, <var>options</var>, _style, <var>durationFormat</var>.[[MicrosecondsStyle]]_).</li><li>Set <var>durationFormat</var>.[[MicrosecondsStyle]] to <var>microsecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[MicrosecondsDisplay]] to <var>microsecondsOptions</var>.[[Display]].</li><li>Let <var>nanosecondsOptions</var> be ?&nbsp;<emu-xref aoid="GetUnitOptions" id="_ref_22"><a href="#sec-getunitoptions">GetUnitOptions</a></emu-xref>(<code>"nanoseconds"</code>, <var>options</var>, <var>style</var>, <var>durationFormat</var>.[[NanosecondsStyle]]).</li><li>Set <var>durationFormat</var>.[[NanosecondsStyle]] to <var>nanosecondsOptions</var>.[[Style]].</li><li>Set <var>durationFormat</var>.[[NanosecondsDisplay]] to <var>nanosecondsOptions</var>.[[Display]].</li><li>Set <var>durationFormat</var>.[[FractionalDigits]] to ?&nbsp;GetNumberOption(<var>options</var>, <code>"fractionalDigits"</code>, 0, 9, <code>undefined</code>).</li><li>Return <var>durationFormat</var>.</li></ol></emu-alg>
     </emu-clause>
   </emu-clause>
 
