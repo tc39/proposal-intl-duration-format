@@ -90,17 +90,27 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     </emu-table>
 
     <emu-clause id="sec-getunitoptions" aoid="GetUnitOptions">
-      <h1>GetUnitOptions ( _unit_, _options_, _baseStyle_, _prevStyle_ )</h1>
-      <p>The GetUnitOptions abstract operation is called with the arguments _unit_ (which must be a String), _options_ (which must be an Object), _baseStyle_ (which must be a String), and _prevStyle_ (which must be a String) and returns a Record containing the relevant options for that unit. The following steps are taken:</p>
+      <h1>
+        GetUnitOptions (
+          _unit_: a String,
+          _options_: an ECMAScript language value,
+          _baseStyle_: a String,
+          _prevStyle_: a String,
+        ): a Record with [[Style]] and [[Display]] fields
+      </h1>
+      <dl class="header">
+      </dl>
 
       <emu-alg>
-        1. Let _stylesList_ be the List &laquo; `"long"`, `"short"`, `"narrow"` &raquo;.
+        1. Let _stylesList_ be &laquo; `"long"`, `"short"`, `"narrow"` &raquo;.
         1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds"`, or `"nanoseconds"`, then
-          1. Set _stylesList_ to the list-concatenation of _stylesList_ and &laquo; "numeric" &raquo;.
+          1. Append `"numeric"` to _stylesList_.
           1. If _unit_ is one of `"hours"`, `"minutes"`, or `"seconds"`, then
-            1. Set _stylesList_ to the list-concatenation of _stylesList_ and &laquo; "2-digit" &raquo;.
-        1. Let _style_ be ? GetOption(_options_, _unit_, _stylesList_, *undefined*).
+            1. Append `"2-digit"` to _stylesList_.
+        1. Let _style_ be ? GetOption(_options_, _unit_, `"string"`, _stylesList_, *undefined*).
+        1. Let _displayDefault_ be `"always"`.
         1. If _style_ is *undefined*, then
+          1. Set _displayDefault_ to `"auto"`.
           1. If _baseStyle_ is `"digital"`, then
             1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds"`, or `"nanoseconds"`, then
               1. Set _style_ to `"numeric"`.
@@ -108,11 +118,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _style_ to `"narrow"`.
           1. Else,
             1. Set _style_ to _baseStyle_.
-          1. Let _displayDefault_ to `"auto"`.
-        1. Else,
-          1. Let _displayDefault_ to `"always"`.
         1. Let _displayField_ be the string-concatenation of _unit_ and `"Display"`.
-        1. Let _display_ be ? GetOption(_options_, _displayField_, &laquo; `"auto"`, `"always"` &raquo;, _displayDefault_).
+        1. Let _display_ be ? GetOption(_options_, _displayField_, `"string"`, &laquo; `"auto"`, `"always"` &raquo;, _displayDefault_).
         1. If _prevStyle_ is `"numeric` or `"2-digit`, then
           1. If _style_ is not `"numeric` or `"2-digit"`, then
             1. Throw a *RangeError* exception.
@@ -160,15 +167,14 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _nf_ be ? Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
           1. Let _num_ be ! FormatNumeric(_durationFormat_.[[NumberFormat]], _value_).
           1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-          1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
-          1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
+          1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
           1. If _style_ is `"2-digit"` or `"numeric"`, then
             1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
             1. If _unit_ is `"hours"` or `"minutes"`, then
               1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
               1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
           1. Else,
-            1. Let _pr_ be ? Construct(%PluralRules&, &laquo; _durationFormat_.[[Locale]] &raquo;).
+            1. Let _pr_ be ? Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
             1. Let _prv_ be ! ResolvePlural(_pr_, _value_).
             1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_prv_&gt;]].
             1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
@@ -202,33 +208,30 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]]  &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be GetOptionsObject(_options_).
-        1. Let _opt_ be a new Record.
         1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
-        1. Set _opt_.[[localeMatcher]] to _matcher_.
         1. Let _numberingSystem_ be ? GetOption(_options_, `"numberingSystem"`, `"string"`, `undefined`, `undefined`).
         1. If _numberingSystem_ does not match the Unicode Locale Identifier `type` nonterminal, throw a `RangeError` exception.
-        1. Set _opt_.[[nu]] to _numberingSystem_.
-        1. Let _localeData_ be %DurationFormat%.[[LocaleData]].
-        1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], _localeData_).
+        1. Let _opt_ be the Record { [[localeMatcher]]: _matcher_, [[nu]]: _numberingSystem_ }.
+        1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], %DurationFormat%.[[LocaleData]]).
         1. Let _locale_ be r.[[locale]].
         1. Set _durationFormat_.[[Locale]] to _locale_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"digital"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
-        1. Let _yearsOptions_ be ? GetUnitOptions(`"years"`, _options_, _style_).
+        1. Let _yearsOptions_ be ? GetUnitOptions(`"years"`, _options_, _style_, _style_).
         1. Set _durationFormat_.[[YearsStyle]] to _yearsOptions_.[[Style]].
         1. Set _durationFormat_.[[YearsDisplay]] to _yearsOptions_.[[Display]].
-        1. Let _monthsOptions_ be ? GetUnitOptions(`"months"`, _options_, _style_).
+        1. Let _monthsOptions_ be ? GetUnitOptions(`"months"`, _options_, _style_, _durationFormat_.[[YearsStyle]]).
         1. Set _durationFormat_.[[MonthsStyle]] to _monthsOptions_.[[Style]].
         1. Set _durationFormat_.[[MonthsDisplay]] to _monthsOptions_.[[Display]].
-        1. Let _weeksOptions_ be ? GetUnitOptions(`"weeks"`, _options_, _style_).
+        1. Let _weeksOptions_ be ? GetUnitOptions(`"weeks"`, _options_, _style_, _durationFormat_.[[MonthsStyle]]).
         1. Set _durationFormat_.[[WeeksStyle]] to _weeksOptions_.[[Style]].
         1. Set _durationFormat_.[[WeeksDisplay]] to _weeksOptions_.[[Display]].
-        1. Let _daysOptions_ be ? GetUnitOptions(`"days"`, _options_, _style_).
+        1. Let _daysOptions_ be ? GetUnitOptions(`"days"`, _options_, _style_, _durationFormat_.[[WeeksStyle]]).
         1. Set _durationFormat_.[[DaysStyle]] to _daysOptions_.[[Style]].
         1. Set _durationFormat_.[[DaysDisplay]] to _daysOptions_.[[Display]].
-        1. Let _hoursOptions_ be ? GetUnitOptions(`"hours"`, _options_, _style_).
+        1. Let _hoursOptions_ be ? GetUnitOptions(`"hours"`, _options_, _style_, _durationFormat_.[[DaysStyle]]).
         1. Set _durationFormat_.[[HoursStyle]] to _hoursOptions_.[[Style]].
         1. Set _durationFormat_.[[HoursDisplay]] to _hoursOptions_.[[Display]].
         1. Let _minutesOptions_ be ? GetUnitOptions(`"minutes"`, _options_, _style_, _durationFormat_.[[HoursStyle]]).
