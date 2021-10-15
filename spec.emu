@@ -159,7 +159,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to `true`.
           1. Else,
-            1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]]
+            1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]].
           1. If _style_ is `"2-digit"`, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
           1. If _value_ is `0` or `-0` and _display_ is `"auto"`, then
@@ -205,7 +205,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]]  &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be GetOptionsObject(_options_).
         1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
