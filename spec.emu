@@ -89,7 +89,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </table>
     </emu-table>
 
-    <emu-clause id="sec-getunitoptions" aoid="GetUnitOptions">
+    <emu-clause id="sec-getunitoptions" type="abstract operation">
       <h1>
         GetUnitOptions (
           _unit_: a String,
