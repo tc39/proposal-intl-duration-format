@@ -111,9 +111,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </table>
     </emu-table>
 
-    <emu-clause id="sec-getunitoptions" type="abstract operation">
+    <emu-clause id="sec-getdurationunitoptions" type="abstract operation">
       <h1>
-        GetUnitOptions (
+        GetDurationUnitOptions (
           _unit_: a String,
           _options_: an ECMAScript language value,
           _baseStyle_: a String,
@@ -242,7 +242,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _unit_ be the Unit value.
           1. Let _valueList_ be the Values value.
           1. Let _digitalBase_ be the Digital Default value.
-          1. Let _unitOptions_ be ? GetUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
+          1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set _durationFormat_.[[&lt;_styleSlot_&gt;]] to _unitOptions_.[[Style]].
           1. Set _durationFormat_.[[&lt;_displaySlot_&gt;]] to _unitOptions_.[[Display]].
           1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
