@@ -170,8 +170,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
-          1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
-          1. Let _nextStyle_ be _durationFormat_[[&lt;_nextStyleSlot_&gt;]].
+          1. Let _style_ be the current value of the _styleSlot_ slot of _durationFormat_.
+          1. Let _nextStyle_ be the current value of the _nextStyleSlot_ slot of _durationFormat_.
           1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
           1. Let _value_ be `0`.
           1. Let _done_ be `false`.
@@ -184,7 +184,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to `true`.
           1. Else,
-            1. Set _value_ to _duration_.[[&lt;_valueSlot_&gt;]].
+            1. Set _value_ to the current value of the _valueSlot_ slot of _duration_.
           1. If _style_ is `"2-digit"`, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
           1. If _value_ is `0` or `-0` and _display_ is `"auto"`, then
@@ -192,7 +192,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _nf_ be ? Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
           1. Let _num_ be ! FormatNumeric(_durationFormat_.[[NumberFormat]], _value_).
           1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-          1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
+          1. Let _dataLocaleData_ be the current value of the _dataLocale_ slot of %DurationFormat%.[[LocaleData]].
           1. If _style_ is `"2-digit"` or `"numeric"`, then
             1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
             1. If _unit_ is `"hours"` or `"minutes"`, then
@@ -201,7 +201,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Else,
             1. Let _pr_ be ? Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
             1. Let _prv_ be ! ResolvePlural(_pr_, _value_).
-            1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_prv_&gt;]].
+            1. Let _template_ be the current value of the _prv_ slot of the _unit_ slot of the _style_ slot of _dataLocaleData_.[[formats]].
             1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
             1. Let _concat_ be an empty String.
             1. For each element _part_ in _parts_, in List order, do
@@ -252,8 +252,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _valueList_ be the Values value.
           1. Let _digitalBase_ be the Digital Default value.
           1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
-          1. Set _durationFormat_.[[&lt;_styleSlot_&gt;]] to _unitOptions_.[[Style]].
-          1. Set _durationFormat_.[[&lt;_displaySlot_&gt;]] to _unitOptions_.[[Display]].
+          1. Set the value of the _styleSlot_ slot of _durationFormat_ to _unitOptions_.[[Style]].
+          1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
           1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
              1. Set _prevStyle_ to _unitOptions_.[[Style]].
         1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, `undefined`).
