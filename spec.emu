@@ -24,6 +24,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <th>Style Slot</th>
             <th>Display Slot</th>
             <th>Unit</th>
+            <th>Values</th>
+            <th>Digital Default</th>
           </tr>
         </thead>
         <tr>
@@ -31,60 +33,80 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[YearsStyle]]</td>
           <td>[[YearsDisplay]]</td>
           <td>`"years"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
+          <td>`"narrow"`</td>
         </tr>
         <tr>
           <td>[[Months]]</td>
           <td>[[MonthsStyle]]</td>
           <td>[[MonthsDisplay]]</td>
           <td>`"months"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
+          <td>`"narrow"`</td>
         </tr>
         <tr>
           <td>[[Weeks]]</td>
           <td>[[WeeksStyle]]</td>
           <td>[[WeeksDisplay]]</td>
           <td>`"weeks"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
+          <td>`"narrow"`</td>
         </tr>
         <tr>
           <td>[[Days]]</td>
           <td>[[DaysStyle]]</td>
           <td>[[DaysDisplay]]</td>
           <td>`"days"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
+          <td>`"narrow"`</td>
         </tr>
         <tr>
           <td>[[Hours]]</td>
           <td>[[HoursStyle]]</td>
           <td>[[HoursDisplay]]</td>
           <td>`"hours"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
         <tr>
           <td>[[Minutes]]</td>
           <td>[[MinutesStyle]]</td>
           <td>[[MinutesDisplay]]</td>
           <td>`"minutes"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
         <tr>
           <td>[[Seconds]]</td>
           <td>[[SecondsStyle]]</td>
           <td>[[SecondsDisplay]]</td>
           <td>`"seconds"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
         <tr>
           <td>[[Milliseconds]]</td>
           <td>[[MillisecondsStyle]]</td>
           <td>[[MillisecondsDisplay]]</td>
           <td>`"milliseconds"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
         <tr>
           <td>[[Microseconds]]</td>
           <td>[[MicrosecondsStyle]]</td>
           <td>[[MicrosecondsDisplay]]</td>
           <td>`"microseconds"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
         <tr>
           <td>[[Nanoseconds]]</td>
           <td>[[NanosecondsStyle]]</td>
           <td>[[NanosecondsDisplay]]</td>
           <td>`"nanoseconds"`</td>
+          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
+          <td>`"numeric"`</td>
         </tr>
       </table>
     </emu-table>
@@ -95,6 +117,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           _unit_: a String,
           _options_: an ECMAScript language value,
           _baseStyle_: a String,
+          _stylesList_: a List of String,
+          _digitalBase_: a String,
           _prevStyle_: a String,
         ): a Record with [[Style]] and [[Display]] fields
       </h1>
@@ -102,20 +126,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
 
       <emu-alg>
-        1. Let _stylesList_ be &laquo; `"long"`, `"short"`, `"narrow"` &raquo;.
-        1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds"`, or `"nanoseconds"`, then
-          1. Append `"numeric"` to _stylesList_.
-          1. If _unit_ is one of `"hours"`, `"minutes"`, or `"seconds"`, then
-            1. Append `"2-digit"` to _stylesList_.
         1. Let _style_ be ? GetOption(_options_, _unit_, `"string"`, _stylesList_, *undefined*).
         1. Let _displayDefault_ be `"always"`.
         1. If _style_ is *undefined*, then
           1. Set _displayDefault_ to `"auto"`.
           1. If _baseStyle_ is `"digital"`, then
-            1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, `"microseconds"`, or `"nanoseconds"`, then
-              1. Set _style_ to `"numeric"`.
-            1. Else,
-              1. Set _style_ to `"narrow"`.
+            1. Set _style_ to _digitalBase_.
           1. Else,
             1. Set _style_ to _baseStyle_.
         1. Let _displayField_ be the string-concatenation of _unit_ and `"Display"`.
@@ -224,7 +240,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _styleSlot_ be the Style Slot value.
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _unit_ be the Unit value.
-          1. Let _unitOptions_ be ? GetUnitOptions(_unit_, _options_, _style_, _prevStyle_).
+          1. Let _valueList_ be the Values value.
+          1. Let _digitalBase_ be the Digital Default value.
+          1. Let _unitOptions_ be ? GetUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set _durationFormat_.[[&lt;_styleSlot_&gt;]] to _unitOptions_.[[Style]].
           1. Set _durationFormat_.[[&lt;_displaySlot_&gt;]] to _unitOptions_.[[Display]].
           1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
