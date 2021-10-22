@@ -112,7 +112,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     </emu-table>
 
     <emu-clause id="sec-getunitoptions" type="abstract operation">
-      <h1> GetUnitOptions (
+      <h1>
+        GetUnitOptions (
           _unit_: a String,
           _options_: an ECMAScript language value,
           _baseStyle_: a String,
