@@ -54,6 +54,21 @@
             "type": "clause",
             "number": "12.3.3",
             "id": "sec-intl.numberformat-internal-slots"
+        },
+        {
+            "type": "op",
+            "aoid": "GetOptionsObject",
+            "id": "sec-getoptionsobject"
+        },
+        {
+            "type": "op",
+            "aoid": "SupportedLocales",
+            "id": "sec-supportedlocales"
+        },
+        {
+            "type": "op",
+            "aoid": "GetNumberOption",
+            "id": "sec-getnumberoption"
         }
     ],
     "https://tc39.github.io/proposal-temporal/": [
