@@ -421,7 +421,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <td>`"daysDisplay"`</td>
           </tr>
           <tr>
-            <td>[[HoursDisplay]]</td>
+            <td>[[HoursStyle]]</td>
             <td>`"hours"`</td>
           </tr>
           <tr>
