@@ -1,6 +1,6 @@
 # Proposal for Intl.DurationFormat
 
-**Stage**: 2
+**Stage**: 3
 
 **Champion**: [Younies Mahmoud](https://github.com/younies), [Ujjwal Sharma](https://github.com/ryzokuken)
 
@@ -15,8 +15,9 @@
 
 ## Status
 
-This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
-This proposal reached Stage 2 at the 2020 June TC39 meeting.
+- This proposal reached Stage 1 at the 2020 Feb TC39 meeting.
+- This proposal reached Stage 2 at the 2020 June TC39 meeting.
+- This proposal reached Stage 3 at the 2021 October TC39 meeting.
 
 ## Overview
 
