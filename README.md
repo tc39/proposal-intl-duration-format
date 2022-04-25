@@ -11,7 +11,11 @@
 - Ron Buckton [@rbuckton](https://github.com/rbuckton)
 - Ross Kirsling [@rkirsling](https://github.com/rkirsling)
 
-**[slides](https://docs.google.com/presentation/d/1QmrhwsYwlsfe8FJqgGarCIAySWxeZzDqCrVN3-DWiGk/edit?usp=sharing)**
+**Resources**
+ - Spec text in [ecmarkup output](https://tc39.es/proposal-intl-duration-format/)
+ - [Stage 2 slides](https://docs.google.com/presentation/d/1QmrhwsYwlsfe8FJqgGarCIAySWxeZzDqCrVN3-DWiGk/edit?usp=sharing)
+ - [Stage 3 slides](https://ryzokuken.dev/slides/2021-10-df#/)
+
 
 ## Status
 
