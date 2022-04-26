@@ -2,7 +2,7 @@
 <meta charset="utf8">
 <pre class="metadata">
 title: Intl.DurationFormat
-stage: 2
+stage: 3
 location: https://tc39.es/proposal-intl-duration-format/
 contributors: Ujjwal Sharma, Younies Mahmoud
 </pre>
