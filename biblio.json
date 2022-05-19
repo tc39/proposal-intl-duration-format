@@ -74,8 +74,8 @@
     "https://tc39.github.io/proposal-temporal/": [
         {
             "type": "op",
-            "aoid": "ToPartialDuration",
-            "id": "sec-temporal-topartialduration"
+            "aoid": "ToTemporalDurationRecord",
+            "id": "sec-temporal-totemporaldurationrecord"
         }
     ]
 }
