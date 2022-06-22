@@ -114,7 +114,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     <emu-clause id="sec-todurationrecord" type="abstract operation">
       <h1>
         ToDurationRecord (
-          _input_: an Object
+          _input_: an ECMAScript language value
         ): a Record with the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref>
       </h1>
       <dl class="header">
