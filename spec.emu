@@ -339,8 +339,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
         1. Return _result_.
       </emu-alg>
-
-      <emu-note type=editor>It's still being actively discussed if balancing should be done in DurationFormat. For more information, check out the <a href="https://github.com/tc39/proposal-intl-duration-format/issues/10">relevant github issue</a>.</emu-note>
     </emu-clause>
     <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
       <h1>Intl.DurationFormat.prototype.formatToParts ( _duration_ )</h1>
