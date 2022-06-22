@@ -123,16 +123,20 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
 
       <emu-alg>
+        1. If Type(_input_) is not Object, throw a *TypeError* exception.
         1. Let _result_ be a new Record.
+        1. Let _any_ be *false*.
         1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
           1. Let _value_ be ? Get(_input_, _unit_).
           1. If _value_ is not *undefined*, then
+            1. Set _any_ to *true*.
             1. Set _value_ to ? ToIntegerWithoutRounding(_value_).
           1. Else,
-            1. Set _value_ to `0`.
+            1. Set _value_ to 0.
           1. Set the field of _result_ whose name is _valueSlot_ to _value_.
+        1. If _any_ is *false*, throw a *TypeError* exception.
         1. Return _result_.
       </emu-alg>
     </emu-clause>
