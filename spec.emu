@@ -180,7 +180,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         PartitionDurationFormatPattern (
           _durationFormat_: a DurationFormat,
-          _duration_: a Object,
+          _duration_: an Object,
         ): a List
       </h1>
       <dl class="header">
