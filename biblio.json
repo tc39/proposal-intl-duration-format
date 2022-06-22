@@ -70,12 +70,5 @@
             "aoid": "GetNumberOption",
             "id": "sec-getnumberoption"
         }
-    ],
-    "https://tc39.github.io/proposal-temporal/": [
-        {
-            "type": "op",
-            "aoid": "ToTemporalDurationRecord",
-            "id": "sec-temporal-totemporaldurationrecord"
-        }
     ]
 }
