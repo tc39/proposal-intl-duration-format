@@ -115,7 +115,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         ToDurationRecord (
           _input_: an ECMAScript language value
-        ): a Record with the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref>
+        ): either a normal completion containing a Record with the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref>, or an abrupt completion
       </h1>
       <dl class="header">
         <dt>description</dt>
