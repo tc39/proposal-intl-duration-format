@@ -117,6 +117,24 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <p>Duration Records have the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref></p>
     </emu-clause>
 
+    <emu-clause id="sec-tointegerwithoutrounding" type="abstract operation">
+      <h1>
+        ToIntegerWithoutRounding (
+          _argument_: an ECMAScript language value,
+        )
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It converts _argument_ to an integer, throwing if doing so would require rounding.</dd>
+      </dl>
+      <emu-alg>
+        1. Let _number_ be ? ToNumber(_argument_).
+        1. If _number_ is *NaN*, *+0*<sub>𝔽</sub>, or *-0*<sub>𝔽</sub>, return 0.
+        1. If IsIntegralNumber(_number_) is *false*, throw a *RangeError* exception.
+        1. Return ℝ(_number_).
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-todurationrecord" type="abstract operation">
       <h1>
         ToDurationRecord (
