@@ -111,15 +111,21 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </table>
     </emu-table>
 
+    <emu-clause id="sec-duration-records">
+      <h1>Duration Records</h1>
+      <p>A <dfn variants="Duration Records">Duration Record</dfn> is a Record value used to represent a Duration.</p>
+      <p>Duration Records have the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref></p>
+    </emu-clause>
+
     <emu-clause id="sec-todurationrecord" type="abstract operation">
       <h1>
         ToDurationRecord (
           _input_: an ECMAScript language value
-        ): either a normal completion containing a Record with the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref>, or an abrupt completion
+        ): either a normal completion containing a Duration Record, or an abrupt completion
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It converts a given object that represents a Duration into a Record.</dd>
+        <dd>It converts a given object that represents a Duration into a Duration Record.</dd>
       </dl>
 
       <emu-alg>
@@ -138,6 +144,48 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set the field of _result_ whose name is _valueSlot_ to _value_.
         1. If _any_ is *false*, throw a *TypeError* exception.
         1. Return _result_.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-durationsign" type="abstract operation">
+      <h1>
+        DurationSign (
+          _record_: a Duration Record
+        ): an integer
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It returns 1 if the most significant non-zero field in _record_ is positive, and -1 if the most significant non-zero field is negative. If all the fields are zero, it returns 0.</dd>
+      </dl>
+      <emu-alg>
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+          1. Let _valueSlot_ be the Value Slot value.
+          1. Let _v_ be value of the _valueSlot_ slot of _record_.
+          1. If _v_ &lt; 0, return -1.
+          1. If _v_ &gt; 0, return 1.
+        1. Return 0.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-isvaliddurationrecord" type="abstract operation">
+      <h1>
+        IsValidDurationRecord (
+          _record_: a Duration Record
+        )
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It returns *true* if _record_ represents a valid duration, and *false* otherwise.</dd>
+      </dl>
+      <emu-alg>
+        1. Let _sign_ be ! DurationSign(_record_).
+        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+          1. Let _valueSlot_ be the Value Slot value.
+          1. Let _v_ be value of the _valueSlot_ slot of _record_.
+          1. If 𝔽(_v_) is not finite, return *false*.
+          1. If _v_ &lt; 0 and _sign_ &gt; 0, return *false*.
+          1. If _v_ &gt; 0 and _sign_ &lt; 0, return *false*.
+        1. Return *true*.
       </emu-alg>
     </emu-clause>
 
@@ -184,7 +232,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         PartitionDurationFormatPattern (
           _durationFormat_: a DurationFormat,
-          _duration_: a Record with the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref>,
+          _duration_: a Duration Record,
         ): a List
       </h1>
       <dl class="header">
@@ -363,6 +411,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _df_ be *this* value.
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToDurationRecord(_duration_).
+        1. If IsValidDurationRecord(_record_) is *false*, throw a *RangeError* exception.
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _record_).
         1. Let _result_ be a new empty String.
         1. For each element _part_ in _formatted_, in List order, do
@@ -379,6 +428,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _df_ be *this* value.
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToDurationRecord(_duration_).
+        1. If IsValidDurationRecord(_record_) is *false*, throw a *RangeError* exception.
         1. Let _formatted_ be ? PartitionDurationFormatPattern(_df_, _record_).
         1. Let _result_ be ! ArrayCreate(0).
         1. Let _n_ be 0.
