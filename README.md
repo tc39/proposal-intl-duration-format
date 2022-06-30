@@ -208,7 +208,7 @@ new Intl.DurationFormat(locales, options)
 
 * `locales: Array<string> | string`: A locale string or a list of locale strings in decreasing order of preference.
 * `options?: object`: An object for configuring the behavior of the instance. It may have some or all of the following properties:
-  * `localeMatcher: "best-fit" | "lookup"`: A string denoting which locale matching algorithm to use. Defaults to `"best fit"`.
+  * `localeMatcher: "best fit" | "lookup"`: A string denoting which locale matching algorithm to use. Defaults to `"best fit"`.
   * `numberingSystem: string`: A string containing the name of the numbering system to be used for number formatting.
   * `style: "long" | "short" | "narrow" | "digital"`: The base style to be used for formatting. This can be overriden per-unit by setting the more granular options. Defaults to `"short"`.
   * `years: "long" | "short" | "narrow"`: The style to be used for formatting years.
