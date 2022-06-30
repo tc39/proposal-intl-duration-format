@@ -278,6 +278,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. If _unit_ is `"seconds"`, then
                   1. Set _value_ to _duration_.[[Seconds]] + _value_ / 1000.
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to *true*.
           1. Else,
             1. Set _value_ to the current value of the _valueSlot_ slot of _duration_.
