@@ -40,13 +40,20 @@
 
 ## Quick Start
 
+Use the `format` getter function for formatting using `long` and `short` style options.
+
 ```javascript
-new Intl.DurationFormat("fr-FR", { style: "long" }).format({
-    hours: 1,
-    minutes: 46,
-    seconds: 40,
-});
-// => "1 heure, 46 minutes et 40 secondes"
+const duration = {
+  hours: 1,
+  minutes: 46,
+  seconds: 40,
+};
+
+new Intl.DurationFormat("fr-FR", { style: "long" }).format(duration);
+// → '1 heure, 46 minutes et 40 secondes'
+
+new Intl.DurationFormat("en", { style: "short" }).format(duration);
+// → '1 hr, 46 min and 40 sec'
 ```
 
 ## Motivation
@@ -65,8 +72,9 @@ In this section, we are going to illustrate each user needs (requirements) and a
 
 #### Design
 
-* Input value will be an object of type `Temporal.Duration`
-* Example: `new DurationFormat().format(Temporal.Duration.from({hours: 3, minutes: 4});`
+* Input value will be an object, possible values include:
+     "`months`", " `weeks`", "`days`", "`hours`", "`minutes`", " `seconds`", "`milliseconds`", "`microseconds`", "`nanoseconds`".
+* Example: `new DurationFormat().format({hours: 3, minutes: 4 });`
 
 ### Formatting width
 
@@ -182,19 +190,67 @@ We allow users to specify a `fractionalDigits` option that will display the smal
 #### Example
 
 ```javascript
-new Intl.DurationFormat('en', { fractionalDigits: 2 }).format('PT12.3456S'); // => 12.34 sec
-new Intl.DurationFormat('en', { milliseconds: 'narrow', fractionalDigits: 2 }).format('PT12.3456S'); // => 12s 345.60ms
+const duration = {
+  seconds: 12,
+  milliseconds: 345,
+  microseconds: 600,
+};
+
+// Example using fractionalDigits
+new Intl.DurationFormat("en", { fractionalDigits: 2 }).format(duration);
+// => 12.34 sec
+
+// Example using fractionalDigits and milliseconds set to `narrow`
+new Intl.DurationFormat("en", {
+  milliseconds: "narrow",
+  fractionalDigits: 2,
+}).format(duration);
+// => 12s 345.60ms
 ```
 
 ## API design
 
 ``` javascript
-    new Intl.DurationFormat('en').format(Temporal.Duration.from('PT2H46M40S')); // => 2 hr 46 min 40 sec
-    new Intl.DurationFormat('en', {
-      hours: 'numeric',
-      seconds: 'numeric',
-    }).format(Temporal.Duration.from('PT2H40S')); // => 2:00:40
+const duration = {
+  hours: 2,
+  minutes: 46,
+  seconds: 40,
+};
+
+new Intl.DurationFormat("en").format(duration);
+// => 2 hr 46 min 40 sec
+
+new Intl.DurationFormat("en", {
+  hours: "numeric",
+  seconds: "numeric",
+}).format(duration);
+// => 2:46:40
 ```
+
+```javascript
+const duration = {
+  years: 1,
+  months: 2,
+  weeks: 3,
+  days: 3,
+  hours: 4,
+  minutes: 5,
+  seconds: 6,
+  milliseconds: 7,
+  microseconds: 8,
+  nanoseconds: 9,
+};
+
+new Intl.DurationFormat("en").format(duration);
+// => '1 year, 2 months, 3 weeks, 3 days, 4 hours, 5 minutes, 6 seconds, 7 milliseconds, 8 microseconds, and 9 nanoseconds'
+new Intl.DurationFormat("en", { style: "short" }).format(duration);
+// => '1 yr, 2 mths, 3 wks, 3 days, 4 hr, 5 min, 6 sec, 7 ms, 8 μs, and 9 ns'
+new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
+// => '1y, 2m, 3w, 3d, 4h, 5m, 6s, 7ms, 8μs, and 9ns'
+new Intl.DurationFormat("en", { style: "digital" }).format(duration);
+// = '1y, 2m, 3w, 3d, and 4:05:06.007'
+```
+
 
 ### Constructor
 
