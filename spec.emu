@@ -301,10 +301,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _template_ be _dataLocaleData_.[[formats]][[&lt;_style_&gt;]][[&lt;_unit_&gt;]][[&lt;_prv_&gt;]].
               1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
               1. Let _concat_ be an empty String.
-              1. For each element _part_ in _parts_, in List order, do
+              1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
-                1. If _part_ has a [[Unit]] field, then
-                  1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]] &raquo;).
         1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
