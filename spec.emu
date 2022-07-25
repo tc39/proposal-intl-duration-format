@@ -261,25 +261,30 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _done_ be *false*.
         1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-duration-components"></emu-xref> in order, except the header row:
           1. Let _styleSlot_ be the Style Slot value.
-          1. Let _nextStyleSlot_ be the Style Slot value of the next row.
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
-          1. Let _nextStyle_ be _durationFormat_[[&lt;_nextStyleSlot_&gt;]].
+          1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
           1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
-          1. If _unit_ is `"seconds"`, `"milliseconds"`, or `"microseconds"` and _nextStyle_ is `"numeric"`, then
-              1. Let _value_ be _duration_.[[Microseconds]] + _duration_.[[Nanoseconds]] / 1000.
-              1. If _unit_ is `"seconds"` or `"milliseconds"`, then
-                1. Set _value_ to _duration_.[[Milliseconds]] + _value_ / 1000.
-                1. If _unit_ is `"seconds"`, then
-                  1. Set _value_ to _duration_.[[Seconds]] + _value_ / 1000.
+          1. If _unit_ is `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
+            1. If _unit_ is `"seconds"`, then
+              1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
+            1. Else if _unit_ is `"milliseconds"`, then
+              1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
+            1. Else,
+              1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
+            1. If _nextStyle_ is `"numeric"`, then
+              1. If _unit_ is `"seconds"`, then
+                1. Set _value_ to _value_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
+              1. Else if _unit_ is `"milliseconds"`, then
+                1. Set _value_ to _value_ + _duration_.[[Microseconds]] / 10<sup>3</sup> + _duration_.[[Nanoseconds]] / 10<sup>6</sup>.
+              1. Else,
+                1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to *true*.
-          1. Else,
-            1. Let _value_ be _duration_[[&lt;_valueSlot_&gt;]].
           1. If _style_ is `"2-digit"`, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
           1. If _value_ is not 0 or _display_ is not `"auto"`, then
