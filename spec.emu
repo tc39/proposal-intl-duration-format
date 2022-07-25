@@ -286,15 +286,16 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _value_ is 0 and _display_ is `"auto"`, then
             1. Skip to the next iteration.
           1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-          1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
           1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
           1. Let _dataLocaleData_ be the current value of the _dataLocale_ slot of %DurationFormat%.[[LocaleData]].
           1. If _style_ is `"2-digit"` or `"numeric"`, then
+            1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
             1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
             1. If _unit_ is `"hours"` or `"minutes"`, then
               1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
               1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
           1. Else,
+            1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
             1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
             1. Let _prv_ be ! ResolvePlural(_pr_, 𝔽(_value_)).
             1. Let _template_ be the current value of the _prv_ slot of the _unit_ slot of the _style_ slot of _dataLocaleData_.[[formats]].
