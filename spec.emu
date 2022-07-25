@@ -32,81 +32,81 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[Years]]</td>
           <td>[[YearsStyle]]</td>
           <td>[[YearsDisplay]]</td>
-          <td>`"years"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
-          <td>`"narrow"`</td>
+          <td>*"years"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+          <td>*"narrow"*</td>
         </tr>
         <tr>
           <td>[[Months]]</td>
           <td>[[MonthsStyle]]</td>
           <td>[[MonthsDisplay]]</td>
-          <td>`"months"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
-          <td>`"narrow"`</td>
+          <td>*"months"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+          <td>*"narrow"*</td>
         </tr>
         <tr>
           <td>[[Weeks]]</td>
           <td>[[WeeksStyle]]</td>
           <td>[[WeeksDisplay]]</td>
-          <td>`"weeks"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
-          <td>`"narrow"`</td>
+          <td>*"weeks"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+          <td>*"narrow"*</td>
         </tr>
         <tr>
           <td>[[Days]]</td>
           <td>[[DaysStyle]]</td>
           <td>[[DaysDisplay]]</td>
-          <td>`"days"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"` &raquo;</td>
-          <td>`"narrow"`</td>
+          <td>*"days"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+          <td>*"narrow"*</td>
         </tr>
         <tr>
           <td>[[Hours]]</td>
           <td>[[HoursStyle]]</td>
           <td>[[HoursDisplay]]</td>
-          <td>`"hours"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"hours"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Minutes]]</td>
           <td>[[MinutesStyle]]</td>
           <td>[[MinutesDisplay]]</td>
-          <td>`"minutes"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"minutes"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Seconds]]</td>
           <td>[[SecondsStyle]]</td>
           <td>[[SecondsDisplay]]</td>
-          <td>`"seconds"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"`, `"2-digit"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"seconds"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Milliseconds]]</td>
           <td>[[MillisecondsStyle]]</td>
           <td>[[MillisecondsDisplay]]</td>
-          <td>`"milliseconds"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"milliseconds"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Microseconds]]</td>
           <td>[[MicrosecondsStyle]]</td>
           <td>[[MicrosecondsDisplay]]</td>
-          <td>`"microseconds"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"microseconds"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Nanoseconds]]</td>
           <td>[[NanosecondsStyle]]</td>
           <td>[[NanosecondsDisplay]]</td>
-          <td>`"nanoseconds"`</td>
-          <td>&laquo; `"long"`, `"short"`, `"narrow"`, `"numeric"` &raquo;</td>
-          <td>`"numeric"`</td>
+          <td>*"nanoseconds"*</td>
+          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
+          <td>*"numeric"*</td>
         </tr>
       </table>
     </emu-table>
@@ -222,23 +222,23 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
 
       <emu-alg>
-        1. Let _style_ be ? GetOption(_options_, _unit_, `"string"`, _stylesList_, *undefined*).
-        1. Let _displayDefault_ be `"always"`.
+        1. Let _style_ be ? GetOption(_options_, _unit_, *"string"*, _stylesList_, *undefined*).
+        1. Let _displayDefault_ be *"always"*.
         1. If _style_ is *undefined*, then
-          1. Set _displayDefault_ to `"auto"`.
-          1. If _baseStyle_ is `"digital"`, then
+          1. Set _displayDefault_ to *"auto"*.
+          1. If _baseStyle_ is *"digital"*, then
             1. Set _style_ to _digitalBase_.
-          1. Else if _prevStyle_ is `"numeric"` or `"2-digit"`, then
-            1. Set _style_ to `"numeric"`.
+          1. Else if _prevStyle_ is *"numeric"* or *"2-digit"*, then
+            1. Set _style_ to *"numeric"*.
           1. Else,
             1. Set _style_ to _baseStyle_.
-        1. Let _displayField_ be the string-concatenation of _unit_ and `"Display"`.
-        1. Let _display_ be ? GetOption(_options_, _displayField_, `"string"`, &laquo; `"auto"`, `"always"` &raquo;, _displayDefault_).
-        1. If _prevStyle_ is `"numeric"` or `"2-digit"`, then
-          1. If _style_ is not `"numeric"` or `"2-digit"`, then
+        1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
+        1. Let _display_ be ? GetOption(_options_, _displayField_, *"string"*, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
+        1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+          1. If _style_ is not *"numeric"* or *"2-digit"*, then
             1. Throw a *RangeError* exception.
-          1. Else if _unit_ is `"minutes"` or `"seconds"`, then
-            1. Set _style_ to `"2-digit"`.
+          1. Else if _unit_ is *"minutes"* or *"seconds"*, then
+            1. Set _style_ to *"2-digit"*.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
@@ -270,44 +270,44 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
           1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
-          1. If _unit_ is `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
-            1. If _unit_ is `"seconds"`, then
+          1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
+            1. If _unit_ is *"seconds"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
-            1. Else if _unit_ is `"milliseconds"`, then
+            1. Else if _unit_ is *"milliseconds"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
             1. Else,
               1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
-            1. If _nextStyle_ is `"numeric"`, then
-              1. If _unit_ is `"seconds"`, then
+            1. If _nextStyle_ is *"numeric"*, then
+              1. If _unit_ is *"seconds"*, then
                 1. Set _value_ to _value_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
-              1. Else if _unit_ is `"milliseconds"`, then
+              1. Else if _unit_ is *"milliseconds"*, then
                 1. Set _value_ to _value_ + _duration_.[[Microseconds]] / 10<sup>3</sup> + _duration_.[[Nanoseconds]] / 10<sup>6</sup>.
               1. Else,
                 1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"maximumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to *true*.
-          1. If _style_ is `"2-digit"`, then
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
-          1. If _value_ is not 0 or _display_ is not `"auto"`, then
+          1. If _style_ is *"2-digit"*, then
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, `2`).
+          1. If _value_ is not 0 or _display_ is not *"auto"*, then
             1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
             1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
             1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]][[&lt;_dataLocale_&gt;]].
-            1. If _style_ is `"2-digit"` or `"numeric"`, then
+            1. If _style_ is *"2-digit"* or *"numeric"*, then
               1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
-              1. If _unit_ is `"hours"` or `"minutes"`, then
-                1. If _unit_ is `"hours"`, then
+              1. If _unit_ is *"hours"* or *"minutes"*, then
+                1. If _unit_ is *"hours"*, then
                   1. Let _nextValue_ be _duration_.[[Minutes]].
                   1. Let _nextDisplay_ be _durationFormat_.[[MinutesDisplay]].
                 1. Else,
                   1. Let _nextValue_ be _duration_.[[Seconds]].
                   1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
-                  1. If _durationFormat_.[[MillisecondsStyle]] is `"numeric"`, then
+                  1. If _durationFormat_.[[MillisecondsStyle]] is *"numeric"*, then
                     1. Set _nextValue_ to _nextValue_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
-                1. If _nextValue_ is not 0 or _nextDisplay_ is not `"auto"`, then
+                1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
                   1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
-                  1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
+                  1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to the end of _result_.
             1. Else,
               1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
@@ -344,11 +344,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, `"%DurationFormatPrototype%"`, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be ? GetOptionsObject(_options_).
-        1. Let _matcher_ be ? GetOption(_options_, `"localeMatcher"`, `"string"`, &laquo; `"lookup"`, `"best fit"` &raquo;, `"best fit"`).
-        1. Let _numberingSystem_ be ? GetOption(_options_, `"numberingSystem"`, `"string"`, *undefined*, *undefined*).
+        1. Let _matcher_ be ? GetOption(_options_, *"localeMatcher"*, *"string"*, &laquo; *"lookup"*, *"best fit"* &raquo;, *"best fit"*).
+        1. Let _numberingSystem_ be ? GetOption(_options_, *"numberingSystem"*, *"string"*, *undefined*, *undefined*).
         1. If _numberingSystem_ is not *undefined, then
           1. If _numberingSystem_ does not match the Unicode Locale Identifier `type` nonterminal, throw a `RangeError` exception.
         1. Let _opt_ be the Record { [[localeMatcher]]: _matcher_, [[nu]]: _numberingSystem_ }.
@@ -356,7 +356,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _locale_ be r.[[locale]].
         1. Set _durationFormat_.[[Locale]] to _locale_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
-        1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"digital"` &raquo;, `"long"`).
+        1. Let _style_ be ? GetOption(_options_, *"style"*, *"string"*, &laquo; *"long"*, *"short"*, *"narrow"*, *"digital"* &raquo;, *"long"*).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _prevStyle_ be the empty String.
@@ -369,9 +369,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set the value of the _styleSlot_ slot of _durationFormat_ to _unitOptions_.[[Style]].
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
-          1. If _unit_ is one of `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`, or `"microseconds"`, then
+          1. If _unit_ is one of *"hours"*, *"minutes"*, *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
              1. Set _prevStyle_ to _unitOptions_.[[Style]].
-        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, `"fractionalDigits"`, 0, 9, *undefined*).
+        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, *"fractionalDigits"*, 0, 9, *undefined*).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
@@ -407,13 +407,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
 
-      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; `"nu"` &raquo;.</p>
+      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; *"nu"* &raquo;.</p>
 
       <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
 
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, and `narrow`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain *"{0}"* to be replaced by a formatted number. The value of the fourth field, corresponding to the `digital` style, on the other hand, must be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with `"{"`, followed by the name of the field, followed by `"}"`.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, and `narrow`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain *"{0}"* to be replaced by a formatted number. The value of the fourth field, corresponding to the `digital` style, on the other hand, must be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with *"{"*, followed by the name of the field, followed by *"}"*.</li>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[formats]] should have an additional [[digital]] field which is a record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
       </ul>
 
@@ -435,7 +435,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     <emu-clause id="sec-Intl.DurationFormat.prototype-@@tostringtag">
       <h1>Intl.DurationFormat.prototype [ @@toStringTag ]</h1>
 
-      <p>The initial value of the @@toStringTag property is the string value `"Intl.DurationFormat"`.</p>
+      <p>The initial value of the @@toStringTag property is the string value *"Intl.DurationFormat"*.</p>
       <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
     </emu-clause>
 
@@ -471,8 +471,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _n_ be 0.
         1. For each { [[Type]], [[Value]] } _part_ in _parts_, do
           1. Let _obj_ be ! OrdinaryObjectCreate(%ObjectPrototype%).
-          1. Perform ! CreateDataPropertyOrThrow(_obj_, `"type"`, _part_.[[Type]]).
-          1. Perform ! CreateDataPropertyOrThrow(_obj_, `"value"`, _part_.[[Value]]).
+          1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
+          1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
           1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
           1. Increment _n_ by 1.
         1. Return _result_.
@@ -506,99 +506,99 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           </thead>
           <tr>
             <td>[[Locale]]</td>
-            <td>`"locale"`</td>
+            <td>*"locale"*</td>
           </tr>
           <tr>
             <td>[[Style]]</td>
-            <td>`"style"`</td>
+            <td>*"style"*</td>
           </tr>
           <tr>
             <td>[[YearsStyle]]</td>
-            <td>`"years"`</td>
+            <td>*"years"*</td>
           </tr>
           <tr>
             <td>[[YearsDisplay]]</td>
-            <td>`"yearsDisplay"`</td>
+            <td>*"yearsDisplay"*</td>
           </tr>
           <tr>
             <td>[[MonthsStyle]]</td>
-            <td>`"months"`</td>
+            <td>*"months"*</td>
           </tr>
           <tr>
             <td>[[MonthsDisplay]]</td>
-            <td>`"monthsDisplay"`</td>
+            <td>*"monthsDisplay"*</td>
           </tr>
           <tr>
             <td>[[WeeksStyle]]</td>
-            <td>`"weeks"`</td>
+            <td>*"weeks"*</td>
           </tr>
           <tr>
             <td>[[WeeksDisplay]]</td>
-            <td>`"weeksDisplay"`</td>
+            <td>*"weeksDisplay"*</td>
           </tr>
           <tr>
             <td>[[DaysStyle]]</td>
-            <td>`"days"`</td>
+            <td>*"days"*</td>
           </tr>
           <tr>
             <td>[[DaysDisplay]]</td>
-            <td>`"daysDisplay"`</td>
+            <td>*"daysDisplay"*</td>
           </tr>
           <tr>
             <td>[[HoursStyle]]</td>
-            <td>`"hours"`</td>
+            <td>*"hours"*</td>
           </tr>
           <tr>
             <td>[[HoursDisplay]]</td>
-            <td>`"hoursDisplay"`</td>
+            <td>*"hoursDisplay"*</td>
           </tr>
           <tr>
             <td>[[MinutesStyle]]</td>
-            <td>`"minutes"`</td>
+            <td>*"minutes"*</td>
           </tr>
           <tr>
             <td>[[MinutesDisplay]]</td>
-            <td>`"minutesDisplay"`</td>
+            <td>*"minutesDisplay"*</td>
           </tr>
           <tr>
             <td>[[SecondsStyle]]</td>
-            <td>`"seconds"`</td>
+            <td>*"seconds"*</td>
           </tr>
           <tr>
             <td>[[SecondsDisplay]]</td>
-            <td>`"secondsDisplay"`</td>
+            <td>*"secondsDisplay"*</td>
           </tr>
           <tr>
             <td>[[MillisecondsStyle]]</td>
-            <td>`"milliseconds"`</td>
+            <td>*"milliseconds"*</td>
           </tr>
           <tr>
             <td>[[MillisecondsDisplay]]</td>
-            <td>`"millisecondsDisplay"`</td>
+            <td>*"millisecondsDisplay"*</td>
           </tr>
           <tr>
             <td>[[MicrosecondsStyle]]</td>
-            <td>`"microseconds"`</td>
+            <td>*"microseconds"*</td>
           </tr>
           <tr>
             <td>[[MicrosecondsDisplay]]</td>
-            <td>`"microsecondsDisplay"`</td>
+            <td>*"microsecondsDisplay"*</td>
           </tr>
           <tr>
             <td>[[NanosecondsStyle]]</td>
-            <td>`"nanoseconds"`</td>
+            <td>*"nanoseconds"*</td>
           </tr>
           <tr>
             <td>[[NanosecondsDisplay]]</td>
-            <td>`"nanosecondsDisplay"`</td>
+            <td>*"nanosecondsDisplay"*</td>
           </tr>
           <tr>
             <td>[[FractionalDigits]]</td>
-            <td>`"fractionalDigits"`</td>
+            <td>*"fractionalDigits"*</td>
           </tr>
           <tr>
             <td>[[NumberingSystem]]</td>
-            <td>`"numberingSystem"`</td>
+            <td>*"numberingSystem"*</td>
           </tr>
         </table>
       </emu-table>
@@ -617,28 +617,28 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     <ul>
       <li>[[Locale]] is a String value with the language tag of the locale whose localization is used for formatting.</li>
       <li>[[DataLocale]] is a String value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of [[Locale]].</li>
-      <li>[[NumberingSystem]] is a String value with the `"type"` given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
-      <li>[[Style]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"digital"` identifying the duration formatting style used.</li>
-      <li>[[YearsStyle]] is one of the String values `"long"`, `"short"`, or `"narrow"` identifying the formatting style used for the years field.</li>
-      <li>[[YearsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the years field.</li>
-      <li>[[MonthsStyle]] is one of the String values `"long"`, `"short"`, or `"narrow"` identifying the formatting style used for the months field.</li>
-      <li>[[MonthsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the months field.</li>
-      <li>[[WeeksStyle]] is one of the String values `"long"`, `"short"`, or `"narrow"` identifying the formatting style used for the weeks field.</li>
-      <li>[[WeeksDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the weeks field.</li>
-      <li>[[DaysStyle]] is one of the String values `"long"`, `"short"`, or `"narrow"` identifying the formatting style used for the days field.</li>
-      <li>[[DaysDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the days field.</li>
-      <li>[[HoursStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, `"2-digit"`, or `"numeric"` identifying the formatting style used for the hours field.</li>
-      <li>[[HoursDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the hours field.</li>
-      <li>[[MinutesStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, `"2-digit"`, or `"numeric"` identifying the formatting style used for the minutes field.</li>
-      <li>[[MinutesDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the minutes field.</li>
-      <li>[[SecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, `"2-digit"`, or `"numeric"` identifying the formatting style used for the seconds field.</li>
-      <li>[[SecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the seconds field.</li>
-      <li>[[MillisecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"numeric"` identifying the formatting style used for the milliseconds field.</li>
-      <li>[[MillisecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the milliseconds field.</li>
-      <li>[[MicrosecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"numeric"` identifying the formatting style used for the microseconds field.</li>
-      <li>[[MicrosecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the microseconds field.</li>
-      <li>[[NanosecondsStyle]] is one of the String values `"long"`, `"short"`, `"narrow"`, or `"numeric"` identifying the formatting style used for the nanoseconds field.</li>
-      <li>[[NanosecondsDisplay]] is one of the String values `"auto"` or `"always"` identifying when to display the nanoseconds field.</li>
+      <li>[[NumberingSystem]] is a String value with the *"type"* given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
+      <li>[[Style]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"digital"* identifying the duration formatting style used.</li>
+      <li>[[YearsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the years field.</li>
+      <li>[[YearsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the years field.</li>
+      <li>[[MonthsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the months field.</li>
+      <li>[[MonthsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the months field.</li>
+      <li>[[WeeksStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the weeks field.</li>
+      <li>[[WeeksDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the weeks field.</li>
+      <li>[[DaysStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the days field.</li>
+      <li>[[DaysDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the days field.</li>
+      <li>[[HoursStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the hours field.</li>
+      <li>[[HoursDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the hours field.</li>
+      <li>[[MinutesStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the minutes field.</li>
+      <li>[[MinutesDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the minutes field.</li>
+      <li>[[SecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the seconds field.</li>
+      <li>[[SecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the seconds field.</li>
+      <li>[[MillisecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the milliseconds field.</li>
+      <li>[[MillisecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the milliseconds field.</li>
+      <li>[[MicrosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the microseconds field.</li>
+      <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
+      <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
+      <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
       <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
     </ul>
   </emu-clause>
