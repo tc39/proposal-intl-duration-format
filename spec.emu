@@ -295,8 +295,17 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
               1. If _unit_ is `"hours"` or `"minutes"`, then
-                1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
-                1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
+                1. If _unit_ is `"hours"`, then
+                  1. Let _nextValue_ be _duration_.[[Minutes]].
+                  1. Let _nextDisplay_ be _durationFormat_.[[MinutesDisplay]].
+                1. Else,
+                  1. Let _nextValue_ be _duration_.[[Seconds]].
+                  1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
+                  1. If _durationFormat_.[[MillisecondsStyle]] is `"numeric"`, then
+                    1. Set _nextValue_ to _nextValue_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
+                1. If _nextValue_ is not 0 or _nextDisplay_ is not `"auto"`, then
+                  1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
+                  1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
             1. Else,
               1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
