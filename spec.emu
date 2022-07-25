@@ -312,6 +312,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
         1. Return _result_.
       </emu-alg>
+
+      <emu-note type="editor">
+        CreatePartsFromList will be changed to accept a List of Records in the form {[[Type]], [[Value]]}.
+      </emu-note>
     </emu-clause>
   </emu-clause>
 
