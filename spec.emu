@@ -283,29 +283,28 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _value_ be _duration_[[&lt;_valueSlot_&gt;]].
           1. If _style_ is `"2-digit"`, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
-          1. If _value_ is 0 and _display_ is `"auto"`, then
-            1. Skip to the next iteration.
-          1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-          1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-          1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]][[&lt;_dataLocale_&gt;]].
-          1. If _style_ is `"2-digit"` or `"numeric"`, then
-            1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
-            1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
-            1. If _unit_ is `"hours"` or `"minutes"`, then
-              1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
-              1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
-          1. Else,
-            1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
-            1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
-            1. Let _prv_ be ! ResolvePlural(_pr_, 𝔽(_value_)).
-            1. Let _template_ be _dataLocaleData_.[[formats]][[&lt;_style_&gt;]][[&lt;_unit_&gt;]][[&lt;_prv_&gt;]].
-            1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
-            1. Let _concat_ be an empty String.
-            1. For each element _part_ in _parts_, in List order, do
-              1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
-              1. If _part_ has a [[Unit]] field, then
-                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
-            1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
+          1. If _value_ is not 0 or _display_ is not `"auto"`, then
+            1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+            1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+            1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]][[&lt;_dataLocale_&gt;]].
+            1. If _style_ is `"2-digit"` or `"numeric"`, then
+              1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
+              1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
+              1. If _unit_ is `"hours"` or `"minutes"`, then
+                1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
+                1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
+            1. Else,
+              1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
+              1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
+              1. Let _prv_ be ! ResolvePlural(_pr_, 𝔽(_value_)).
+              1. Let _template_ be _dataLocaleData_.[[formats]][[&lt;_style_&gt;]][[&lt;_unit_&gt;]][[&lt;_prv_&gt;]].
+              1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
+              1. Let _concat_ be an empty String.
+              1. For each element _part_ in _parts_, in List order, do
+                1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
+                1. If _part_ has a [[Unit]] field, then
+                  1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Unit]].
+              1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]] &raquo;).
         1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
         1. Return _result_.
