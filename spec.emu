@@ -270,7 +270,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _nextStyle_ be the current value of the _nextStyleSlot_ slot of _durationFormat_.
           1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
           1. Let _done_ be *false*.
-          1. If _unit_ is `"seconds"`, `"milliseconds"` or `"microseconds"` and _nextStyle_ is `"numeric"`, then
+          1. If _unit_ is `"seconds"`, `"milliseconds"`, or `"microseconds"` and _nextStyle_ is `"numeric"`, then
               1. Let _value_ be _duration_.[[Microseconds]] + _duration_.[[Nanoseconds]] / 1000.
               1. If _unit_ is `"seconds"` or `"milliseconds"`, then
                 1. Set _value_ to _duration_.[[Milliseconds]] + _value_ / 1000.
