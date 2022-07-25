@@ -269,10 +269,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _style_ be the current value of the _styleSlot_ slot of _durationFormat_.
           1. Let _nextStyle_ be the current value of the _nextStyleSlot_ slot of _durationFormat_.
           1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
-          1. Let _value_ be 0.
           1. Let _done_ be *false*.
           1. If _unit_ is `"seconds"`, `"milliseconds"` or `"microseconds"` and _nextStyle_ is `"numeric"`, then
-              1. Set _value_ to _duration_.[[Microseconds]] + _duration_.[[Nanoseconds]] / 1000.
+              1. Let _value_ be _duration_.[[Microseconds]] + _duration_.[[Nanoseconds]] / 1000.
               1. If _unit_ is `"seconds"` or `"milliseconds"`, then
                 1. Set _value_ to _duration_.[[Milliseconds]] + _value_ / 1000.
                 1. If _unit_ is `"seconds"`, then
@@ -281,13 +280,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumFractionDigits"`, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to *true*.
           1. Else,
-            1. Set _value_ to the current value of the _valueSlot_ slot of _duration_.
+            1. Let _value_ be the current value of the _valueSlot_ slot of _duration_.
           1. If _style_ is `"2-digit"`, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, `"minimumIntegerDigits"`, `2`).
-          1. If _value_ is *+0*<sub>𝔽</sub> or *-0*<sub>𝔽</sub> and _display_ is `"auto"`, then
+          1. If _value_ is 0 and _display_ is `"auto"`, then
             1. Skip to the next iteration.
           1. Let _nf_ be ? Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-          1. Let _num_ be ! FormatNumeric(_durationFormat_.[[NumberFormat]], _value_).
+          1. Let _num_ be ! FormatNumeric(_durationFormat_.[[NumberFormat]], 𝔽(_value_)).
           1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
           1. Let _dataLocaleData_ be the current value of the _dataLocale_ slot of %DurationFormat%.[[LocaleData]].
           1. If _style_ is `"2-digit"` or `"numeric"`, then
@@ -297,7 +296,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Append the new Record { [[Type]]: `"literal"`, [[Value]]: _separator_} to the end of _result_.
           1. Else,
             1. Let _pr_ be ? Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
-            1. Let _prv_ be ! ResolvePlural(_pr_, _value_).
+            1. Let _prv_ be ! ResolvePlural(_pr_, 𝔽(_value_)).
             1. Let _template_ be the current value of the _prv_ slot of the _unit_ slot of the _style_ slot of _dataLocaleData_.[[formats]].
             1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
             1. Let _concat_ be an empty String.
