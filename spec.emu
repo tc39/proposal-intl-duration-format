@@ -150,7 +150,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If Type(_input_) is not Object, throw a *TypeError* exception.
         1. Let _result_ be a new Duration Record with each field set to 0.
         1. Let _any_ be *false*.
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
           1. Let _value_ be ? Get(_input_, _unit_).
@@ -174,7 +174,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <dd>It returns 1 if the most significant non-zero field in _record_ is positive, and -1 if the most significant non-zero field is negative. If all the fields are zero, it returns 0.</dd>
       </dl>
       <emu-alg>
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _v_ be value of the _valueSlot_ slot of _record_.
           1. If _v_ &lt; 0, return -1.
@@ -195,7 +195,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
       <emu-alg>
         1. Let _sign_ be ! DurationRecordSign(_record_).
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _v_ be value of the _valueSlot_ slot of _record_.
           1. If 𝔽(_v_) is not finite, return *false*.
@@ -341,7 +341,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _prevStyle_ be the empty String.
-        1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _styleSlot_ be the Style Slot value.
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _unit_ be the Unit value.
