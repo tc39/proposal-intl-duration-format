@@ -269,7 +269,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
-          1. Let _nfOpts_ be ! OrdinaryObjectCreate(`null`).
+          1. Let _nfOpts_ be ! OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If _unit_ is *"seconds"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
@@ -288,7 +288,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
               1. Set _done_ to *true*.
           1. If _style_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, `2`).
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
           1. If _value_ is not 0 or _display_ is not *"auto"*, then
             1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
             1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
