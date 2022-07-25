@@ -342,7 +342,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _style_ be ? GetOption(_options_, `"style"`, `"string"`, &laquo; `"long"`, `"short"`, `"narrow"`, `"digital"` &raquo;, `"long"`).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
-        1. Let _prevStyle_ be *undefined*.
+        1. Let _prevStyle_ be the empty String.
         1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _styleSlot_ be the Style Slot value.
           1. Let _displaySlot_ be the Display Slot value.
