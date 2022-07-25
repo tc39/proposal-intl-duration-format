@@ -163,9 +163,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-durationsign" type="abstract operation">
+    <emu-clause id="sec-durationrecordsign" type="abstract operation">
       <h1>
-        DurationSign (
+        DurationRecordSign (
           _record_: a Duration Record
         ): an integer
       </h1>
@@ -194,7 +194,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <dd>It returns *true* if _record_ represents a valid duration, and *false* otherwise.</dd>
       </dl>
       <emu-alg>
-        1. Let _sign_ be ! DurationSign(_record_).
+        1. Let _sign_ be ! DurationRecordSign(_record_).
         1. For each row in <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _v_ be value of the _valueSlot_ slot of _record_.
