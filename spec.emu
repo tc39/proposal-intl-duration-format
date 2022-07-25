@@ -228,6 +228,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _displayDefault_ to `"auto"`.
           1. If _baseStyle_ is `"digital"`, then
             1. Set _style_ to _digitalBase_.
+          1. Else if _prevStyle_ is `"numeric"` or `"2-digit"`, then
+            1. Set _style_ to `"numeric"`.
           1. Else,
             1. Set _style_ to _baseStyle_.
         1. Let _displayField_ be the string-concatenation of _unit_ and `"Display"`.
