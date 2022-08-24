@@ -150,17 +150,66 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If Type(_input_) is not Object, throw a *TypeError* exception.
         1. Let _result_ be a new Duration Record with each field set to 0.
         1. Let _any_ be *false*.
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Value Slot value of the current row.
-          1. Let _unit_ be the Unit value of the current row.
-          1. Let _value_ be ? Get(_input_, _unit_).
+        1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
+          1. Let _property_ be the Property Name value of the current row.
+          1. Let _value_ be ? Get(_input_, _property_).
           1. If _value_ is not *undefined*, then
             1. Set _any_ to *true*.
             1. Set _value_ to ? ToIntegerWithoutRounding(_value_).
-            1. Set _result_.[[&lt;_valueSlot_&gt;]] to _value_.
+            1. Let _fieldName_ be the Field Name value of the current row.
+            1. Set the field of _result_ whose name is _fieldName_ to _value_.
         1. If _any_ is *false*, throw a *TypeError* exception.
         1. Return _result_.
       </emu-alg>
+
+      <emu-table id="table-duration-record-fields" caption="Duration Record Fields">
+        <table class="real-table">
+          <tr>
+            <th>Field Name</th>
+            <th>Property Name</th>
+          </tr>
+          <tr>
+            <td>[[Days]]</td>
+            <td>*"days"*</td>
+          </tr>
+          <tr>
+            <td>[[Hours]]</td>
+            <td>*"hours"*</td>
+          </tr>
+          <tr>
+            <td>[[Microseconds]]</td>
+            <td>*"microseconds"*</td>
+          </tr>
+          <tr>
+            <td>[[Milliseconds]]</td>
+            <td>*"milliseconds"*</td>
+          </tr>
+          <tr>
+            <td>[[Minutes]]</td>
+            <td>*"minutes"*</td>
+          </tr>
+          <tr>
+            <td>[[Months]]</td>
+            <td>*"months"*</td>
+          </tr>
+          <tr>
+            <td>[[Nanoseconds]]</td>
+            <td>*"nanoseconds"*</td>
+          </tr>
+          <tr>
+            <td>[[Seconds]]</td>
+            <td>*"seconds"*</td>
+          </tr>
+          <tr>
+            <td>[[Weeks]]</td>
+            <td>*"weeks"*</td>
+          </tr>
+          <tr>
+            <td>[[Years]]</td>
+            <td>*"years"*</td>
+          </tr>
+        </table>
+      </emu-table>
     </emu-clause>
 
     <emu-clause id="sec-durationrecordsign" type="abstract operation">
