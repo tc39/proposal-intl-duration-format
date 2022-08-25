@@ -318,7 +318,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
-        1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]] &raquo;).
+        1. Let _lfOpts_ be ! OrdinaryObjectCreate(*null*).
+        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
+        1. Let _listStyle_ be _durationFormat_.[[Style]].
+        1. If _listStyle_ is *"digital"*, then
+          1. Set _listStyle_ to *"narrow"*.
+        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
+        1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
         1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
         1. Return _result_.
       </emu-alg>
