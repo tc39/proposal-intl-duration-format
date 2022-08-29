@@ -362,7 +362,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _locale_ be r.[[locale]].
         1. Set _durationFormat_.[[Locale]] to _locale_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
-        1. Let _style_ be ? GetOption(_options_, *"style"*, *"string"*, &laquo; *"long"*, *"short"*, *"narrow"*, *"digital"* &raquo;, *"long"*).
+        1. Let _style_ be ? GetOption(_options_, *"style"*, *"string"*, &laquo; *"long"*, *"short"*, *"narrow"*, *"digital"* &raquo;, *"short"*).
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _prevStyle_ be the empty String.
