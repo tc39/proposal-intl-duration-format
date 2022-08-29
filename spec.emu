@@ -24,6 +24,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <th>Style Slot</th>
             <th>Display Slot</th>
             <th>Unit</th>
+            <th>NumberFormat Unit</th>
             <th>Values</th>
             <th>Digital Default</th>
           </tr>
@@ -33,6 +34,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[YearsStyle]]</td>
           <td>[[YearsDisplay]]</td>
           <td>*"years"*</td>
+          <td>*"year"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
           <td>*"narrow"*</td>
         </tr>
@@ -41,6 +43,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[MonthsStyle]]</td>
           <td>[[MonthsDisplay]]</td>
           <td>*"months"*</td>
+          <td>*"month"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
           <td>*"narrow"*</td>
         </tr>
@@ -49,6 +52,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[WeeksStyle]]</td>
           <td>[[WeeksDisplay]]</td>
           <td>*"weeks"*</td>
+          <td>*"week"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
           <td>*"narrow"*</td>
         </tr>
@@ -57,6 +61,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[DaysStyle]]</td>
           <td>[[DaysDisplay]]</td>
           <td>*"days"*</td>
+          <td>*"day"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
           <td>*"narrow"*</td>
         </tr>
@@ -65,6 +70,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[HoursStyle]]</td>
           <td>[[HoursDisplay]]</td>
           <td>*"hours"*</td>
+          <td>*"hour"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -73,6 +79,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[MinutesStyle]]</td>
           <td>[[MinutesDisplay]]</td>
           <td>*"minutes"*</td>
+          <td>*"minute"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -81,6 +88,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[SecondsStyle]]</td>
           <td>[[SecondsDisplay]]</td>
           <td>*"seconds"*</td>
+          <td>*"second"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -89,6 +97,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[MillisecondsStyle]]</td>
           <td>[[MillisecondsDisplay]]</td>
           <td>*"milliseconds"*</td>
+          <td>*"millisecond"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -97,6 +106,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[MicrosecondsStyle]]</td>
           <td>[[MicrosecondsDisplay]]</td>
           <td>*"microseconds"*</td>
+          <td>*"microsecond"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -105,6 +115,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <td>[[NanosecondsStyle]]</td>
           <td>[[NanosecondsDisplay]]</td>
           <td>*"nanoseconds"*</td>
+          <td>*"nanosecond"*</td>
           <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
           <td>*"numeric"*</td>
         </tr>
@@ -266,6 +277,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
+          1. Let _numberFormatUnit_ be the NumberFormat Unit value.
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
@@ -290,10 +302,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _style_ is *"2-digit"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
           1. If _value_ is not 0 or _display_ is not *"auto"*, then
-            1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-            1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-            1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
             1. If _style_ is *"2-digit"* or *"numeric"*, then
+              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+              1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+              1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
               1. Let _num_ be ! FormatNumeric(_nf_, 𝔽(_value_)).
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _num_} to the end of _result_.
               1. If _unit_ is *"hours"* or *"minutes"*, then
@@ -306,14 +318,14 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. If _durationFormat_.[[MillisecondsStyle]] is *"numeric"*, then
                     1. Set _nextValue_ to _nextValue_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
                 1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
-                  1. Let _separator_ be _dataLocaleData_.[[formats]].[[digital]].[[separator]].
+                  1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[separator]].
                   1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to the end of _result_.
             1. Else,
-              1. Let _num_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
-              1. Let _pr_ be ! Construct(%PluralRules%, &laquo; _durationFormat_.[[Locale]] &raquo;).
-              1. Let _prv_ be ! ResolvePlural(_pr_, 𝔽(_value_)).
-              1. Let _template_ be _dataLocaleData_.[[formats]].[[&lt;_style_&gt;]].[[&lt;_unit_&gt;]].[[&lt;_prv_&gt;]].
-              1. Let _parts_ be ! MakePartsList(_template_, _unit_, _num_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
+              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+              1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. Let _concat_ be an empty String.
               1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
@@ -419,8 +431,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]] must have a [[formats]] field. The value of this field must be a record, which must have fields with the names of the four formatting styles: `long`, `short`, and `narrow`. Each of first three fields must be records themselves, and each must have fields with the names of the supported units: `nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years`, which are Records with a field for each of the plural categories relevant for _locale_; the value corresponding to those fields is a pattern which may contain *"{0}"* to be replaced by a formatted number. The value of the fourth field, corresponding to the `digital` style, on the other hand, must be a pattern; i.e. a String that contains for an arbitrary subset of the Duration component fields a substring starting with *"{"*, followed by the name of the field, followed by *"}"*.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[formats]] should have an additional [[digital]] field which is a record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[digitalFormat]] must be record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
       </ul>
 
       <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
