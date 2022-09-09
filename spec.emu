@@ -240,7 +240,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. If _unit_ is not one of *"hours"*, *"minutes"*, or *"seconds"*, then
               1. Set _displayDefault_ to *"auto"*.
             1. Set _style_ to _digitalBase_.
-          1. Else
+          1. Else,
             1. Set _displayDefault_ to *"auto"*.
             1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
               1. Set _style_ to *"numeric"*.
