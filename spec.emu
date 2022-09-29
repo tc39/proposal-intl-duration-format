@@ -157,7 +157,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Set _any_ to *true*.
             1. Set _value_ to ? ToIntegerWithoutRounding(_value_).
             1. Let _fieldName_ be the Field Name value of the current row.
-            1. Set the field of _result_ whose name is _fieldName_ to _value_.
+            1. Set _result_.[[&lt;_fieldName_&gt;]] to _value_.
         1. If _any_ is *false*, throw a *TypeError* exception.
         1. Return _result_.
       </emu-alg>
