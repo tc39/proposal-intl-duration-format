@@ -205,7 +205,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <dd>It returns *true* if _record_ represents a valid duration, and *false* otherwise.</dd>
       </dl>
       <emu-alg>
-        1. Let _sign_ be ! DurationRecordSign(_record_).
+        1. Let _sign_ be DurationRecordSign(_record_).
         1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
           1. Let _valueSlot_ be the Value Slot value of the current row.
           1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
@@ -225,7 +225,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           _stylesList_: a List of String,
           _digitalBase_: a String,
           _prevStyle_: a String,
-        ): a Record with [[Style]] and [[Display]] fields
+        ): either a normal completion containing a Record with [[Style]] and [[Display]] fields, or an abrupt completion
       </h1>
       <dl class="header">
         <dt>description</dt>
@@ -284,7 +284,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
-          1. Let _nfOpts_ be ! OrdinaryObjectCreate(*null*).
+          1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If _unit_ is *"seconds"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
@@ -333,7 +333,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
                 1. Set _concat_ to the string-concatenation of _concat_ and _part_.[[Value]].
               1. Append the new Record { [[Type]]: _unit_, [[Value]]: _concat_ } to the end of _result_.
-        1. Let _lfOpts_ be ! OrdinaryObjectCreate(*null*).
+        1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
         1. If _listStyle_ is *"digital"*, then
@@ -472,7 +472,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToDurationRecord(_duration_).
         1. If IsValidDurationRecord(_record_) is *false*, throw a *RangeError* exception.
-        1. Let _parts_ be ! PartitionDurationFormatPattern(_df_, _record_).
+        1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
         1. Let _result_ be a new empty String.
         1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
           1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
@@ -489,11 +489,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
         1. Let _record_ be ? ToDurationRecord(_duration_).
         1. If IsValidDurationRecord(_record_) is *false*, throw a *RangeError* exception.
-        1. Let _parts_ be ! PartitionDurationFormatPattern(_df_, _record_).
+        1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
         1. Let _result_ be ! ArrayCreate(0).
         1. Let _n_ be 0.
         1. For each { [[Type]], [[Value]] } _part_ in _parts_, do
-          1. Let _obj_ be ! OrdinaryObjectCreate(%ObjectPrototype%).
+          1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
           1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
           1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
           1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
@@ -509,7 +509,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _df_ be the *this* value.
         1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
-        1. Let _options_ be ! OrdinaryObjectCreate(%ObjectPrototype%).
+        1. Let _options_ be OrdinaryObjectCreate(%ObjectPrototype%).
         1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
           1. Let _p_ be the Property value of the current row.
           1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
