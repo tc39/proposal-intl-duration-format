@@ -160,16 +160,27 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. If Type(_input_) is not Object, throw a *TypeError* exception.
         1. Let _result_ be a new Duration Record with each field set to 0.
-        1. Let _any_ be *false*.
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Value Slot value of the current row.
-          1. Let _unit_ be the Unit value of the current row.
-          1. Let _value_ be ? Get(_input_, _unit_).
-          1. If _value_ is not *undefined*, then
-            1. Set _any_ to *true*.
-            1. Set _value_ to ? ToIntegerIfIntegral(_value_).
-            1. Set _result_.[[&lt;_valueSlot_&gt;]] to _value_.
-        1. If _any_ is *false*, throw a *TypeError* exception.
+        1. Let _days_ be ? Get(_input_, *"days"*).
+        1. If _days_ is not *undefined*, set _result_.[[Days]] to ? ToIntegerIfIntegral(_days_).
+        1. Let _hours_ be ? Get(_input_, *"hours"*).
+        1. If _hours_ is not *undefined*, set _result_.[[Hours]] to ? ToIntegerIfIntegral(_hours_).
+        1. Let _microseconds_ be ? Get(_input_, *"microseconds"*).
+        1. If _microseconds_ is not *undefined*, set _result_.[[Microseconds]] to ? ToIntegerIfIntegral(_microseconds_).
+        1. Let _milliseconds_ be ? Get(_input_, *"milliseconds"*).
+        1. If _milliseconds_ is not *undefined*, set _result_.[[Milliseconds]] to ? ToIntegerIfIntegral(_milliseconds_).
+        1. Let _minutes_ be ? Get(_input_, *"minutes"*).
+        1. If _minutes_ is not *undefined*, set _result_.[[Minutes]] to ? ToIntegerIfIntegral(_minutes_).
+        1. Let _months_ be ? Get(_input_, *"months"*).
+        1. If _months_ is not *undefined*, set _result_.[[Months]] to ? ToIntegerIfIntegral(_months_).
+        1. Let _nanoseconds_ be ? Get(_input_, *"nanoseconds"*).
+        1. If _nanoseconds_ is not *undefined*, set _result_.[[Nanoseconds]] to ? ToIntegerIfIntegral(_nanoseconds_).
+        1. Let _seconds_ be ? Get(_input_, *"seconds"*).
+        1. If _seconds_ is not *undefined*, set _result_.[[Seconds]] to ? ToIntegerIfIntegral(_seconds_).
+        1. Let _weeks_ be ? Get(_input_, *"weeks"*).
+        1. If _weeks_ is not *undefined*, set _result_.[[Weeks]] to ? ToIntegerIfIntegral(_weeks_).
+        1. Let _years_ be ? Get(_input_, *"years"*).
+        1. If _years_ is not *undefined*, set _result_.[[Years]] to ? ToIntegerIfIntegral(_years_).
+        1. If _years_, _months_, _weeks_, _days_, _hours_, _minutes_, _seconds_, _milliseconds_, _microseconds_, and _nanoseconds_ are all *undefined*, throw a *TypeError* exception.
         1. If IsValidDurationRecord(_result_) is *false*, throw a *RangeError* exception.
         1. Return _result_.
       </emu-alg>
