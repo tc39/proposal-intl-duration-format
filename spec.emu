@@ -337,7 +337,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
         1. If _listStyle_ is *"digital"*, then
-          1. Set _listStyle_ to *"narrow"*.
+          1. Set _listStyle_ to *"short"*.
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
         1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
