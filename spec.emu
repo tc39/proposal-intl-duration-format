@@ -158,7 +158,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
 
       <emu-alg>
-        1. If Type(_input_) is not Object, throw a *TypeError* exception.
+        1. If Type(_input_) is not Object, then
+          1. If Type(_input_) is String, throw a *RangeError* exception.
+          1. Throw a *TypeError* exception.
         1. Let _result_ be a new Duration Record with each field set to 0.
         1. Let _days_ be ? Get(_input_, *"days"*).
         1. If _days_ is not *undefined*, set _result_.[[Days]] to ? ToIntegerIfIntegral(_days_).
