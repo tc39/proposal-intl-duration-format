@@ -71,6 +71,11 @@
                 "type": "op",
                 "aoid": "GetNumberOption",
                 "id": "sec-getnumberoption"
+            },
+            {
+                "type": "op",
+                "aoid": "DeconstructPattern",
+                "id": "sec-deconstructpattern"
             }
         ]
     }
