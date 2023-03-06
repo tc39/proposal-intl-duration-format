@@ -14,8 +14,8 @@
             },
             {
                 "type": "op",
-                "aoid": "CreatePartsFromList",
-                "id": "sec-createpartsfromlist"
+                "aoid": "FormatList",
+                "id": "sec-formatlist"
             },
             {
                 "type": "op",

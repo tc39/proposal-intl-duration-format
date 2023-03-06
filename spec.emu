@@ -367,7 +367,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _listStyle_ to *"short"*.
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
-        1. Let _formatted_ be ! CreatePartsFromList(_lf_, _units_).
+        1. Let _formatted_ be ! FormatList(_lf_, _units_).
         1. Return DeconstructPattern(_formatted_, _result_).
       </emu-alg>
 
