@@ -326,9 +326,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
               1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
               1. If _separated_ is *null*, then
-                1. Set _result_.[[&lt; _numberFormatUnit_ &gt;]] to a new empty List.
-                1. Append _unit_ to _units_.
                 1. Set _separated_ to _numberFormatUnit_.
+                1. Set _result_.[[&lt; _separated_ &gt;]] to a new empty List.
+                1. Append _unit_ to _units_.
               1. Let _last_ be _result_.[[&lt; _separated_ &gt;]].
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
@@ -376,12 +376,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-note type="editor">
         In order to work, this needs all the necessary units be supported by *NumberFormat*, which is tracked in https://github.com/tc39/ecma402/issues/702 and https://github.com/tc39/ecma402/issues/704.
-      </emu-note>
-      <emu-note type="editor">
-        CreatePartsFromList will be changed to accept a List of Records in the form {[[Type]], [[Value]]}.
-      </emu-note>
-      <emu-note type="editor">
-        Adding the time separator as a separate list element is wrong, because it will be formatted as a single entry through the list formatter resulting in strings like *"12, :, 30, :, and 45"*.
       </emu-note>
     </emu-clause>
   </emu-clause>
