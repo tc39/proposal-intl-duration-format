@@ -327,7 +327,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
               1. If _separated_ is *null*, then
                 1. Set _result_.[[&lt; _numberFormatUnit_ &gt;]] to a new empty List.
-                1. Append the string-concatenation of *{*, _numberFormatUnit_ and *}* to _units_.
+                1. Let _placeholder_ be the string-concatenation of *"{"*, _numberFormatUnit_, and *"}"*.
+                1. Append _placeholder_ to _units_.
                 1. Set _separated_ to _numberFormatUnit_.
               1. Let _last_ be _result_.[[&lt; _separated_ &gt;]].
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
