@@ -290,7 +290,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _unitPlaceholders_ be a new empty List.
         1. Let _unitPlaceables_ be a new empty Record.
         1. Let _done_ be *false*.
-        1. Let _separated_ be *null*.
+        1. Let _lastDigitalUnit_ be *null*.
         1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-duration-components"></emu-xref> in order, except the header row:
           1. Let _styleSlot_ be the Style Slot value.
           1. Let _displaySlot_ be the Display Slot value.
@@ -325,11 +325,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
               1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
-              1. If _separated_ is *null*, then
-                1. Set _separated_ to _numberFormatUnit_.
-                1. Set _unitPlaceables_.[[&lt; _separated_ &gt;]] to a new empty List.
+              1. If _lastDigitalUnit_ is *null*, then
+                1. Set _lastDigitalUnit_ to _numberFormatUnit_.
+                1. Set _unitPlaceables_.[[&lt; _lastDigitalUnit_ &gt;]] to a new empty List.
                 1. Append _unit_ to _unitPlaceholders_.
-              1. Let _last_ be _unitPlaceables_.[[&lt; _separated_ &gt;]].
+              1. Let _last_ be _unitPlaceables_.[[&lt; _lastDigitalUnit_ &gt;]].
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
                 1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _last_.
@@ -347,7 +347,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[&lt;_numberingSystem_&gt;]].
                   1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to the end of _last_.
                 1. Else,
-                  1. Set _separated_ to *null*.
+                  1. Set _lastDigitalUnit_ to *null*.
             1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
