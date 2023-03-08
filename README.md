@@ -198,14 +198,14 @@ const duration = {
 
 // Example using fractionalDigits
 new Intl.DurationFormat("en", { fractionalDigits: 2 }).format(duration);
-// => 12.34 sec
+// => 12 sec, 345 ms, 600 μs
 
-// Example using fractionalDigits and milliseconds set to `narrow`
+// Example using fractionalDigits and milliseconds set to `long`
 new Intl.DurationFormat("en", {
-  milliseconds: "narrow",
+  milliseconds: "long",
   fractionalDigits: 2,
 }).format(duration);
-// => 12s 345.60ms
+// => 12 sec, 345 milliseconds, 600 μs
 ```
 
 ## API design
@@ -242,13 +242,13 @@ const duration = {
 };
 
 new Intl.DurationFormat("en").format(duration);
-// => '1 year, 2 months, 3 weeks, 3 days, 4 hours, 5 minutes, 6 seconds, 7 milliseconds, 8 microseconds, and 9 nanoseconds'
+// => '1 yr, 2 mths, 3 wks, 3 days, 4 hr, 5 min, 6 sec, 7 ms, 8 μs, 9 ns'
 new Intl.DurationFormat("en", { style: "short" }).format(duration);
-// => '1 yr, 2 mths, 3 wks, 3 days, 4 hr, 5 min, 6 sec, 7 ms, 8 μs, and 9 ns'
+// => '1 yr, 2 mths, 3 wks, 3 days, 4 hr, 5 min, 6 sec, 7 ms, 8 μs, 9 ns'
 new Intl.DurationFormat("en", { style: "narrow" }).format(duration);
-// => '1y, 2m, 3w, 3d, 4h, 5m, 6s, 7ms, 8μs, and 9ns'
+// => '1y 2mo 3w 3d 4h 5m 6s 7ms 8μs 9ns'
 new Intl.DurationFormat("en", { style: "digital" }).format(duration);
-// = '1y, 2m, 3w, 3d, and 4:05:06.007'
+// = '1y, 2mo, 3w, 3d, 4:05:06'
 ```
 
 
@@ -296,7 +296,7 @@ new Intl.DurationFormat(locales, options)
 
 ##### Default values
 
-* The per-unit style options default to the value of `style` for all styles except `"digital"`, for which units years till days default to `"narrow"` and hours till nanoseconds default to `"numeric"`.
+* The per-unit style options default to the value of `style` for all styles except `"digital"`, for which units years till days default to `"short"` and hours till nanoseconds default to `"numeric"`.
 * The per-unit display options default to `"auto"` if the corresponding style option is `undefined` and `"always"` otherwise.
 
 #### Notes
@@ -325,7 +325,42 @@ A `string` containing the formatted duration.
 #### Syntax
 
 ```javascript
-new Intl.DurationFormat('en').formatToParts(duration)
+const duration = {
+  hours: 7,
+  minutes: 8,
+  seconds: 9,
+  milliseconds: 123,
+  microseconds: 456,
+  nanoseconds: 789,
+};
+
+new Intl.DurationFormat('en').formatToParts(duration);
+
+// =>  [
+//    { type: "integer", value: "7", unit: "hour" },
+//    { type: "literal", value: " ", unit: "hour" },
+//    { type: "unit", value: "hr", unit: "hour" },
+//    { type: "literal", value: ", " },
+//    { type: "integer", value: "8", unit: "minute" },
+//    { type: "literal", value: " ", unit: "minute" },
+//    { type: "unit", value: "min", unit: "minute" },
+//    { type: "literal", value: ", " },
+//    { type: "integer", value: "9", unit: "second" },
+//    { type: "literal", value: " ", unit: "second" },
+//    { type: "unit", value: "sec", unit: "second" },
+//    { type: "literal", value: ", " },
+//    { type: "integer", value: "123", unit: "millisecond" },
+//    { type: "literal", value: " ", unit: "millisecond" },
+//    { type: "unit", value: "msec", unit: "millisecond" },
+//    { type: "literal", value: ", " },
+//    { type: "integer", value: "456", unit: "microsecond" },
+//    { type: "literal", value: " ", unit: "microsecond" },
+//    { type: "unit", value: "μsec", unit: "microsecond" },
+//    { type: "literal", value: " and " },
+//    { type: "integer", value: "789", unit: "nanosecond" },
+//    { type: "literal", value: " ", unit: "nanosecond" },
+//    { type: "unit", value: "nsec", unit: "nanosecond" },
+//  ]
 ```
 
 #### Parameters
