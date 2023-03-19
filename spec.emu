@@ -13,119 +13,78 @@ contributors: Ujjwal Sharma, Younies Mahmoud
   <emu-clause id="sec-intl-durationformat-abstracts">
     <h1>Abstract Operations for DurationFormat Objects</h1>
 
-    <p>Several DurationFormat algorithms use values from the following table, which provides internal slots and property names for Duration instances, and which is also used to key Records of templates to format individual Duration components:</p>
-
-    <emu-table id="table-duration-components">
-      <emu-caption>Components of Duration Instances</emu-caption>
-      <table class="real-table">
-        <thead>
-          <tr>
-            <th>Value Slot</th>
-            <th>Style Slot</th>
-            <th>Display Slot</th>
-            <th>Unit</th>
-            <th>NumberFormat Unit</th>
-            <th>Values</th>
-            <th>Digital Default</th>
-          </tr>
-        </thead>
-        <tr>
-          <td>[[Years]]</td>
-          <td>[[YearsStyle]]</td>
-          <td>[[YearsDisplay]]</td>
-          <td>*"years"*</td>
-          <td>*"year"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
-        </tr>
-        <tr>
-          <td>[[Months]]</td>
-          <td>[[MonthsStyle]]</td>
-          <td>[[MonthsDisplay]]</td>
-          <td>*"months"*</td>
-          <td>*"month"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
-        </tr>
-        <tr>
-          <td>[[Weeks]]</td>
-          <td>[[WeeksStyle]]</td>
-          <td>[[WeeksDisplay]]</td>
-          <td>*"weeks"*</td>
-          <td>*"week"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
-        </tr>
-        <tr>
-          <td>[[Days]]</td>
-          <td>[[DaysStyle]]</td>
-          <td>[[DaysDisplay]]</td>
-          <td>*"days"*</td>
-          <td>*"day"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
-        </tr>
-        <tr>
-          <td>[[Hours]]</td>
-          <td>[[HoursStyle]]</td>
-          <td>[[HoursDisplay]]</td>
-          <td>*"hours"*</td>
-          <td>*"hour"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-        <tr>
-          <td>[[Minutes]]</td>
-          <td>[[MinutesStyle]]</td>
-          <td>[[MinutesDisplay]]</td>
-          <td>*"minutes"*</td>
-          <td>*"minute"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-        <tr>
-          <td>[[Seconds]]</td>
-          <td>[[SecondsStyle]]</td>
-          <td>[[SecondsDisplay]]</td>
-          <td>*"seconds"*</td>
-          <td>*"second"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-        <tr>
-          <td>[[Milliseconds]]</td>
-          <td>[[MillisecondsStyle]]</td>
-          <td>[[MillisecondsDisplay]]</td>
-          <td>*"milliseconds"*</td>
-          <td>*"millisecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-        <tr>
-          <td>[[Microseconds]]</td>
-          <td>[[MicrosecondsStyle]]</td>
-          <td>[[MicrosecondsDisplay]]</td>
-          <td>*"microseconds"*</td>
-          <td>*"microsecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-        <tr>
-          <td>[[Nanoseconds]]</td>
-          <td>[[NanosecondsStyle]]</td>
-          <td>[[NanosecondsDisplay]]</td>
-          <td>*"nanoseconds"*</td>
-          <td>*"nanosecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
-        </tr>
-      </table>
-    </emu-table>
-
     <emu-clause id="sec-duration-records">
       <h1>Duration Records</h1>
       <p>A <dfn variants="Duration Records">Duration Record</dfn> is a Record value used to represent a Duration.</p>
-      <p>Duration Records have the fields listed in the Value Slot column of <emu-xref href="#table-duration-components"></emu-xref></p>
+      <p>Duration Records have the fields in <emu-xref href="#table-duration-record-fields"></emu-xref></p>
+      <emu-table id="table-duration-record-fields" caption="Duration Record Fields">
+        <table class="real-table">
+          <tr>
+            <th>Field</th>
+            <th>Meaning</th>
+          </tr>
+          <tr>
+            <td>[[Years]]</td>
+            <td>
+              The number of years in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Months]]</td>
+            <td>
+              The number of months in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Weeks]]</td>
+            <td>
+              The number of weeks in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Days]]</td>
+            <td>
+              The number of days in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Hours]]</td>
+            <td>
+              The number of hours in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Minutes]]</td>
+            <td>
+              The number of minutes in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Seconds]]</td>
+            <td>
+              The number of seconds in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Milliseconds]]</td>
+            <td>
+              The number of milliseconds in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Microseconds]]</td>
+            <td>
+              The number of microseconds in the duration.
+            </td>
+          </tr>
+          <tr>
+            <td>[[Nanoseconds]]</td>
+            <td>
+              The number of nanoseconds in the duration.
+            </td>
+          </tr>
+        </table>
+      </emu-table>
     </emu-clause>
 
     <emu-clause id="sec-tointegerwithoutrounding" type="abstract operation">
@@ -199,8 +158,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <dd>It returns 1 if the most significant non-zero field in _record_ is positive, and -1 if the most significant non-zero field is negative. If all the fields are zero, it returns 0.</dd>
       </dl>
       <emu-alg>
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Value Slot value of the current row.
+        1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
+          1. Let _valueSlot_ be the Field value of the current row.
           1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
           1. If _v_ &lt; 0, return -1.
           1. If _v_ &gt; 0, return 1.
@@ -220,8 +179,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
       <emu-alg>
         1. Let _sign_ be DurationRecordSign(_record_).
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Value Slot value of the current row.
+        1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
+          1. Let _valueSlot_ be the Field value of the current row.
           1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
           1. Assert: 𝔽(_v_) is finite.
           1. If _v_ &lt; 0 and _sign_ &gt; 0, return *false*.
@@ -292,10 +251,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _result_ be a new empty List.
         1. Let _done_ be *false*.
         1. Let _separated_ be *false*.
-        1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-duration-components"></emu-xref> in order, except the header row:
+        1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
+          1. Let _valueSlot_ be the Value Slot value.
           1. Let _styleSlot_ be the Style Slot value.
           1. Let _displaySlot_ be the Display Slot value.
-          1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
           1. Let _numberFormatUnit_ be the NumberFormat Unit value.
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
@@ -381,6 +340,91 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Return _flattened_.
       </emu-alg>
 
+    <emu-table id="table-partition-duration-format-pattern">
+      <emu-caption>DurationFormat instance internal slots and properties relevant to PartitionDurationFormatPattern</emu-caption>
+        <table class="real-table">
+          <thead>
+            <tr>
+              <th>Value Slot</th>
+              <th>Style Slot</th>
+              <th>Display Slot</th>
+              <th>Unit</th>
+              <th>NumberFormat Unit</th>
+            </tr>
+          </thead>
+          <tr>
+            <td>[[Years]]</td>
+            <td>[[YearsStyle]]</td>
+            <td>[[YearsDisplay]]</td>
+            <td>*"years"*</td>
+            <td>*"year"*</td>
+          </tr>
+          <tr>
+            <td>[[Months]]</td>
+            <td>[[MonthsStyle]]</td>
+            <td>[[MonthsDisplay]]</td>
+            <td>*"months"*</td>
+            <td>*"month"*</td>
+          </tr>
+          <tr>
+            <td>[[Weeks]]</td>
+            <td>[[WeeksStyle]]</td>
+            <td>[[WeeksDisplay]]</td>
+            <td>*"weeks"*</td>
+            <td>*"week"*</td>
+          </tr>
+          <tr>
+            <td>[[Days]]</td>
+            <td>[[DaysStyle]]</td>
+            <td>[[DaysDisplay]]</td>
+            <td>*"days"*</td>
+            <td>*"day"*</td>
+          </tr>
+          <tr>
+            <td>[[Hours]]</td>
+            <td>[[HoursStyle]]</td>
+            <td>[[HoursDisplay]]</td>
+            <td>*"hours"*</td>
+            <td>*"hour"*</td>
+          </tr>
+          <tr>
+            <td>[[Minutes]]</td>
+            <td>[[MinutesStyle]]</td>
+            <td>[[MinutesDisplay]]</td>
+            <td>*"minutes"*</td>
+            <td>*"minute"*</td>
+          </tr>
+          <tr>
+            <td>[[Seconds]]</td>
+            <td>[[SecondsStyle]]</td>
+            <td>[[SecondsDisplay]]</td>
+            <td>*"seconds"*</td>
+            <td>*"second"*</td>
+          </tr>
+          <tr>
+            <td>[[Milliseconds]]</td>
+            <td>[[MillisecondsStyle]]</td>
+            <td>[[MillisecondsDisplay]]</td>
+            <td>*"milliseconds"*</td>
+            <td>*"millisecond"*</td>
+          </tr>
+          <tr>
+            <td>[[Microseconds]]</td>
+            <td>[[MicrosecondsStyle]]</td>
+            <td>[[MicrosecondsDisplay]]</td>
+            <td>*"microseconds"*</td>
+            <td>*"microsecond"*</td>
+          </tr>
+          <tr>
+            <td>[[Nanoseconds]]</td>
+            <td>[[NanosecondsStyle]]</td>
+            <td>[[NanosecondsDisplay]]</td>
+            <td>*"nanoseconds"*</td>
+            <td>*"nanosecond"*</td>
+          </tr>
+        </table>
+      </emu-table>
+
       <emu-note type="editor">
         In order to work, this needs all the necessary units be supported by *NumberFormat*, which is tracked in https://github.com/tc39/ecma402/issues/702 and https://github.com/tc39/ecma402/issues/704.
       </emu-note>
@@ -421,7 +465,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _durationFormat_.[[Style]] to _style_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _prevStyle_ be the empty String.
-        1. For each row of <emu-xref href="#table-duration-components"></emu-xref>, except the header row, in table order, do
+        1. For each row of <emu-xref href="#table-durationformat"></emu-xref>, except the header row, in table order, do
           1. Let _styleSlot_ be the Style Slot value of the current row.
           1. Let _displaySlot_ be the Display Slot value of the current row.
           1. Let _unit_ be the Unit value.
@@ -435,270 +479,352 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, *"fractionalDigits"*, 0, 9, 0).
         1. Return _durationFormat_.
       </emu-alg>
-    </emu-clause>
-  </emu-clause>
-
-  <emu-clause id="sec-properties-of-intl-durationformat-constructor">
-    <h1>Properties of the Intl.DurationFormat Constructor</h1>
-
-    <p>The Intl.DurationFormat constructor has the following properties:</p>
-
-    <emu-clause id="sec-Intl.DurationFormat.prototype">
-      <h1>Intl.DurationFormat.prototype</h1>
-
-      <p>The value of `Intl.DurationFormat.prototype` is %DurationFormatPrototype%.</p>
-
-      <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
-    </emu-clause>
-
-    <emu-clause id="sec-Intl.DurationFormat.supportedLocalesOf">
-      <h1>Intl.DurationFormat.supportedLocalesOf ( _locales_ [ , _options_ ] )</h1>
-
-      <p>When the `supportedLocalesOf` method is called with arguments _locales_ and _options_, the following steps are taken:</p>
-
-      <emu-alg>
-        1. Let _availableLocales_ be %DurationFormat%.[[AvailableLocales]].
-        1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
-        1. Return ? SupportedLocales(_availableLocales_, _requestedLocales_, _options_).
-      </emu-alg>
-    </emu-clause>
-
-    <emu-clause id="sec-Intl.DurationFormat-internal-slots">
-      <h1>Internal slots</h1>
-
-      <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
-
-      <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; *"nu"* &raquo;.</p>
-
-      <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
-
-      <ul>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[digitalFormat]] must be record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
-      </ul>
-
-      <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
-    </emu-clause>
-  </emu-clause>
-
-  <emu-clause id="sec-properties-of-intl-durationformat-prototype-object">
-    <h1>Properties of the Intl.DurationFormat Prototype Object</h1>
-
-    <p>The Intl.DurationFormat prototype object is itself an ordinary object. <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
-
-    <emu-clause id="sec-Intl.DurationFormat.prototype.constructor">
-      <h1>Intl.DurationFormat.prototype.constructor</h1>
-
-      <p>The initial value of `Intl.DurationFormat.prototype.constructor` is the intrinsic object %DurationFormat%.</p>
-    </emu-clause>
-
-    <emu-clause id="sec-Intl.DurationFormat.prototype-@@tostringtag">
-      <h1>Intl.DurationFormat.prototype [ @@toStringTag ]</h1>
-
-      <p>The initial value of the @@toStringTag property is the string value *"Intl.DurationFormat"*.</p>
-      <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
-    </emu-clause>
-
-    <emu-clause id="sec-Intl.DurationFormat.prototype.format">
-      <h1>Intl.DurationFormat.prototype.format ( _duration_ )</h1>
-
-      <p>When the `format` method is called with an argument _duration_, the following steps are taken:</p>
-
-      <emu-alg>
-        1. Let _df_ be *this* value.
-        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
-        1. Let _record_ be ? ToDurationRecord(_duration_).
-        1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
-        1. Let _result_ be a new empty String.
-        1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
-          1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
-        1. Return _result_.
-      </emu-alg>
-    </emu-clause>
-    <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
-      <h1>Intl.DurationFormat.prototype.formatToParts ( _duration_ )</h1>
-
-      <p>When the `formatToParts` method is called with an argument _duration_, the following steps are taken:</p>
-
-      <emu-alg>
-        1. Let _df_ be *this* value.
-        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
-        1. Let _record_ be ? ToDurationRecord(_duration_).
-        1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
-        1. Let _result_ be ! ArrayCreate(0).
-        1. Let _n_ be 0.
-        1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
-          1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
-          1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
-          1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
-          1. If _part_.[[Unit]] is not ~empty~, Perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
-          1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
-          1. Increment _n_ by 1.
-        1. Return _result_.
-      </emu-alg>
-    </emu-clause>
-    <emu-clause id="sec-Intl.DurationFormat.prototype.resolvedOptions">
-      <h1>Intl.DurationFormat.prototype.resolvedOptions ( )</h1>
-
-      <p>This function provides access to the locale and options computed during initialization of the object.</p>
-
-      <emu-alg>
-        1. Let _df_ be the *this* value.
-        1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
-        1. Let _options_ be OrdinaryObjectCreate(%ObjectPrototype%).
-        1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
-          1. Let _p_ be the Property value of the current row.
-          1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
-          1. Assert: _v_ is not *undefined*.
-          1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
-        1. Return _options_.
-      </emu-alg>
-
-      <emu-table id="table-durationformat-resolvedoptions-properties">
-        <emu-caption>Resolved Options of DurationFormat Instances</emu-caption>
+      <emu-table id="table-durationformat">
+      <emu-caption>Internal slots and property names of DurationFormat instances relevant to Intl.DurationFormat constructor</emu-caption>
         <table class="real-table">
           <thead>
             <tr>
-              <th>Internal Slot</th>
-              <th>Property</th>
+              <th>Style Slot</th>
+              <th>Display Slot</th>
+              <th>Unit</th>
+              <th>Values</th>
+              <th>Digital Default</th>
             </tr>
           </thead>
           <tr>
-            <td>[[Locale]]</td>
-            <td>*"locale"*</td>
-          </tr>
-          <tr>
-            <td>[[Style]]</td>
-            <td>*"style"*</td>
-          </tr>
-          <tr>
             <td>[[YearsStyle]]</td>
-            <td>*"years"*</td>
-          </tr>
-          <tr>
             <td>[[YearsDisplay]]</td>
-            <td>*"yearsDisplay"*</td>
+            <td>*"years"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+            <td>*"short"*</td>
           </tr>
           <tr>
             <td>[[MonthsStyle]]</td>
-            <td>*"months"*</td>
-          </tr>
-          <tr>
             <td>[[MonthsDisplay]]</td>
-            <td>*"monthsDisplay"*</td>
+            <td>*"months"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+            <td>*"short"*</td>
           </tr>
           <tr>
             <td>[[WeeksStyle]]</td>
-            <td>*"weeks"*</td>
-          </tr>
-          <tr>
             <td>[[WeeksDisplay]]</td>
-            <td>*"weeksDisplay"*</td>
+            <td>*"weeks"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+            <td>*"short"*</td>
           </tr>
           <tr>
             <td>[[DaysStyle]]</td>
-            <td>*"days"*</td>
-          </tr>
-          <tr>
             <td>[[DaysDisplay]]</td>
-            <td>*"daysDisplay"*</td>
+            <td>*"days"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
+            <td>*"short"*</td>
           </tr>
           <tr>
             <td>[[HoursStyle]]</td>
-            <td>*"hours"*</td>
-          </tr>
-          <tr>
             <td>[[HoursDisplay]]</td>
-            <td>*"hoursDisplay"*</td>
+            <td>*"hours"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"*, *"2-digit"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[MinutesStyle]]</td>
-            <td>*"minutes"*</td>
-          </tr>
-          <tr>
             <td>[[MinutesDisplay]]</td>
-            <td>*"minutesDisplay"*</td>
+            <td>*"minutes"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"*, *"2-digit"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[SecondsStyle]]</td>
-            <td>*"seconds"*</td>
-          </tr>
-          <tr>
             <td>[[SecondsDisplay]]</td>
-            <td>*"secondsDisplay"*</td>
+            <td>*"seconds"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"*, *"2-digit"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[MillisecondsStyle]]</td>
-            <td>*"milliseconds"*</td>
-          </tr>
-          <tr>
             <td>[[MillisecondsDisplay]]</td>
-            <td>*"millisecondsDisplay"*</td>
+            <td>*"milliseconds"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[MicrosecondsStyle]]</td>
-            <td>*"microseconds"*</td>
-          </tr>
-          <tr>
             <td>[[MicrosecondsDisplay]]</td>
-            <td>*"microsecondsDisplay"*</td>
+            <td>*"microseconds"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[NanosecondsStyle]]</td>
-            <td>*"nanoseconds"*</td>
-          </tr>
-          <tr>
             <td>[[NanosecondsDisplay]]</td>
-            <td>*"nanosecondsDisplay"*</td>
-          </tr>
-          <tr>
-            <td>[[FractionalDigits]]</td>
-            <td>*"fractionalDigits"*</td>
-          </tr>
-          <tr>
-            <td>[[NumberingSystem]]</td>
-            <td>*"numberingSystem"*</td>
+            <td>*"nanoseconds"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
         </table>
-      </emu-table>
+    </emu-table>
+        </emu-clause>
+      </emu-clause>
+
+      <emu-clause id="sec-properties-of-intl-durationformat-constructor">
+        <h1>Properties of the Intl.DurationFormat Constructor</h1>
+
+        <p>The Intl.DurationFormat constructor has the following properties:</p>
+
+        <emu-clause id="sec-Intl.DurationFormat.prototype">
+          <h1>Intl.DurationFormat.prototype</h1>
+
+          <p>The value of `Intl.DurationFormat.prototype` is %DurationFormatPrototype%.</p>
+
+          <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
+        </emu-clause>
+
+        <emu-clause id="sec-Intl.DurationFormat.supportedLocalesOf">
+          <h1>Intl.DurationFormat.supportedLocalesOf ( _locales_ [ , _options_ ] )</h1>
+
+          <p>When the `supportedLocalesOf` method is called with arguments _locales_ and _options_, the following steps are taken:</p>
+
+          <emu-alg>
+            1. Let _availableLocales_ be %DurationFormat%.[[AvailableLocales]].
+            1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
+            1. Return ? SupportedLocales(_availableLocales_, _requestedLocales_, _options_).
+          </emu-alg>
+        </emu-clause>
+
+        <emu-clause id="sec-Intl.DurationFormat-internal-slots">
+          <h1>Internal slots</h1>
+
+          <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
+
+          <p>The value of the [[RelevantExtensionKeys]] internal slot is &laquo; *"nu"* &raquo;.</p>
+
+          <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"></emu-xref> and the following additional constraints for all locale values _locale_:</p>
+
+          <ul>
+            <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
+            <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[digitalFormat]] must be record with just one field, [[separator]], which contains the appropriate time unit separator for that locale.</li>
+          </ul>
+
+          <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
+        </emu-clause>
+      </emu-clause>
+
+      <emu-clause id="sec-properties-of-intl-durationformat-prototype-object">
+        <h1>Properties of the Intl.DurationFormat Prototype Object</h1>
+
+        <p>The Intl.DurationFormat prototype object is itself an ordinary object. <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
+
+        <emu-clause id="sec-Intl.DurationFormat.prototype.constructor">
+          <h1>Intl.DurationFormat.prototype.constructor</h1>
+
+          <p>The initial value of `Intl.DurationFormat.prototype.constructor` is the intrinsic object %DurationFormat%.</p>
+        </emu-clause>
+
+        <emu-clause id="sec-Intl.DurationFormat.prototype-@@tostringtag">
+          <h1>Intl.DurationFormat.prototype [ @@toStringTag ]</h1>
+
+          <p>The initial value of the @@toStringTag property is the string value *"Intl.DurationFormat"*.</p>
+          <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }.</p>
+        </emu-clause>
+
+        <emu-clause id="sec-Intl.DurationFormat.prototype.format">
+          <h1>Intl.DurationFormat.prototype.format ( _duration_ )</h1>
+
+          <p>When the `format` method is called with an argument _duration_, the following steps are taken:</p>
+
+          <emu-alg>
+            1. Let _df_ be *this* value.
+            1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
+            1. Let _record_ be ? ToDurationRecord(_duration_).
+            1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
+            1. Let _result_ be a new empty String.
+            1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
+              1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
+            1. Return _result_.
+          </emu-alg>
+        </emu-clause>
+        <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
+          <h1>Intl.DurationFormat.prototype.formatToParts ( _duration_ )</h1>
+
+          <p>When the `formatToParts` method is called with an argument _duration_, the following steps are taken:</p>
+
+          <emu-alg>
+            1. Let _df_ be *this* value.
+            1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
+            1. Let _record_ be ? ToDurationRecord(_duration_).
+            1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
+            1. Let _result_ be ! ArrayCreate(0).
+            1. Let _n_ be 0.
+            1. For each { [[Type]], [[Value]] } _part_ in _parts_, do
+              1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
+              1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
+              1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
+              1. If _part_.[[Unit]] is set, Perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
+              1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
+              1. Increment _n_ by 1.
+            1. Return _result_.
+          </emu-alg>
+        </emu-clause>
+        <emu-clause id="sec-Intl.DurationFormat.prototype.resolvedOptions">
+          <h1>Intl.DurationFormat.prototype.resolvedOptions ( )</h1>
+
+          <p>This function provides access to the locale and options computed during initialization of the object.</p>
+
+          <emu-alg>
+            1. Let _df_ be the *this* value.
+            1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
+            1. Let _options_ be OrdinaryObjectCreate(%ObjectPrototype%).
+            1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
+              1. Let _p_ be the Property value of the current row.
+              1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
+              1. Assert: _v_ is not *undefined*.
+              1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
+            1. Return _options_.
+          </emu-alg>
+
+          <emu-table id="table-durationformat-resolvedoptions-properties">
+            <emu-caption>Resolved Options of DurationFormat Instances</emu-caption>
+            <table class="real-table">
+              <thead>
+                <tr>
+                  <th>Internal Slot</th>
+                  <th>Property</th>
+                </tr>
+              </thead>
+              <tr>
+                <td>[[Locale]]</td>
+                <td>*"locale"*</td>
+              </tr>
+              <tr>
+                <td>[[Style]]</td>
+                <td>*"style"*</td>
+              </tr>
+              <tr>
+                <td>[[YearsStyle]]</td>
+                <td>*"years"*</td>
+              </tr>
+              <tr>
+                <td>[[YearsDisplay]]</td>
+                <td>*"yearsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[MonthsStyle]]</td>
+                <td>*"months"*</td>
+              </tr>
+              <tr>
+                <td>[[MonthsDisplay]]</td>
+                <td>*"monthsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[WeeksStyle]]</td>
+                <td>*"weeks"*</td>
+              </tr>
+              <tr>
+                <td>[[WeeksDisplay]]</td>
+                <td>*"weeksDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[DaysStyle]]</td>
+                <td>*"days"*</td>
+              </tr>
+              <tr>
+                <td>[[DaysDisplay]]</td>
+                <td>*"daysDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[HoursStyle]]</td>
+                <td>*"hours"*</td>
+              </tr>
+              <tr>
+                <td>[[HoursDisplay]]</td>
+                <td>*"hoursDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[MinutesStyle]]</td>
+                <td>*"minutes"*</td>
+              </tr>
+              <tr>
+                <td>[[MinutesDisplay]]</td>
+                <td>*"minutesDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[SecondsStyle]]</td>
+                <td>*"seconds"*</td>
+              </tr>
+              <tr>
+                <td>[[SecondsDisplay]]</td>
+                <td>*"secondsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[MillisecondsStyle]]</td>
+                <td>*"milliseconds"*</td>
+              </tr>
+              <tr>
+                <td>[[MillisecondsDisplay]]</td>
+                <td>*"millisecondsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[MicrosecondsStyle]]</td>
+                <td>*"microseconds"*</td>
+              </tr>
+              <tr>
+                <td>[[MicrosecondsDisplay]]</td>
+                <td>*"microsecondsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[NanosecondsStyle]]</td>
+                <td>*"nanoseconds"*</td>
+              </tr>
+              <tr>
+                <td>[[NanosecondsDisplay]]</td>
+                <td>*"nanosecondsDisplay"*</td>
+              </tr>
+              <tr>
+                <td>[[FractionalDigits]]</td>
+                <td>*"fractionalDigits"*</td>
+              </tr>
+              <tr>
+                <td>[[NumberingSystem]]</td>
+                <td>*"numberingSystem"*</td>
+              </tr>
+            </table>
+          </emu-table>
+        </emu-clause>
+      </emu-clause>
+
+      <emu-clause id="sec-properties-of-intl-durationformat-instances">
+        <h1>Properties of Intl.DurationFormat Instances</h1>
+
+        <p>Intl.DurationFormat instances inherit properties from %DurationFormatPrototype%.</p>
+        <p>Intl.DurationFormat instances have an [[InitializedDurationFormat]] internal slot.</p>
+        <p>Intl.DurationFormat instances also have several internal slots that are computed by the constructor:</p>
+
+        <ul>
+          <li>[[Locale]] is a String value with the language tag of the locale whose localization is used for formatting.</li>
+          <li>[[DataLocale]] is a String value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of [[Locale]].</li>
+          <li>[[NumberingSystem]] is a String value with the *"type"* given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
+          <li>[[Style]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"digital"* identifying the duration formatting style used.</li>
+          <li>[[YearsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the years field.</li>
+          <li>[[YearsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the years field.</li>
+          <li>[[MonthsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the months field.</li>
+          <li>[[MonthsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the months field.</li>
+          <li>[[WeeksStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the weeks field.</li>
+          <li>[[WeeksDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the weeks field.</li>
+          <li>[[DaysStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the days field.</li>
+          <li>[[DaysDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the days field.</li>
+          <li>[[HoursStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the hours field.</li>
+          <li>[[HoursDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the hours field.</li>
+          <li>[[MinutesStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the minutes field.</li>
+          <li>[[MinutesDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the minutes field.</li>
+          <li>[[SecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the seconds field.</li>
+          <li>[[SecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the seconds field.</li>
+          <li>[[MillisecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the milliseconds field.</li>
+          <li>[[MillisecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the milliseconds field.</li>
+          <li>[[MicrosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the microseconds field.</li>
+          <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
+          <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
+          <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
+          <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
+        </ul>
+      </emu-clause>
     </emu-clause>
-  </emu-clause>
-
-  <emu-clause id="sec-properties-of-intl-durationformat-instances">
-    <h1>Properties of Intl.DurationFormat Instances</h1>
-
-    <p>Intl.DurationFormat instances inherit properties from %DurationFormatPrototype%.</p>
-
-    <p>Intl.DurationFormat instances have an [[InitializedDurationFormat]] internal slot.</p>
-
-    <p>Intl.DurationFormat instances also have several internal slots that are computed by the constructor:</p>
-
-    <ul>
-      <li>[[Locale]] is a String value with the language tag of the locale whose localization is used for formatting.</li>
-      <li>[[DataLocale]] is a String value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of [[Locale]].</li>
-      <li>[[NumberingSystem]] is a String value with the *"type"* given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
-      <li>[[Style]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"digital"* identifying the duration formatting style used.</li>
-      <li>[[YearsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the years field.</li>
-      <li>[[YearsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the years field.</li>
-      <li>[[MonthsStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the months field.</li>
-      <li>[[MonthsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the months field.</li>
-      <li>[[WeeksStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the weeks field.</li>
-      <li>[[WeeksDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the weeks field.</li>
-      <li>[[DaysStyle]] is one of the String values *"long"*, *"short"*, or *"narrow"* identifying the formatting style used for the days field.</li>
-      <li>[[DaysDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the days field.</li>
-      <li>[[HoursStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the hours field.</li>
-      <li>[[HoursDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the hours field.</li>
-      <li>[[MinutesStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the minutes field.</li>
-      <li>[[MinutesDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the minutes field.</li>
-      <li>[[SecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the seconds field.</li>
-      <li>[[SecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the seconds field.</li>
-      <li>[[MillisecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the milliseconds field.</li>
-      <li>[[MillisecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the milliseconds field.</li>
-      <li>[[MicrosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the microseconds field.</li>
-      <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
-      <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
-      <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
-      <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
-    </ul>
-  </emu-clause>
-</emu-clause>
