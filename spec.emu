@@ -24,100 +24,67 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <th>Style Slot</th>
             <th>Display Slot</th>
             <th>Unit</th>
-            <th>NumberFormat Unit</th>
-            <th>Values</th>
-            <th>Digital Default</th>
           </tr>
         </thead>
         <tr>
           <td>[[Years]]</td>
           <td>[[YearsStyle]]</td>
           <td>[[YearsDisplay]]</td>
-          <td>*"years"*</td>
           <td>*"year"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
         </tr>
         <tr>
           <td>[[Months]]</td>
           <td>[[MonthsStyle]]</td>
           <td>[[MonthsDisplay]]</td>
-          <td>*"months"*</td>
           <td>*"month"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
         </tr>
         <tr>
           <td>[[Weeks]]</td>
           <td>[[WeeksStyle]]</td>
           <td>[[WeeksDisplay]]</td>
-          <td>*"weeks"*</td>
           <td>*"week"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
         </tr>
         <tr>
           <td>[[Days]]</td>
           <td>[[DaysStyle]]</td>
           <td>[[DaysDisplay]]</td>
-          <td>*"days"*</td>
           <td>*"day"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"* &raquo;</td>
-          <td>*"short"*</td>
         </tr>
         <tr>
           <td>[[Hours]]</td>
           <td>[[HoursStyle]]</td>
           <td>[[HoursDisplay]]</td>
-          <td>*"hours"*</td>
           <td>*"hour"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Minutes]]</td>
           <td>[[MinutesStyle]]</td>
           <td>[[MinutesDisplay]]</td>
-          <td>*"minutes"*</td>
           <td>*"minute"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Seconds]]</td>
           <td>[[SecondsStyle]]</td>
           <td>[[SecondsDisplay]]</td>
-          <td>*"seconds"*</td>
           <td>*"second"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"*, *"2-digit"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Milliseconds]]</td>
           <td>[[MillisecondsStyle]]</td>
           <td>[[MillisecondsDisplay]]</td>
-          <td>*"milliseconds"*</td>
           <td>*"millisecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Microseconds]]</td>
           <td>[[MicrosecondsStyle]]</td>
           <td>[[MicrosecondsDisplay]]</td>
-          <td>*"microseconds"*</td>
           <td>*"microsecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
         <tr>
           <td>[[Nanoseconds]]</td>
           <td>[[NanosecondsStyle]]</td>
           <td>[[NanosecondsDisplay]]</td>
-          <td>*"nanoseconds"*</td>
           <td>*"nanosecond"*</td>
-          <td>&laquo; *"long"*, *"short"*, *"narrow"*, *"numeric"* &raquo;</td>
-          <td>*"numeric"*</td>
         </tr>
       </table>
     </emu-table>
@@ -295,22 +262,21 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _displaySlot_ be the Display Slot value.
           1. Let _valueSlot_ be the Value Slot value.
           1. Let _unit_ be the Unit value.
-          1. Let _numberFormatUnit_ be the NumberFormat Unit value.
           1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
           1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
           1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
           1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
-          1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
-            1. If _unit_ is *"seconds"*, then
+          1. If _unit_ is *"second"*, *"millisecond"*, or *"microsecond"*, then
+            1. If _unit_ is *"second"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
-            1. Else if _unit_ is *"milliseconds"*, then
+            1. Else if _unit_ is *"millisecond"*, then
               1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
             1. Else,
               1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
             1. If _nextStyle_ is *"numeric"*, then
-              1. If _unit_ is *"seconds"*, then
+              1. If _unit_ is *"second"*, then
                 1. Set _value_ to _value_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
-              1. Else if _unit_ is *"milliseconds"*, then
+              1. Else if _unit_ is *"millisecond"*, then
                 1. Set _value_ to _value_ + _duration_.[[Microseconds]] / 10<sup>3</sup> + _duration_.[[Nanoseconds]] / 10<sup>6</sup>.
               1. Else,
                 1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
@@ -331,9 +297,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _last_ be the last element of _result_.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _last_.
-              1. If _unit_ is *"hours"* or *"minutes"*, then
-                1. If _unit_ is *"hours"*, then
+                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _unit_ } to the end of _last_.
+              1. If _unit_ is *"hour"* or *"minute"*, then
+                1. If _unit_ is *"hour"*, then
                   1. Let _nextValue_ be _duration_.[[Minutes]].
                   1. Let _nextDisplay_ be _durationFormat_.[[MinutesDisplay]].
                 1. Else,
@@ -347,13 +313,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. Set _separated_ to *true*.
             1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _unit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
               1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. Let _list_ be a new empty List.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
               1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _list_.
+                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _unit_ } to the end of _list_.
               1. Append _list_ to the end of _result_.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
@@ -422,8 +388,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _styleSlot_ be the Style Slot value of the current row.
           1. Let _displaySlot_ be the Display Slot value of the current row.
           1. Let _unit_ be the Unit value.
-          1. Let _valueList_ be the Values value.
-          1. Let _digitalBase_ be the Digital Default value.
+          1. Let _valueList_ be the List &laquo; *"long"*, *"short"*, *"narrow"* &raquo;.
+          1. Let _digitalBase_ be *"short"*.
+          1. If _unit_ is one of *"hour"*, *"minute"*, *"second"*, *"millisecond"*, *"microsecond"*, or *"nanosecond"*, then
+            1. Append *"numeric"* to the end of _valueList_.
+            1. Set _digitalBase_ to *"numeric"*.
+            1. If _unit_ is one of *"hours"*, *"minutes"*, or *"seconds"*, then
+              1. Append *"2-digit"* to the end of _valueList_.
           1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set the value of the _styleSlot_ slot of _durationFormat_ to _unitOptions_.[[Style]].
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
