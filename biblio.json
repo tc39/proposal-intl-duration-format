@@ -14,8 +14,8 @@
             },
             {
                 "type": "op",
-                "aoid": "CreatePartsFromList",
-                "id": "sec-createpartsfromlist"
+                "aoid": "FormatList",
+                "id": "sec-fomatlist"
             },
             {
                 "type": "op",
@@ -71,6 +71,11 @@
                 "type": "op",
                 "aoid": "GetNumberOption",
                 "id": "sec-getnumberoption"
+            },
+            {
+                "type": "op",
+                "aoid": "DeconstructPattern",
+                "id": "sec-deconstructpattern"
             }
         ]
     }
