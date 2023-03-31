@@ -429,7 +429,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
           1. If _unit_ is one of *"hours"*, *"minutes"*, *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
              1. Set _prevStyle_ to _unitOptions_.[[Style]].
-        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, *"fractionalDigits"*, 0, 9, 0).
+        1. Set _durationFormat_.[[MinimumFractionDigits]] to ? GetNumberOption(_options_, *"minimumFractionDigits"*, 0, 9, 0).
+        1. Set _durationFormat_.[[MaximumFractionDigits]] to ? GetNumberOption(_options_, *"maximumFractionDigits"*, 0, 9, 9).
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
@@ -649,8 +650,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <td>*"nanosecondsDisplay"*</td>
           </tr>
           <tr>
-            <td>[[FractionalDigits]]</td>
-            <td>*"fractionalDigits"*</td>
+            <td>[[MinimumFractionDigits]]</td>
+            <td>*"minimumFractionDigits"*</td>
+          </tr>
+          <tr>
+            <td>[[MaximumFractionDigits]]</td>
+            <td>*"maximumFractionDigits"*</td>
           </tr>
           <tr>
             <td>[[NumberingSystem]]</td>
@@ -695,7 +700,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
       <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
       <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
-      <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
+      <li>[[MinimumFractionDigits]] is a Number value, identifying the minimum number of fractional digits to be used with numeric styles.</li>
+      <li>[[MaximumFractionDigits]] is a Number value, identifying the maximum number of fractional digits to be used with numeric styles.</li>
     </ul>
   </emu-clause>
 </emu-clause>
