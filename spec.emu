@@ -431,6 +431,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
              1. Set _prevStyle_ to _unitOptions_.[[Style]].
         1. Set _durationFormat_.[[MinimumFractionDigits]] to ? GetNumberOption(_options_, *"minimumFractionDigits"*, 0, 9, 0).
         1. Set _durationFormat_.[[MaximumFractionDigits]] to ? GetNumberOption(_options_, *"maximumFractionDigits"*, 0, 9, 9).
+        1. If _durationFormat_.[[MaximumFractionDigits]] &lt; _durationFormat_.[[MinimumFractionDigits]], throw a RangeError exception.
         1. Return _durationFormat_.
       </emu-alg>
     </emu-clause>
