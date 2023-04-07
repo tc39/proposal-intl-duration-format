@@ -316,6 +316,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
           1. If _style_ is *"2-digit"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
