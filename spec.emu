@@ -476,7 +476,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
           1. If _unit_ is one of *"hours"*, *"minutes"*, *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
              1. Set _prevStyle_ to _unitOptions_.[[Style]].
-        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, *"fractionalDigits"*, 0, 9, 0).
+        1. Set _durationFormat_.[[FractionalDigits]] to ? GetNumberOption(_options_, *"fractionalDigits"*, 0, 9, *undefined*).
         1. Return _durationFormat_.
       </emu-alg>
       <emu-table id="table-durationformat">
