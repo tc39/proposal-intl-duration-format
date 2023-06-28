@@ -677,7 +677,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
               1. Let _p_ be the Property value of the current row.
               1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
-              1. Assert: _v_ is not *undefined*.
+              1. If _p_ is not "fractionalDigits", then
+                1. Assert: _v_ is not *undefined*.
               1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
             1. Return _options_.
           </emu-alg>
