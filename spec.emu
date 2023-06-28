@@ -95,11 +95,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It converts _argument_ to an integer representing its Number value (replacing *NaN* with 0), or throws a *RangeError* when that Number value is not a finite integral Number.</dd>
+        <dd>It converts _argument_ to an integer representing its Number value, or throws a *RangeError* when that value is not <emu-xref href="#integral-number">integral</emu-xref>.</dd>
       </dl>
       <emu-alg>
         1. Let _number_ be ? ToNumber(_argument_).
-        1. If _number_ is *NaN*, *+0*<sub>𝔽</sub>, or *-0*<sub>𝔽</sub>, return 0.
         1. If IsIntegralNumber(_number_) is *false*, throw a *RangeError* exception.
         1. Return ℝ(_number_).
       </emu-alg>
