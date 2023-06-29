@@ -829,7 +829,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
           <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
           <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
-          <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles.</li>
+          <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
         </ul>
       </emu-clause>
     </emu-clause>
