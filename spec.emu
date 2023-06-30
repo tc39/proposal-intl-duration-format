@@ -300,10 +300,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. Let _nextValue_ be _duration_.[[Minutes]].
                   1. Let _nextDisplay_ be _durationFormat_.[[MinutesDisplay]].
                 1. Else,
-                  1. Let _nextValue_ be _duration_.[[Seconds]].
+                  1. Let _nextValue_ be _duration_.[[Seconds]] + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
                   1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
-                  1. If _durationFormat_.[[MillisecondsStyle]] is *"numeric"*, then
-                    1. Set _nextValue_ to _nextValue_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
                 1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
                   1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
                   1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[&lt;_numberingSystem_&gt;]].
