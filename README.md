@@ -186,6 +186,25 @@ new Intl.DurationFormat('en', { fractionalDigits: 2 }).format('PT12.3456S'); // 
 new Intl.DurationFormat('en', { milliseconds: 'narrow', fractionalDigits: 2 }).format('PT12.3456S'); // => 12s 345.60ms
 ```
 
+```javascript
+const duration = {
+  months: 1,
+  days: 2,
+  hours: 3,
+  minutes: 45,
+  seconds: 67,
+  milliseconds: 890,
+  microseconds: 567
+}
+
+new Intl.DurationFormat("en", {style: "digital", fractionalDigits: 1}).format(duration)
+// =>  "1mo, 2d, 3:45:67.9"
+new Intl.DurationFormat("en", {style: "digital", fractionalDigits: 2}).format(duration)
+// => "1mo, 2d, 3:45:67.89"
+new Intl.DurationFormat("en", {style: "digital", fractionalDigits: 5}).format(duration)
+// => "1mo, 2d, 3:45:67.89057"
+```
+
 ## API design
 
 ``` javascript
