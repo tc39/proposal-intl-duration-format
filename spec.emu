@@ -696,10 +696,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 </tr>
               </thead>
               <tr>
-                <td>[[NumberingSystem]]</td>
-                <td>*"numberingSystem"*</td>
-              </tr>
-              <tr>
                 <td>[[Locale]]</td>
                 <td>*"locale"*</td>
               </tr>
@@ -791,6 +787,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 <td>[[FractionalDigits]]</td>
                 <td>*"fractionalDigits"*</td>
               </tr>
+              <tr>
+                <td>[[NumberingSystem]]</td>
+                <td>*"numberingSystem"*</td>
+              </tr>
+
            </table>
           </emu-table>
         </emu-clause>
