@@ -286,11 +286,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
-          1. If _style_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
           1. If _value_ is not 0 or _display_ is not *"auto"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
             1. If _style_ is *"2-digit"* or *"numeric"*, then
+              1. If _style_ is *"2-digit"*, then
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
               1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. If _separated_ is *false*, then
                 1. Append a new empty List to the end of _result_.
