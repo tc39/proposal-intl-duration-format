@@ -1,16 +1,16 @@
 {
     "private": true,
-    "name": "template-for-proposals",
-    "description": "A repository template for ECMAScript proposals.",
+    "name": "proposal-intl-duration-format",
+    "description": "Proposal for Intl.DurationFormat",
     "scripts": {
         "start": "npm run build-loose -- --watch",
         "build": "npm run build-loose -- --strict",
         "build-loose": "ecmarkup --verbose --lint-spec --load-biblio @tc39/ecma262-biblio spec.emu index.html"
     },
-    "homepage": "https://github.com/tc39/template-for-proposals#readme",
+    "homepage": "https://tc39.es/proposal-intl-duration-format/",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/tc39/template-for-proposals.git"
+        "url": "git+https://github.com/tc39/proposal-intl-duration-format.git"
     },
     "license": "MIT",
     "devDependencies": {
