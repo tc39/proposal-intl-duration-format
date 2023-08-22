@@ -170,7 +170,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         IsValidDurationRecord (
           _record_: a Duration Record
-        )
+        ): a Boolean
       </h1>
       <dl class="header">
         <dt>description</dt>
