@@ -299,7 +299,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _list_ be a new empty List.
             1. Else,
               1. Let _list_ be the last element of _result_.
-              1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_ } to _list_.
+              1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _list_.
             1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
             1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
               1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
