@@ -158,8 +158,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
       <emu-alg>
         1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Field value of the current row.
-          1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
+          1. Let _v_ be the value of _record_'s field whose name is the Field value of the current row.
           1. If _v_ &lt; 0, return -1.
           1. If _v_ &gt; 0, return 1.
         1. Return 0.
@@ -179,8 +178,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _sign_ be DurationRecordSign(_record_).
         1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Field value of the current row.
-          1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
+          1. Let _v_ be the value of _record_'s field whose name is the Field value of the current row.
           1. Assert: 𝔽(_v_) is finite.
           1. If _v_ &lt; 0 and _sign_ &gt; 0, return *false*.
           1. If _v_ &gt; 0 and _sign_ &lt; 0, return *false*.
@@ -255,14 +253,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
         1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[&lt;_numberingSystem_&gt;]].
         1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
-          1. Let _valueSlot_ be the Value Slot value.
-          1. Let _styleSlot_ be the Style Slot value.
-          1. Let _displaySlot_ be the Display Slot value.
-          1. Let _unit_ be the Unit value.
-          1. Let _numberFormatUnit_ be the NumberFormat Unit value.
-          1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
-          1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
-          1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
+          1. Let _value_ be the value of _duration_'s field whose name is the Value Field value of the current row.
+          1. Let _style_ be the value of _durationFormat_'s internal slot whose name is the Style Slot value of the current row.
+          1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
+          1. Let _unit_ be the Unit value of the current row.
+          1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
           1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If _unit_ is *"seconds"*, then
@@ -344,7 +339,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <table class="real-table">
           <thead>
             <tr>
-              <th>Value Slot</th>
+              <th>Value Field</th>
               <th>Style Slot</th>
               <th>Display Slot</th>
               <th>Unit</th>
