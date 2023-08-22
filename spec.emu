@@ -299,7 +299,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _last_ be the last element of _result_.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _last_.
+                1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _last_.
               1. If _unit_ is *"hours"* or *"minutes"*, then
                 1. If _unit_ is *"hours"*, then
                   1. Let _nextValue_ be _duration_.[[Minutes]].
@@ -308,7 +308,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. Let _nextValue_ be _duration_.[[Seconds]] + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
                   1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
                 1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
-                  1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to _last_.
+                  1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_ } to _last_.
                   1. Set _separated_ to *true*.
             1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
@@ -318,7 +318,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _list_ be a new empty List.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+                1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
               1. Append _list_ to _result_.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
