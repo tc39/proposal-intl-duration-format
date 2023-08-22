@@ -288,30 +288,24 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _done_ to *true*.
           1. If _value_ is not 0 or _display_ is not *"auto"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
-            1. If _style_ is *"2-digit"* or *"numeric"*, then
-              1. If _style_ is *"2-digit"*, then
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-              1. If _separated_ is *false*, then
-                1. Let _list_ be a new empty List.
-              1. Else,
-                1. Let _list_ be the last element of _result_.
-                1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_ } to _list_.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
-              1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
-              1. If _separated_ is *false*, then
-                1. Set _separated_ to *true*.
-                1. Append _list_ to _result_.
-            1. Else,
+            1. If _style_ is *"2-digit"*, then
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
+            1. If _style_ is neither *"2-digit"* nor *"numeric"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
-              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+            1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+            1. If _separated_ is *false*, then
               1. Let _list_ be a new empty List.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
-              1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
-                1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+            1. Else,
+              1. Let _list_ be the last element of _result_.
+              1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_ } to _list_.
+            1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
+            1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
+              1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+            1. If _separated_ is *false*, then
+              1. If _style_ is *"2-digit"* or *"numeric"*, then
+                1. Set _separated_ to *true*.
               1. Append _list_ to _result_.
           1. Else,
             1. Set _separated_ to *false*.
