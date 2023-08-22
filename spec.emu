@@ -295,7 +295,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Else,
                 1. Set _separated_ to *false*.
               1. Let _last_ be the last element of _result_.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
+              1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
                 1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _last_.
               1. If _unit_ is *"hours"* or *"minutes"*, then
@@ -316,7 +316,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
               1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. Let _list_ be a new empty List.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
+              1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
                 1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _list_.
               1. Append _list_ to the end of _result_.
