@@ -275,11 +275,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Else,
                 1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
               1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, 9).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 0).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, *9*<sub>𝔽</sub>).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, *+0*<sub>𝔽</sub>).
               1. Else,
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
           1. If _style_ is *"2-digit"*, then
@@ -680,7 +680,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
               1. Let _p_ be the Property value of the current row.
               1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
-              1. If _p_ is not *"fractionalDigits"*, then
+              1. If _p_ is *"fractionalDigits"*, then
+                1. If _v_ is not *undefined*, set _v_ to 𝔽(_v_).
+              1. Else,
                 1. Assert: _v_ is not *undefined*.
               1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
             1. Return _options_.
@@ -828,7 +830,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
           <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
           <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
-          <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
+          <li>[[FractionalDigits]] is a non-negative integer, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
         </ul>
       </emu-clause>
     </emu-clause>
