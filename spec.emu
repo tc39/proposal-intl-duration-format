@@ -429,9 +429,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-table>
 
       <emu-note type="editor">
-        In order to work, this needs all the necessary units be supported by *NumberFormat*, which is tracked in https://github.com/tc39/ecma402/issues/702 and https://github.com/tc39/ecma402/issues/704.
-      </emu-note>
-      <emu-note type="editor">
         CreatePartsFromList will be changed to accept a List of Records in the form {[[Type]], [[Value]]}.
       </emu-note>
       <emu-note type="editor">
