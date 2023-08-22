@@ -316,19 +316,26 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _listStyle_ to *"short"*.
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
-        1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
+        1. Let _strings_ be a new empty List.
+        1. For each element _parts_ of _result_, do
+          1. Let _string_ be the empty String.
+          1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+            1. Set _string_ to the string-concatenation of _string_ and _part_.[[Value]].
+          1. Append _string_ to _strings_.
+        1. Let _formatted_ be CreatePartsFromList(_lf_, _strings_).
+        1. Let _resultIndex_ be 0.
+        1. Let _resultLength_ be the number of elements in _result_.
         1. Let _flattened_ be a new empty List.
-        1. For each Record { [[Type]], [[Value]] } _part_ in _result_, do
-          1. If _part_.[[Type]] is *"literal"*, then
-            1. Append _part_ to _flattened_.
+        1. For each Record { [[Type]], [[Value]] } _listPart_ in _formatted_, do
+          1. If _listPart_.[[Type]] is *"element"*, then
+            1. Assert: _resultIndex_ &lt; _resultLength_.
+            1. Let _parts_ be _result_[_resultIndex_].
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+              1. Append _part_ to _flattened_.
+            1. Set _resultIndex_ to _resultIndex_ + 1.
           1. Else,
-            1. Let _value_ be _part_.[[Value]].
-            1. If Type(_value_) is Record { [[Type]], [[Value]], [[Unit]] }, then
-              1. Append _value_ to _flattened_.
-            1. Else,
-              1. Assert: Type(_value_) is List.
-              1. For each Record _element_ in _value_, do
-                1. Append _element_ to _flattened_.
+            1. Assert: _listPart_.[[Type]] is *"literal"*.
+            1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _listPart_.[[Value]], [[Unit]]: ~empty~ } to _flattened_.
         1. Return _flattened_.
       </emu-alg>
 
@@ -416,13 +423,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           </tr>
         </table>
       </emu-table>
-
-      <emu-note type="editor">
-        CreatePartsFromList will be changed to accept a List of Records in the form {[[Type]], [[Value]]}.
-      </emu-note>
-      <emu-note type="editor">
-        Adding the time separator as a separate list element is wrong, because it will be formatted as a single entry through the list formatter resulting in strings like *"12, :, 30, :, and 45"*.
-      </emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -627,7 +627,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _record_ be ? ToDurationRecord(_duration_).
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
             1. Let _result_ be a new empty String.
-            1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
               1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
             1. Return _result_.
           </emu-alg>
@@ -644,11 +644,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
             1. Let _result_ be ! ArrayCreate(0).
             1. Let _n_ be 0.
-            1. For each { [[Type]], [[Value]] } _part_ in _parts_, do
+            1. For each { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
               1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
-              1. If _part_.[[Unit]] is set, Perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
+              1. If _part_.[[Unit]] is not ~empty~, perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
               1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
               1. Increment _n_ by 1.
             1. Return _result_.
