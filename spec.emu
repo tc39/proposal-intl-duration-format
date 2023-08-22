@@ -645,7 +645,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
               1. If _part_.[[Unit]] is not ~empty~, perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
               1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
-              1. Increment _n_ by 1.
+              1. Set _n_ to _n_ + 1.
             1. Return _result_.
           </emu-alg>
         </emu-clause>
