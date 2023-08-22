@@ -293,13 +293,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
               1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. If _separated_ is *false*, then
-                1. Append a new empty List to the end of _result_.
+                1. Append a new empty List to _result_.
               1. Else,
                 1. Set _separated_ to *false*.
               1. Let _last_ be the last element of _result_.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _last_.
+                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _last_.
               1. If _unit_ is *"hours"* or *"minutes"*, then
                 1. If _unit_ is *"hours"*, then
                   1. Let _nextValue_ be _duration_.[[Minutes]].
@@ -308,7 +308,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                   1. Let _nextValue_ be _duration_.[[Seconds]] + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
                   1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
                 1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
-                  1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to the end of _last_.
+                  1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to _last_.
                   1. Set _separated_ to *true*.
             1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
@@ -318,8 +318,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _list_ be a new empty List.
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _list_.
-              1. Append _list_ to the end of _result_.
+                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+              1. Append _list_ to _result_.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
@@ -331,15 +331,15 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _flattened_ be a new empty List.
         1. For each Record { [[Type]], [[Value]] } _part_ in _result_, do
           1. If _part_.[[Type]] is *"literal"*, then
-            1. Append _part_ to the end of _flattened_.
+            1. Append _part_ to _flattened_.
           1. Else,
             1. Let _value_ be _part_.[[Value]].
             1. If Type(_value_) is Record { [[Type]], [[Value]], [[Unit]] }, then
-              1. Append _value_ to the end of _flattened_.
+              1. Append _value_ to _flattened_.
             1. Else,
               1. Assert: Type(_value_) is List.
               1. For each Record _element_ in _value_, do
-                1. Append _element_ to the end of _flattened_.
+                1. Append _element_ to _flattened_.
         1. Return _flattened_.
       </emu-alg>
 
