@@ -59,35 +59,6 @@ new Intl.DurationFormat("fr-FR", { style: "long" }).format({
 
 In this section, we are going to illustrate each user needs (requirements) and a design for each need (requirement)
 
-### Input Value
-
-+ Users need to identify how to input a duration value. For example, if a user needs to format `1000 seconds` , how could the user pass the value to the formatting function.
-
-#### Design
-
-* Input value will be an object of type `Temporal.Duration`
-* Example: `new DurationFormat().format(Temporal.Duration.from({hours: 3, minutes: 4});`
-
-### Formatting width
-
-Users want to determine several types of the formatting width as following
-
-| Format width | Example               |
-|--------------|-----------------------|
-| Long         | 1 hour and 50 minutes |
-| Short        | 1 hr, 50 min          |
-| Narrow       | 1h 50m                |
-| Digital      | 1:50:00             |
-
-#### Design
-
-+ The user can determine the formatting width using a parameter `style` and the value of this parameter may be one of the following strings:
-  - `"long"`
-  - `"short"`
-  - `"narrow"`
-  - `"digital"`
-+ The width of each field can be set separately in the options, for example: `{ years: "long", months: "short", days: "narrow" }`.
-
 ### Supported Duration Units
 
 * Users need the following fields to be supported
@@ -104,7 +75,7 @@ Users want to determine several types of the formatting width as following
 
 #### Design
 
-* We are going to support the same fields as in [ `Temporal.Duration` ](https://github.com/tc39/proposal-temporal/blob/main/docs/duration.md), which contains:
+* Duration objects support the same fields as in [ `Temporal.Duration` ](https://github.com/tc39/proposal-temporal/blob/main/docs/duration.md), which contains:
   + years
   + months
   + weeks
@@ -116,25 +87,50 @@ Users want to determine several types of the formatting width as following
   + microseconds
   + nanoseconds
 
+### Input Value
+
++ Users need to identify how to input a duration value. For example, if a user needs to format `1000 seconds` , how could the user pass the value to the formatting function.
+
+#### Design
+
+* Input value will be a duration object, containing fields for some number of the supported duration units fields.
+* Example: `new DurationFormat().format({hours: 3, minutes: 4});`
+
+### Formatting width
+
+Users want to determine several types of the formatting width as following
+
+| Format width | Example               |
+|--------------|-----------------------|
+| Long         | 1 hour and 50 minutes |
+| Short        | 1 hr, 50 min          |
+| Narrow       | 1h 50m                |
+| Digital      | 1:50:00               |
+
+#### Design
+
++ The user can determine the formatting width using a parameter `style` and the value of this parameter may be one of the following strings:
+  - `"long"`
+  - `"short"`
+  - `"narrow"`
+  - `"digital"`
++ The width of each field can be set separately in the options, for example: `{ years: "long", months: "short", days: "narrow" }`.
+
 ### Determining Duration Units
 
 `DurationFormat` does not do any arithmetic operations nor rounding on the input implicitly.
-Instead, the user must edit the input (e.g. using [`Temporal.Duration.prototype.round`](https://tc39.es/proposal-temporal/docs/duration.html#round)) to ensure the input is within the desired range.
+Instead, the user must edit the input to ensure the input is within the desired range.
 
 To avoid accidentally omitting part of the duration, `DurationFormat` always outputs all nonzero fields (except sub-second fields truncated by `fractionalDigits`).
 Callers who want to omit nonzero fields (for example, only showing the date or time portion of the duration) should edit the input duration.
 
 #### Design
 
-* Users can determine the time fields in array.
+* Durations are stored in duration objects containing the fields above. 
 * Example:
 
 ``` javascript
-    fields: [
-        'hour',
-        'minute',
-        'second'
-    ]
+    const duration = { hours: 1, minutes: 2, seconds: 33 };
 ```
 
 ### Hide zero-value fields
@@ -144,19 +140,6 @@ In most cases, users want to avoid displaying zero-value fields. All zero-valued
 #### Design
 
 For each field `foo`, there is an option `fooDisplay` that is set to `"auto"` by default. Setting that option to `"always"` causes that field to be displayed even if it is zero; for example, to always show the "day" field, set `{ dayDisplay: "always" }`. If you specify the style for that field by setting the `foo` option, then the default for `fooDisplay` becomes `"always"`; for example, `{ day: "short" }` implies `{ day: "short", dayDisplay: "always" }`.
-
-### Round
-
-* Users wants to decide if they are going to round the smallest field or not.
-* for example:
-  + Without rounding option
-    - 1 hour and 30.6 minutes.
-  + With rounding option
-    - 1 hour and 31 minutes.
-
-#### Design
-
-* Users could use `Temporal.Duration#round` function.
 
 ### Locale-aware format
 
@@ -169,7 +152,7 @@ For each field `foo`, there is an option `fooDisplay` that is set to `"auto"` by
 
 #### Design
 
-Adding the locale in string format as a first argument, or specifying a ranked list of locales as an array of string locale values.
+Adding the locale in string format as a first argument, or specifying a ranked list of locales as an array of string values.
 
 ### Display fractional values
 
@@ -177,24 +160,29 @@ Sometimes it is desirable to display the smallest sub-second unit not by itself 
 
 #### Design
 
-We allow users to specify a `fractionalDigits` option that will display the smallest sub-second unit with display set to `"auto"` as a fraction of the previous unit if it is non-zero. The number of digits used will be the value passed to this option.
+We allow users to specify a `fractionalDigits` option that will display the smallest sub-second unit with display set to `"auto"` as a fraction of the previous unit if it is non-zero and if these values have style set to `"numeric"`. The number of digits used will be the value passed to this option. By default `fractionalDigits` is undefined. In this case, exactly as many fractional digits as needed to display the whole duration are included. If rounding is necessary, we round toward 0.
 
 #### Example
 
 ```javascript
-new Intl.DurationFormat('en', { fractionalDigits: 2 }).format('PT12.3456S'); // => 12.34 sec
-new Intl.DurationFormat('en', { milliseconds: 'narrow', fractionalDigits: 2 }).format('PT12.3456S'); // => 12s 345.60ms
+
+const duration = { seconds: 12, milliseconds: 345, microseconds: 600 } ;
+
+new Intl.DurationFormat('en', { style: "digital", fractionalDigits: 2 }).format(duration); 
+// "0:00:12.35"
+
+new Intl.DurationFormat('en', { seconds: "numeric", fractionalDigits: 2 }).format(duration); 
+// "12.35"
+
+> new Intl.DurationFormat('en', { seconds: "numeric", fractionalDigits: 5 }).format(duration); 
+// "12.34560"
+
+> new Intl.DurationFormat('en', { seconds: "numeric"}).format(duration); 
+// "12.3456"
+
 ```
 
 ## API design
-
-``` javascript
-    new Intl.DurationFormat('en').format(Temporal.Duration.from('PT2H46M40S')); // => 2 hr 46 min 40 sec
-    new Intl.DurationFormat('en', {
-      hours: 'numeric',
-      seconds: 'numeric',
-    }).format(Temporal.Duration.from('PT2H40S')); // => 2:00:40
-```
 
 ### Constructor
 
@@ -235,12 +223,13 @@ new Intl.DurationFormat(locales, options)
     Additional decimal places will be truncated towards zero.
     (`Temporal.Duration.prototype.round` can be used to obtain different rounding behavior.)
     Normally this option applies to fractional seconds, but this option actually applies to the largest seconds-or-smaller unit that uses the `"numeric"` or `"2-digit"` style.
-    For example, if options are `{ seconds: "narrow", milliseconds: "narrow", fractionalDigits: 2}` then the output can be `"5s 2.39ms"`.
+    For example, if options are `{ seconds: "narrow", milliseconds: "numeric", fractionalDigits: 4}` then the output is "12.3456 seconds".
     If this option is omitted, only nonzero decimals will be displayed and trailing zeroes will be omitted.
 
 ##### Default values
 
-* The per-unit style options default to the value of `style` for all styles except `"digital"`, for which units years till days default to `"narrow"` and hours till nanoseconds default to `"numeric"`.
+* The per-unit style options default to the value of `style` for all styles except `"digital"`, for which units years till days default to `"short"` and hours till nanoseconds default to `"numeric"`.
+* If `style` is `undefined`, all values default to `"short"`
 * The per-unit display options default to `"auto"` if the corresponding style option is `undefined` and `"always"` otherwise.
 
 #### Notes
