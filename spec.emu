@@ -216,6 +216,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _style_ to *"numeric"*.
             1. Else,
               1. Set _style_ to _baseStyle_.
+        1. Else if _style_ is *"numeric"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
+          1. Set _displayDefault_ to *"auto"*.
         1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
         1. Let _display_ be ? GetOption(_options_, _displayField_, ~string~, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
         1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
@@ -223,8 +225,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Throw a *RangeError* exception.
           1. Else if _unit_ is *"minutes"* or *"seconds"*, then
             1. Set _style_ to *"2-digit"*.
-          1. If _style_ is *"numeric"* and _display_ is *"always"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
-            1. Throw a *RangeError* exception.
+        1. If _style_ is *"numeric"* and _display_ is *"always"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
+          1. Throw a *RangeError* exception.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
