@@ -192,7 +192,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           _unit_: a String,
           _options_: an ECMAScript language value,
           _baseStyle_: a String,
-          _stylesList_: a List of String,
+          _stylesList_: a List of Strings,
           _digitalBase_: a String,
           _prevStyle_: a String,
         ): either a normal completion containing a Record with [[Style]] and [[Display]] fields, or an abrupt completion
