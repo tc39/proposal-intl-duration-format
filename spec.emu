@@ -249,7 +249,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. Let _done_ be *false*.
-        1. Let _separated_ be *false*.
+        1. Let _needSeparator_ be *false*.
         1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
         1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
         1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
@@ -292,7 +292,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
             1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-            1. If _separated_ is *false*, then
+            1. If _needSeparator_ is *false*, then
               1. Let _list_ be a new empty List.
             1. Else,
               1. Let _list_ be the last element of _result_.
@@ -300,12 +300,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
             1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
               1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
-            1. If _separated_ is *false*, then
+            1. If _needSeparator_ is *false*, then
               1. If _style_ is *"2-digit"* or *"numeric"*, then
-                1. Set _separated_ to *true*.
+                1. Set _needSeparator_ to *true*.
               1. Append _list_ to _result_.
           1. Else,
-            1. Set _separated_ to *false*.
+            1. Set _needSeparator_ to *false*.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
