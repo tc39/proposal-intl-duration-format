@@ -211,10 +211,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _displayDefault_ to *"auto"*.
             1. Set _style_ to _digitalBase_.
           1. Else,
-            1. Set _displayDefault_ to *"auto"*.
             1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+              1. If _unit_ is not one of *"minutes"* or *"seconds"*, then
+                1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to *"numeric"*.
             1. Else,
+              1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to _baseStyle_.
         1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
         1. Let _display_ be ? GetOption(_options_, _displayField_, ~string~, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
