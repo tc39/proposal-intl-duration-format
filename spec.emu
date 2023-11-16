@@ -283,7 +283,18 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
-          1. If _value_ is not 0 or _display_ is not *"auto"*, then
+          1. Let _displayRequired_ be *"false"*.
+          1. Let _hoursStyle_ be _durationFormat_.[[HoursStyle]].
+          1. If _unit_ is *"minutes"*, then
+              1. If _hoursStyle_ is *"numeric"* or *"2-digit"*, then
+                1. Let _hoursDisplay_ be _durationFormat_.[[HoursDisplay]].
+                1. Let _hoursValue_ be _durationFormat_.[[HoursValue]].
+                1. If _hoursDisplay_ is *"always"* or _hoursValue_ is not 0, then
+                  1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
+                  1. Let _secondsValue_ be _durationFormat_.[[SecondsValue]].
+                  1. If _secondsDisplay_ is *"always"* or _secondsValue_ is not 0, then
+                    1. Set _displayRequired_ to *"true"*.
+          1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *"true"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
             1. If _style_ is *"2-digit"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
