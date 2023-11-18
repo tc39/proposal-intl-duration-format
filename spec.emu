@@ -182,6 +182,21 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Assert: 𝔽(_v_) is finite.
           1. If _v_ &lt; 0 and _sign_ &gt; 0, return *false*.
           1. If _v_ &gt; 0 and _sign_ &lt; 0, return *false*.
+        1. Let _years_ be _record_.[[Years]].
+        1. Let _months_ be _record_.[[Months]].
+        1. Let _weeks_ be _record_.[[Weeks]].
+        1. If abs(_years_) &ge; 2<sup>32</sup>, return *false*.
+        1. If abs(_months_) &ge; 2<sup>32</sup>, return *false*.
+        1. If abs(_weeks_) &ge; 2<sup>32</sup>, return *false*.
+        1. Let _days_ be _record_.[[Days]].
+        1. Let _hours_ be _record_.[[Hours]].
+        1. Let _minutes_ be _record_.[[Minutes]].
+        1. Let _seconds_ be _record_.[[Seconds]].
+        1. Let _milliseconds_ be _record_.[[Milliseconds]].
+        1. Let _microseconds_ be _record_.[[Microseconds]].
+        1. Let _nanoseconds_ be _record_.[[Nanoseconds]].
+        1. Let _normalizedSeconds_ be _days_ &times; 86,400 + _hours_ &times; 3600 + _minutes_ &times; 60 + _seconds_ + _milliseconds_ &times; 10<sup>-3</sup> + _microseconds_ &times; 10<sup>-6</sup> + _nanoseconds_ &times; 10<sup>-9</sup>.
+        1. If abs(_normalizedSeconds_) &ge; 2<sup>53</sup>, return *false*.
         1. Return *true*.
       </emu-alg>
     </emu-clause>
