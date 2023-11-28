@@ -318,7 +318,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
             1. Else,
               1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
-            1. If _nextStyle_ is *"numeric"*, then
+            1. If _nextStyle_ is *"fractional"*, then
               1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
               1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, *9*<sub>𝔽</sub>).
