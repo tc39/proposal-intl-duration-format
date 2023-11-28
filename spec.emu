@@ -211,10 +211,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _displayDefault_ to *"auto"*.
             1. Set _style_ to _digitalBase_.
           1. Else,
-            1. Set _displayDefault_ to *"auto"*.
             1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+              1. If _unit_ is not one of *"minutes"* or *"seconds"*, then
+                1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to *"numeric"*.
             1. Else,
+              1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to _baseStyle_.
         1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
         1. Let _display_ be ? GetOption(_options_, _displayField_, ~string~, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
@@ -247,7 +249,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. Let _done_ be *false*.
-        1. Let _separated_ be *false*.
+        1. Let _needSeparator_ be *false*.
         1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
         1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
         1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
@@ -281,7 +283,18 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
-          1. If _value_ is not 0 or _display_ is not *"auto"*, then
+          1. Let _displayRequired_ be *"false"*.
+          1. Let _hoursStyle_ be _durationFormat_.[[HoursStyle]].
+          1. If _unit_ is *"minutes"*, then
+              1. If _hoursStyle_ is *"numeric"* or *"2-digit"*, then
+                1. Let _hoursDisplay_ be _durationFormat_.[[HoursDisplay]].
+                1. Let _hoursValue_ be _durationFormat_.[[HoursValue]].
+                1. If _hoursDisplay_ is *"always"* or _hoursValue_ is not 0, then
+                  1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
+                  1. Let _secondsValue_ be _durationFormat_.[[SecondsValue]].
+                  1. If _secondsDisplay_ is *"always"* or _secondsValue_ is not 0, then
+                    1. Set _displayRequired_ to *"true"*.
+          1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *"true"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
             1. If _style_ is *"2-digit"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
@@ -290,7 +303,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
             1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-            1. If _separated_ is *false*, then
+            1. If _needSeparator_ is *false*, then
               1. Let _list_ be a new empty List.
             1. Else,
               1. Let _list_ be the last element of _result_.
@@ -298,12 +311,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
             1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
               1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
-            1. If _separated_ is *false*, then
+            1. If _needSeparator_ is *false*, then
               1. If _style_ is *"2-digit"* or *"numeric"*, then
-                1. Set _separated_ to *true*.
+                1. Set _needSeparator_ to *true*.
               1. Append _list_ to _result_.
           1. Else,
-            1. Set _separated_ to *false*.
+            1. Set _needSeparator_ to *false*.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
