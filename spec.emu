@@ -158,8 +158,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </dl>
       <emu-alg>
         1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Field value of the current row.
-          1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
+          1. Let _v_ be the value of _record_'s field whose name is the Field value of the current row.
           1. If _v_ &lt; 0, return -1.
           1. If _v_ &gt; 0, return 1.
         1. Return 0.
@@ -170,7 +169,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         IsValidDurationRecord (
           _record_: a Duration Record
-        )
+        ): a Boolean
       </h1>
       <dl class="header">
         <dt>description</dt>
@@ -179,8 +178,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _sign_ be DurationRecordSign(_record_).
         1. For each row of <emu-xref href="#table-duration-record-fields"></emu-xref>, except the header row, in table order, do
-          1. Let _valueSlot_ be the Field value of the current row.
-          1. Let _v_ be _record_.[[&lt;_valueSlot_&gt;]].
+          1. Let _v_ be the value of _record_'s field whose name is the Field value of the current row.
           1. Assert: 𝔽(_v_) is finite.
           1. If _v_ &lt; 0 and _sign_ &gt; 0, return *false*.
           1. If _v_ &gt; 0 and _sign_ &lt; 0, return *false*.
@@ -194,7 +192,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           _unit_: a String,
           _options_: an ECMAScript language value,
           _baseStyle_: a String,
-          _stylesList_: a List of String,
+          _stylesList_: a List of Strings,
           _digitalBase_: a String,
           _prevStyle_: a String,
         ): either a normal completion containing a Record with [[Style]] and [[Display]] fields, or an abrupt completion
@@ -213,11 +211,15 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _displayDefault_ to *"auto"*.
             1. Set _style_ to _digitalBase_.
           1. Else,
-            1. Set _displayDefault_ to *"auto"*.
             1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+              1. If _unit_ is not one of *"minutes"* or *"seconds"*, then
+                1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to *"numeric"*.
             1. Else,
+              1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to _baseStyle_.
+        1. Else if _style_ is *"numeric"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
+          1. Set _displayDefault_ to *"auto"*.
         1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
         1. Let _display_ be ? GetOption(_options_, _displayField_, ~string~, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
         1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
@@ -225,8 +227,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Throw a *RangeError* exception.
           1. Else if _unit_ is *"minutes"* or *"seconds"*, then
             1. Set _style_ to *"2-digit"*.
-          1. If _style_ is *"numeric"* and _display_ is *"always"* and _unit_ is one of "milliseconds", "microseconds", or "nanoseconds", then
-            1. Throw a *RangeError* exception.
+        1. If _style_ is *"numeric"* and _display_ is *"always"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
+          1. Throw a *RangeError* exception.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
@@ -249,16 +251,17 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. Let _done_ be *false*.
-        1. Let _separated_ be *false*.
+        1. Let _needSeparator_ be *false*.
+        1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+        1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
+        1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
+        1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[&lt;_numberingSystem_&gt;]].
         1. While _done_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
-          1. Let _valueSlot_ be the Value Slot value.
-          1. Let _styleSlot_ be the Style Slot value.
-          1. Let _displaySlot_ be the Display Slot value.
-          1. Let _unit_ be the Unit value.
-          1. Let _numberFormatUnit_ be the NumberFormat Unit value.
-          1. Let _style_ be _durationFormat_.[[&lt;_styleSlot_&gt;]].
-          1. Let _display_ be _durationFormat_.[[&lt;_displaySlot_&gt;]].
-          1. Let _value_ be _duration_.[[&lt;_valueSlot_&gt;]].
+          1. Let _value_ be the value of _duration_'s field whose name is the Value Field value of the current row.
+          1. Let _style_ be the value of _durationFormat_'s internal slot whose name is the Style Slot value of the current row.
+          1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
+          1. Let _unit_ be the Unit value of the current row.
+          1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
           1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If _unit_ is *"seconds"*, then
@@ -275,51 +278,47 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Else,
                 1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
               1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, 9).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 0).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, *9*<sub>𝔽</sub>).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, *+0*<sub>𝔽</sub>).
               1. Else,
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _durationFormat_.[[FractionalDigits]]).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
-          1. If _style_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-          1. If _value_ is not 0 or _display_ is not *"auto"*, then
+          1. Let _displayRequired_ be *"false"*.
+          1. Let _hoursStyle_ be _durationFormat_.[[HoursStyle]].
+          1. If _unit_ is *"minutes"*, then
+              1. If _hoursStyle_ is *"numeric"* or *"2-digit"*, then
+                1. Let _hoursDisplay_ be _durationFormat_.[[HoursDisplay]].
+                1. Let _hoursValue_ be _durationFormat_.[[HoursValue]].
+                1. If _hoursDisplay_ is *"always"* or _hoursValue_ is not 0, then
+                  1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
+                  1. Let _secondsValue_ be _durationFormat_.[[SecondsValue]].
+                  1. If _secondsDisplay_ is *"always"* or _secondsValue_ is not 0, then
+                    1. Set _displayRequired_ to *"true"*.
+          1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *"true"*, then
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
-            1. If _style_ is *"2-digit"* or *"numeric"*, then
-              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-              1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-              1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
-              1. If _separated_ is *false*, then
-                1. Append a new empty List to the end of _result_.
-              1. Else,
-                1. Set _separated_ to *false*.
-              1. Let _last_ be the last element of _result_.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
-              1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _last_.
-              1. If _unit_ is *"hours"* or *"minutes"*, then
-                1. If _unit_ is *"hours"*, then
-                  1. Let _nextValue_ be _duration_.[[Minutes]].
-                  1. Let _nextDisplay_ be _durationFormat_.[[MinutesDisplay]].
-                1. Else,
-                  1. Let _nextValue_ be _duration_.[[Seconds]] + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
-                  1. Let _nextDisplay_ be _durationFormat_.[[SecondsDisplay]].
-                1. If _nextValue_ is not 0 or _nextDisplay_ is not *"auto"*, then
-                  1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
-                  1. Let _separator_ be _dataLocaleData_.[[digitalFormat]].[[&lt;_numberingSystem_&gt;]].
-                  1. Append the new Record { [[Type]]: *"literal"*, [[Value]]: _separator_} to the end of _last_.
-                  1. Set _separated_ to *true*.
-            1. Else,
+            1. If _style_ is *"2-digit"*, then
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
+            1. If _style_ is neither *"2-digit"* nor *"numeric"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
-              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+            1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+            1. If _needSeparator_ is *false*, then
               1. Let _list_ be a new empty List.
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, 𝔽(_value_)).
-              1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
-                1. Append the new Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to the end of _list_.
-              1. Append _list_ to the end of _result_.
+            1. Else,
+              1. Let _list_ be the last element of _result_.
+              1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _list_.
+            1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
+            1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
+              1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+            1. If _needSeparator_ is *false*, then
+              1. If _style_ is *"2-digit"* or *"numeric"*, then
+                1. Set _needSeparator_ to *true*.
+              1. Append _list_ to _result_.
+          1. Else,
+            1. Set _needSeparator_ to *false*.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
@@ -327,19 +326,26 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _listStyle_ to *"short"*.
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
         1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
-        1. Set _result_ to ! CreatePartsFromList(_lf_, _result_).
+        1. Let _strings_ be a new empty List.
+        1. For each element _parts_ of _result_, do
+          1. Let _string_ be the empty String.
+          1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+            1. Set _string_ to the string-concatenation of _string_ and _part_.[[Value]].
+          1. Append _string_ to _strings_.
+        1. Let _formatted_ be CreatePartsFromList(_lf_, _strings_).
+        1. Let _resultIndex_ be 0.
+        1. Let _resultLength_ be the number of elements in _result_.
         1. Let _flattened_ be a new empty List.
-        1. For each Record { [[Type]], [[Value]] } _part_ in _result_, do
-          1. If _part_.[[Type]] is *"literal"*, then
-            1. Append _part_ to the end of _flattened_.
+        1. For each Record { [[Type]], [[Value]] } _listPart_ in _formatted_, do
+          1. If _listPart_.[[Type]] is *"element"*, then
+            1. Assert: _resultIndex_ &lt; _resultLength_.
+            1. Let _parts_ be _result_[_resultIndex_].
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+              1. Append _part_ to _flattened_.
+            1. Set _resultIndex_ to _resultIndex_ + 1.
           1. Else,
-            1. Let _value_ be _part_.[[Value]].
-            1. If Type(_value_) is Record { [[Type]], [[Value]], [[Unit]] }, then
-              1. Append _value_ to the end of _flattened_.
-            1. Else,
-              1. Assert: Type(_value_) is List.
-              1. For each Record _element_ in _value_, do
-                1. Append _element_ to the end of _flattened_.
+            1. Assert: _listPart_.[[Type]] is *"literal"*.
+            1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _listPart_.[[Value]], [[Unit]]: ~empty~ } to _flattened_.
         1. Return _flattened_.
       </emu-alg>
 
@@ -348,7 +354,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <table class="real-table">
           <thead>
             <tr>
-              <th>Value Slot</th>
+              <th>Value Field</th>
               <th>Style Slot</th>
               <th>Display Slot</th>
               <th>Unit</th>
@@ -427,16 +433,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           </tr>
         </table>
       </emu-table>
-
-      <emu-note type="editor">
-        In order to work, this needs all the necessary units be supported by *NumberFormat*, which is tracked in https://github.com/tc39/ecma402/issues/702 and https://github.com/tc39/ecma402/issues/704.
-      </emu-note>
-      <emu-note type="editor">
-        CreatePartsFromList will be changed to accept a List of Records in the form {[[Type]], [[Value]]}.
-      </emu-note>
-      <emu-note type="editor">
-        Adding the time separator as a separate list element is wrong, because it will be formatted as a single entry through the list formatter resulting in strings like *"12, :, 30, :, and 45"*.
-      </emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -640,8 +636,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
             1. Let _record_ be ? ToDurationRecord(_duration_).
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
-            1. Let _result_ be a new empty String.
-            1. For each Record { [[Type]], [[Value]] } _part_ in _parts_, do
+            1. Let _result_ be the empty String.
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
               1. Set _result_ to the string-concatenation of _result_ and _part_.[[Value]].
             1. Return _result_.
           </emu-alg>
@@ -658,13 +654,13 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
             1. Let _result_ be ! ArrayCreate(0).
             1. Let _n_ be 0.
-            1. For each { [[Type]], [[Value]] } _part_ in _parts_, do
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
               1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
-              1. If _part_.[[Unit]] is set, Perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
+              1. If _part_.[[Unit]] is not ~empty~, perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
               1. Perform ! CreateDataPropertyOrThrow(_result_, ! ToString(_n_), _obj_).
-              1. Increment _n_ by 1.
+              1. Set _n_ to _n_ + 1.
             1. Return _result_.
           </emu-alg>
         </emu-clause>
@@ -680,7 +676,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
               1. Let _p_ be the Property value of the current row.
               1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
-              1. If _p_ is not *"fractionalDigits"*, then
+              1. If _p_ is *"fractionalDigits"*, then
+                1. If _v_ is not *undefined*, set _v_ to 𝔽(_v_).
+              1. Else,
                 1. Assert: _v_ is not *undefined*.
               1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
             1. Return _options_.
@@ -828,7 +826,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
           <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
           <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
-          <li>[[FractionalDigits]] is a Number value, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
+          <li>[[FractionalDigits]] is a non-negative integer, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
         </ul>
       </emu-clause>
     </emu-clause>

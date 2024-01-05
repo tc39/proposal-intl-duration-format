@@ -452,23 +452,66 @@ Menu.prototype.revealInToc = function (path) {
 };
 
 function findActiveClause(root, path) {
-  let clauses = getChildClauses(root);
   path = path || [];
 
-  for (let $clause of clauses) {
-    let rect = $clause.getBoundingClientRect();
+  let visibleClauses = getVisibleClauses(root, path);
+  let midpoint = Math.floor(window.innerHeight / 2);
+
+  for (let [$clause, path] of visibleClauses) {
+    let { top: clauseTop, bottom: clauseBottom } = $clause.getBoundingClientRect();
+    let isFullyVisibleAboveTheFold =
+      clauseTop > 0 && clauseTop < midpoint && clauseBottom < window.innerHeight;
+    if (isFullyVisibleAboveTheFold) {
+      return path;
+    }
+  }
+
+  visibleClauses.sort(([, pathA], [, pathB]) => pathB.length - pathA.length);
+  for (let [$clause, path] of visibleClauses) {
+    let { top: clauseTop, bottom: clauseBottom } = $clause.getBoundingClientRect();
     let $header = $clause.querySelector('h1');
+    let clauseStyles = getComputedStyle($clause);
     let marginTop = Math.max(
-      parseInt(getComputedStyle($clause)['margin-top']),
+      0,
+      parseInt(clauseStyles['margin-top']),
       parseInt(getComputedStyle($header)['margin-top'])
     );
-
-    if (rect.top - marginTop <= 1 && rect.bottom > 0) {
-      return findActiveClause($clause, path.concat($clause)) || path;
+    let marginBottom = Math.max(0, parseInt(clauseStyles['margin-bottom']));
+    let crossesMidpoint =
+      clauseTop - marginTop <= midpoint && clauseBottom + marginBottom >= midpoint;
+    if (crossesMidpoint) {
+      return path;
     }
   }
 
   return path;
+}
+
+function getVisibleClauses(root, path) {
+  let childClauses = getChildClauses(root);
+  path = path || [];
+
+  let result = [];
+
+  let seenVisibleClause = false;
+  for (let $clause of childClauses) {
+    let { top: clauseTop, bottom: clauseBottom } = $clause.getBoundingClientRect();
+    let isPartiallyVisible =
+      (clauseTop > 0 && clauseTop < window.innerHeight) ||
+      (clauseBottom > 0 && clauseBottom < window.innerHeight) ||
+      (clauseTop < 0 && clauseBottom > window.innerHeight);
+
+    if (isPartiallyVisible) {
+      seenVisibleClause = true;
+      let innerPath = path.concat($clause);
+      result.push([$clause, innerPath]);
+      result.push(...getVisibleClauses($clause, innerPath));
+    } else if (seenVisibleClause) {
+      break;
+    }
+  }
+
+  return result;
 }
 
 function* getChildClauses(root) {
@@ -1162,12 +1205,40 @@ function getActiveTocPaths() {
   return [...menu.$menu.querySelectorAll('.active')].map(getTocPath).filter(p => p != null);
 }
 
-function loadStateFromSessionStorage() {
-  if (!window.sessionStorage || typeof menu === 'undefined' || window.navigating) {
+function initTOCExpansion(visibleItemLimit) {
+  // Initialize to a reasonable amount of TOC expansion:
+  // * Expand any full-breadth nesting level up to visibleItemLimit.
+  // * Expand any *single-item* level while under visibleItemLimit (even if that pushes over it).
+
+  // Limit to initialization by bailing out if any parent item is already expanded.
+  const tocItems = Array.from(document.querySelectorAll('#menu-toc li'));
+  if (tocItems.some(li => li.classList.contains('active') && li.querySelector('li'))) {
     return;
   }
-  if (sessionStorage.referencePaneState != null) {
-    let state = JSON.parse(sessionStorage.referencePaneState);
+
+  const selfAndSiblings = maybe => Array.from(maybe?.parentNode.children ?? []);
+  let currentLevelItems = selfAndSiblings(tocItems[0]);
+  let availableCount = visibleItemLimit - currentLevelItems.length;
+  while (availableCount > 0 && currentLevelItems.length) {
+    const nextLevelItems = currentLevelItems.flatMap(li => selfAndSiblings(li.querySelector('li')));
+    availableCount -= nextLevelItems.length;
+    if (availableCount > 0 || currentLevelItems.length === 1) {
+      // Expand parent items of the next level down (i.e., current-level items with children).
+      for (const ol of new Set(nextLevelItems.map(li => li.parentNode))) {
+        ol.closest('li').classList.add('active');
+      }
+    }
+    currentLevelItems = nextLevelItems;
+  }
+}
+
+function initState() {
+  if (typeof menu === 'undefined' || window.navigating) {
+    return;
+  }
+  const storage = typeof sessionStorage !== 'undefined' ? sessionStorage : Object.create(null);
+  if (storage.referencePaneState != null) {
+    let state = JSON.parse(storage.referencePaneState);
     if (state != null) {
       if (state.type === 'ref') {
         let entry = menu.search.biblio.byId[state.id];
@@ -1181,39 +1252,36 @@ function loadStateFromSessionStorage() {
           referencePane.showSDOsBody(sdos, state.id);
         }
       }
-      delete sessionStorage.referencePaneState;
+      delete storage.referencePaneState;
     }
   }
 
-  if (sessionStorage.activeTocPaths != null) {
-    document
-      .getElementById('menu-toc')
-      .querySelectorAll('.active')
-      .forEach(e => {
-        e.classList.remove('active');
-      });
-    let active = JSON.parse(sessionStorage.activeTocPaths);
+  if (storage.activeTocPaths != null) {
+    document.querySelectorAll('#menu-toc li.active').forEach(li => li.classList.remove('active'));
+    let active = JSON.parse(storage.activeTocPaths);
     active.forEach(activateTocPath);
-    delete sessionStorage.activeTocPaths;
+    delete storage.activeTocPaths;
+  } else {
+    initTOCExpansion(20);
   }
 
-  if (sessionStorage.searchValue != null) {
-    let value = JSON.parse(sessionStorage.searchValue);
+  if (storage.searchValue != null) {
+    let value = JSON.parse(storage.searchValue);
     menu.search.$searchBox.value = value;
     menu.search.search(value);
-    delete sessionStorage.searchValue;
+    delete storage.searchValue;
   }
 
-  if (sessionStorage.tocScroll != null) {
-    let tocScroll = JSON.parse(sessionStorage.tocScroll);
+  if (storage.tocScroll != null) {
+    let tocScroll = JSON.parse(storage.tocScroll);
     menu.$toc.scrollTop = tocScroll;
-    delete sessionStorage.tocScroll;
+    delete storage.tocScroll;
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadStateFromSessionStorage);
+document.addEventListener('DOMContentLoaded', initState);
 
-window.addEventListener('pageshow', loadStateFromSessionStorage);
+window.addEventListener('pageshow', initState);
 
 window.addEventListener('beforeunload', () => {
   if (!window.sessionStorage || typeof menu === 'undefined') {
@@ -1226,33 +1294,128 @@ window.addEventListener('beforeunload', () => {
 });
 
 'use strict';
-let decimalBullet = Array.from({ length: 100 }, (a, i) => '' + (i + 1));
-let alphaBullet = Array.from({ length: 26 }, (a, i) => String.fromCharCode('a'.charCodeAt(0) + i));
 
-// prettier-ignore
-let romanBullet = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx', 'xxi', 'xxii', 'xxiii', 'xxiv', 'xxv'];
-// prettier-ignore
-let bullets = [decimalBullet, alphaBullet, romanBullet, decimalBullet, alphaBullet, romanBullet];
+// Manually prefix algorithm step list items with hidden counter representations
+// corresponding with their markers so they get selected and copied with content.
+// We read list-style-type to avoid divergence with the style sheet, but
+// for efficiency assume that all lists at the same nesting depth use the same
+// style (except for those associated with replacement steps).
+// We also precompute some initial items for each supported style type.
+// https://w3c.github.io/csswg-drafts/css-counter-styles/
 
-function addStepNumberText(ol, parentIndex) {
-  for (let i = 0; i < ol.children.length; ++i) {
-    let child = ol.children[i];
-    let index = parentIndex.concat([i]);
-    let applicable = bullets[Math.min(index.length - 1, 5)];
-    let span = document.createElement('span');
-    span.textContent = (applicable[i] || '?') + '. ';
-    span.style.fontSize = '0';
-    span.setAttribute('aria-hidden', 'true');
-    child.prepend(span);
-    let sublist = child.querySelector('ol');
-    if (sublist != null) {
-      addStepNumberText(sublist, index);
+const lowerLetters = Array.from({ length: 26 }, (_, i) =>
+  String.fromCharCode('a'.charCodeAt(0) + i)
+);
+// Implement the lower-alpha 'alphabetic' algorithm,
+// adjusting for indexing from 0 rather than 1.
+// https://w3c.github.io/csswg-drafts/css-counter-styles/#simple-alphabetic
+// https://w3c.github.io/csswg-drafts/css-counter-styles/#alphabetic-system
+const lowerAlphaTextForIndex = i => {
+  let S = '';
+  for (const N = lowerLetters.length; i >= 0; i--) {
+    S = lowerLetters[i % N] + S;
+    i = Math.floor(i / N);
+  }
+  return S;
+};
+
+const weightedLowerRomanSymbols = Object.entries({
+  m: 1000,
+  cm: 900,
+  d: 500,
+  cd: 400,
+  c: 100,
+  xc: 90,
+  l: 50,
+  xl: 40,
+  x: 10,
+  ix: 9,
+  v: 5,
+  iv: 4,
+  i: 1,
+});
+// Implement the lower-roman 'additive' algorithm,
+// adjusting for indexing from 0 rather than 1.
+// https://w3c.github.io/csswg-drafts/css-counter-styles/#simple-numeric
+// https://w3c.github.io/csswg-drafts/css-counter-styles/#additive-system
+const lowerRomanTextForIndex = i => {
+  let value = i + 1;
+  let S = '';
+  for (const [symbol, weight] of weightedLowerRomanSymbols) {
+    if (!value) break;
+    if (weight > value) continue;
+    const reps = Math.floor(value / weight);
+    S += symbol.repeat(reps);
+    value -= weight * reps;
+  }
+  return S;
+};
+
+// Memoize pure index-to-text functions with an exposed cache for fast retrieval.
+const makeCounter = (pureGetTextForIndex, precomputeCount = 30) => {
+  const cache = Array.from({ length: precomputeCount }, (_, i) => pureGetTextForIndex(i));
+  const getTextForIndex = i => {
+    if (i >= cache.length) cache[i] = pureGetTextForIndex(i);
+    return cache[i];
+  };
+  return { getTextForIndex, cache };
+};
+
+const counterByStyle = {
+  __proto__: null,
+  decimal: makeCounter(i => String(i + 1)),
+  'lower-alpha': makeCounter(lowerAlphaTextForIndex),
+  'upper-alpha': makeCounter(i => lowerAlphaTextForIndex(i).toUpperCase()),
+  'lower-roman': makeCounter(lowerRomanTextForIndex),
+  'upper-roman': makeCounter(i => lowerRomanTextForIndex(i).toUpperCase()),
+};
+const fallbackCounter = makeCounter(() => '?');
+const counterByDepth = [];
+
+function addStepNumberText(
+  ol,
+  depth = 0,
+  special = [...ol.classList].some(c => c.startsWith('nested-'))
+) {
+  let counter = !special && counterByDepth[depth];
+  if (!counter) {
+    const counterStyle = getComputedStyle(ol)['list-style-type'];
+    counter = counterByStyle[counterStyle];
+    if (!counter) {
+      console.warn('unsupported list-style-type', {
+        ol,
+        counterStyle,
+        id: ol.closest('[id]')?.getAttribute('id'),
+      });
+      counterByStyle[counterStyle] = fallbackCounter;
+      counter = fallbackCounter;
+    }
+    if (!special) {
+      counterByDepth[depth] = counter;
     }
   }
+  const { cache, getTextForIndex } = counter;
+  let i = (Number(ol.getAttribute('start')) || 1) - 1;
+  for (const li of ol.children) {
+    const marker = document.createElement('span');
+    marker.textContent = `${i < cache.length ? cache[i] : getTextForIndex(i)}. `;
+    marker.setAttribute('aria-hidden', 'true');
+    const attributesContainer = li.querySelector('.attributes-tag');
+    if (attributesContainer == null) {
+      li.prepend(marker);
+    } else {
+      attributesContainer.insertAdjacentElement('afterend', marker);
+    }
+    for (const sublist of li.querySelectorAll(':scope > ol')) {
+      addStepNumberText(sublist, depth + 1, special);
+    }
+    i++;
+  }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('emu-alg > ol').forEach(ol => {
-    addStepNumberText(ol, []);
+    addStepNumberText(ol);
   });
 });
 
@@ -1364,6 +1527,10 @@ var {
   transition: background-color 0.25s ease;
   cursor: pointer;
 }
+var.field {
+  font: inherit;
+  color: inherit;
+}
 
 var.referenced0 {
   color: inherit;
@@ -1447,6 +1614,10 @@ emu-alg ol.nested-lots ol {
   list-style-type: lower-roman;
 }
 
+emu-alg [aria-hidden='true'] {
+  font-size: 0;
+}
+
 emu-eqn {
   display: block;
   margin-left: 4em;
@@ -1498,7 +1669,7 @@ emu-note > div.note-contents > p:last-of-type {
   margin-bottom: 0;
 }
 
-emu-table td code {
+emu-table:not(.code) td code {
   white-space: normal;
 }
 
@@ -2457,19 +2628,19 @@ li.menu-search-result-term:before {
 }
 
 [normative-optional],
+[deprecated],
 [legacy] {
   border-left: 5px solid #ff6600;
   padding: 0.5em;
-  display: block;
   background: #ffeedd;
 }
 
-.clause-attributes-tag {
+.attributes-tag {
   text-transform: uppercase;
   color: #884400;
 }
 
-.clause-attributes-tag a {
+.attributes-tag a {
   color: #884400;
 }
 
@@ -2522,7 +2693,9 @@ li.menu-search-result-term:before {
 </ul></div><div id="menu-toggle"><svg xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; stroke:currentColor" viewBox="0 0 120 120">
       <title>Menu</title>
       <path stroke-width="10" stroke-linecap="round" d="M30,60 h60  M30,30 m0,5 h60  M30,90 m0,-5 h60"></path>
+
     </svg></div><div id="menu-spacer" class="menu-spacer"></div><div id="menu"><div id="menu-search"><input type="text" id="menu-search-box" placeholder="Search..."><div id="menu-search-results" class="inactive"></div></div><div id="menu-pins"><div class="menu-pane-header">Pins</div><ul id="menu-pins-list"></ul></div><div class="menu-pane-header">Table of Contents</div><div id="menu-toc"><ol class="toc"><li><span class="item-toggle">◢</span><a href="#durationformat-objects" title="DurationFormat Objects"><span class="secnum">1</span> DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-abstracts" title="Abstract Operations for DurationFormat Objects"><span class="secnum">1.1</span> Abstract Operations for DurationFormat Objects</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-duration-records" title="Duration Records"><span class="secnum">1.1.1</span> Duration Records</a></li><li><span class="item-toggle-none"></span><a href="#sec-tointegerwithoutrounding" title="ToIntegerIfIntegral ( argument )"><span class="secnum">1.1.2</span> ToIntegerIfIntegral ( <var>argument</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-todurationrecord" title="ToDurationRecord ( input )"><span class="secnum">1.1.3</span> ToDurationRecord ( <var>input</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-durationrecordsign" title="DurationRecordSign ( record )"><span class="secnum">1.1.4</span> DurationRecordSign ( <var>record</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-isvaliddurationrecord" title="IsValidDurationRecord ( record )"><span class="secnum">1.1.5</span> IsValidDurationRecord ( <var>record</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-getdurationunitoptions" title="GetDurationUnitOptions ( unit, options, baseStyle, stylesList, digitalBase, prevStyle )"><span class="secnum">1.1.6</span> GetDurationUnitOptions ( <var>unit</var>, <var>options</var>, <var>baseStyle</var>, <var>stylesList</var>, <var>digitalBase</var>, <var>prevStyle</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-partitiondurationformatpattern" title="PartitionDurationFormatPattern ( durationFormat, duration )"><span class="secnum">1.1.7</span> PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-intl-durationformat-constructor" title="The Intl.DurationFormat Constructor"><span class="secnum">1.2</span> The Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat" title="Intl.DurationFormat ( [ locales [ , options ] ] )"><span class="secnum">1.2.1</span> Intl.DurationFormat ( [ <var>locales</var> [ , <var>options</var> ] ] )</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-constructor" title="Properties of the Intl.DurationFormat Constructor"><span class="secnum">1.3</span> Properties of the Intl.DurationFormat Constructor</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype" title="Intl.DurationFormat.prototype"><span class="secnum">1.3.1</span> Intl.DurationFormat.prototype</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.supportedLocalesOf" title="Intl.DurationFormat.supportedLocalesOf ( locales [ , options ] )"><span class="secnum">1.3.2</span> Intl.DurationFormat.supportedLocalesOf ( <var>locales</var> [ , <var>options</var> ] )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat-internal-slots" title="Internal slots"><span class="secnum">1.3.3</span> Internal slots</a></li></ol></li><li><span class="item-toggle">◢</span><a href="#sec-properties-of-intl-durationformat-prototype-object" title="Properties of the Intl.DurationFormat Prototype Object"><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</a><ol class="toc"><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.constructor" title="Intl.DurationFormat.prototype.constructor"><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype-@@tostringtag" title="Intl.DurationFormat.prototype [ @@toStringTag ]"><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.format" title="Intl.DurationFormat.prototype.format ( duration )"><span class="secnum">1.4.3</span> Intl.DurationFormat.prototype.format ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.formatToParts" title="Intl.DurationFormat.prototype.formatToParts ( duration )"><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</a></li><li><span class="item-toggle-none"></span><a href="#sec-Intl.DurationFormat.prototype.resolvedOptions" title="Intl.DurationFormat.prototype.resolvedOptions ( )"><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ( )</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-properties-of-intl-durationformat-instances" title="Properties of Intl.DurationFormat Instances"><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</a></li></ol></li><li><span class="item-toggle-none"></span><a href="#sec-copyright-and-software-license" title="Copyright &amp; Software License"><span class="secnum">A</span> Copyright &amp; Software License</a></li></ol></div></div><div id="spec-container"><h1 class="version">Stage 3 Draft / August 30, 2023</h1><h1 class="title">Intl.DurationFormat</h1>
+
 <emu-biblio href="./biblio.json"></emu-biblio>
 <emu-clause id="durationformat-objects">
   <h1><span class="secnum">1</span> DurationFormat Objects</h1>
@@ -2541,61 +2714,61 @@ li.menu-search-result-term:before {
             <th>Meaning</th>
           </tr>
           <tr>
-            <td>[[Years]]</td>
+            <td><var class="field">[[Years]]</var></td>
             <td>
               The number of years in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Months]]</td>
+            <td><var class="field">[[Months]]</var></td>
             <td>
               The number of months in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Weeks]]</td>
+            <td><var class="field">[[Weeks]]</var></td>
             <td>
               The number of weeks in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Days]]</td>
+            <td><var class="field">[[Days]]</var></td>
             <td>
               The number of days in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Hours]]</td>
+            <td><var class="field">[[Hours]]</var></td>
             <td>
               The number of hours in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Minutes]]</td>
+            <td><var class="field">[[Minutes]]</var></td>
             <td>
               The number of minutes in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Seconds]]</td>
+            <td><var class="field">[[Seconds]]</var></td>
             <td>
               The number of seconds in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Milliseconds]]</td>
+            <td><var class="field">[[Milliseconds]]</var></td>
             <td>
               The number of milliseconds in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Microseconds]]</td>
+            <td><var class="field">[[Microseconds]]</var></td>
             <td>
               The number of microseconds in the duration.
             </td>
           </tr>
           <tr>
-            <td>[[Nanoseconds]]</td>
+            <td><var class="field">[[Nanoseconds]]</var></td>
             <td>
               The number of nanoseconds in the duration.
             </td>
@@ -2614,43 +2787,43 @@ li.menu-search-result-term:before {
       <h1><span class="secnum">1.1.3</span> ToDurationRecord ( <var>input</var> )</h1>
       <p>The abstract operation ToDurationRecord takes argument <var>input</var> (an <emu-xref href="#sec-ecmascript-language-types"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types">ECMAScript language value</a></emu-xref>) and returns either a <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">normal completion containing</a></emu-xref> a <emu-xref href="#sec-duration-records" id="_ref_7"><a href="#sec-duration-records">Duration Record</a></emu-xref>, or an <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">abrupt completion</a></emu-xref>. It converts a given object that represents a Duration into a <emu-xref href="#sec-duration-records" id="_ref_8"><a href="#sec-duration-records">Duration Record</a></emu-xref>. It performs the following steps when called:</p>
 
-      <emu-alg><ol><li>If <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>input</var>) is not Object, then<ol><li>If <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>input</var>) is String, throw a <emu-val>RangeError</emu-val> exception.</li><li>Throw a <emu-val>TypeError</emu-val> exception.</li></ol></li><li>Let <var>result</var> be a new <emu-xref href="#sec-duration-records" id="_ref_9"><a href="#sec-duration-records">Duration Record</a></emu-xref> with each field set to 0.</li><li>Let <var>days</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"days"</emu-val>).</li><li>If <var>days</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Days]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_10"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>days</var>).</li><li>Let <var>hours</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"hours"</emu-val>).</li><li>If <var>hours</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Hours]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_11"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>hours</var>).</li><li>Let <var>microseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"microseconds"</emu-val>).</li><li>If <var>microseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Microseconds]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_12"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>microseconds</var>).</li><li>Let <var>milliseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"milliseconds"</emu-val>).</li><li>If <var>milliseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Milliseconds]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_13"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>milliseconds</var>).</li><li>Let <var>minutes</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"minutes"</emu-val>).</li><li>If <var>minutes</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Minutes]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_14"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>minutes</var>).</li><li>Let <var>months</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"months"</emu-val>).</li><li>If <var>months</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Months]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_15"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>months</var>).</li><li>Let <var>nanoseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"nanoseconds"</emu-val>).</li><li>If <var>nanoseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Nanoseconds]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_16"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>nanoseconds</var>).</li><li>Let <var>seconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"seconds"</emu-val>).</li><li>If <var>seconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Seconds]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_17"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>seconds</var>).</li><li>Let <var>weeks</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"weeks"</emu-val>).</li><li>If <var>weeks</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Weeks]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_18"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>weeks</var>).</li><li>Let <var>years</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"years"</emu-val>).</li><li>If <var>years</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.[[Years]] to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_19"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>years</var>).</li><li>If <var>years</var>, <var>months</var>, <var>weeks</var>, <var>days</var>, <var>hours</var>, <var>minutes</var>, <var>seconds</var>, <var>milliseconds</var>, <var>microseconds</var>, and <var>nanoseconds</var> are all <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <emu-xref aoid="IsValidDurationRecord" id="_ref_20"><a href="#sec-isvaliddurationrecord">IsValidDurationRecord</a></emu-xref>(<var>result</var>) is <emu-val>false</emu-val>, throw a <emu-val>RangeError</emu-val> exception.</li><li>Return <var>result</var>.</li></ol></emu-alg>
+      <emu-alg><ol><li>If <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>input</var>) is not Object, then<ol><li>If <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>input</var>) is String, throw a <emu-val>RangeError</emu-val> exception.</li><li>Throw a <emu-val>TypeError</emu-val> exception.</li></ol></li><li>Let <var>result</var> be a new <emu-xref href="#sec-duration-records" id="_ref_9"><a href="#sec-duration-records">Duration Record</a></emu-xref> with each field set to 0.</li><li>Let <var>days</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"days"</emu-val>).</li><li>If <var>days</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Days]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_10"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>days</var>).</li><li>Let <var>hours</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"hours"</emu-val>).</li><li>If <var>hours</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Hours]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_11"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>hours</var>).</li><li>Let <var>microseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"microseconds"</emu-val>).</li><li>If <var>microseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Microseconds]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_12"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>microseconds</var>).</li><li>Let <var>milliseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"milliseconds"</emu-val>).</li><li>If <var>milliseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Milliseconds]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_13"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>milliseconds</var>).</li><li>Let <var>minutes</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"minutes"</emu-val>).</li><li>If <var>minutes</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Minutes]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_14"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>minutes</var>).</li><li>Let <var>months</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"months"</emu-val>).</li><li>If <var>months</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Months]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_15"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>months</var>).</li><li>Let <var>nanoseconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"nanoseconds"</emu-val>).</li><li>If <var>nanoseconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Nanoseconds]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_16"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>nanoseconds</var>).</li><li>Let <var>seconds</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"seconds"</emu-val>).</li><li>If <var>seconds</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Seconds]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_17"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>seconds</var>).</li><li>Let <var>weeks</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"weeks"</emu-val>).</li><li>If <var>weeks</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Weeks]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_18"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>weeks</var>).</li><li>Let <var>years</var> be ?&nbsp;<emu-xref aoid="Get"><a href="https://tc39.es/ecma262/#sec-get-o-p">Get</a></emu-xref>(<var>input</var>, <emu-val>"years"</emu-val>).</li><li>If <var>years</var> is not <emu-val>undefined</emu-val>, set <var>result</var>.<var class="field">[[Years]]</var> to ?&nbsp;<emu-xref aoid="ToIntegerIfIntegral" id="_ref_19"><a href="#sec-tointegerwithoutrounding">ToIntegerIfIntegral</a></emu-xref>(<var>years</var>).</li><li>If <var>years</var>, <var>months</var>, <var>weeks</var>, <var>days</var>, <var>hours</var>, <var>minutes</var>, <var>seconds</var>, <var>milliseconds</var>, <var>microseconds</var>, and <var>nanoseconds</var> are all <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>If <emu-xref aoid="IsValidDurationRecord" id="_ref_20"><a href="#sec-isvaliddurationrecord">IsValidDurationRecord</a></emu-xref>(<var>result</var>) is <emu-val>false</emu-val>, throw a <emu-val>RangeError</emu-val> exception.</li><li>Return <var>result</var>.</li></ol></emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-durationrecordsign" type="abstract operation" aoid="DurationRecordSign">
       <h1><span class="secnum">1.1.4</span> DurationRecordSign ( <var>record</var> )</h1>
       <p>The abstract operation DurationRecordSign takes argument <var>record</var> (a <emu-xref href="#sec-duration-records" id="_ref_21"><a href="#sec-duration-records">Duration Record</a></emu-xref>) and returns an <emu-xref href="#integer"><a href="https://tc39.es/ecma262/#integer">integer</a></emu-xref>. It returns 1 if the most significant non-zero field in <var>record</var> is positive, and -1 if the most significant non-zero field is negative. If all the fields are zero, it returns 0. It performs the following steps when called:</p>
-      <emu-alg><ol><li>For each row of <emu-xref href="#table-duration-record-fields" id="_ref_1"><a href="#table-duration-record-fields">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>valueSlot</var> be the Field value of the current row.</li><li>Let <var>v</var> be <var>record</var>.[[&lt;<var>valueSlot</var>&gt;]].</li><li>If <var>v</var> &lt; 0, return -1.</li><li>If <var>v</var> &gt; 0, return 1.</li></ol></li><li>Return 0.</li></ol></emu-alg>
+      <emu-alg><ol><li>For each row of <emu-xref href="#table-duration-record-fields" id="_ref_1"><a href="#table-duration-record-fields">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>v</var> be the value of <var>record</var>'s field whose name is the Field value of the current row.</li><li>If <var>v</var> &lt; 0, return -1.</li><li>If <var>v</var> &gt; 0, return 1.</li></ol></li><li>Return 0.</li></ol></emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-isvaliddurationrecord" type="abstract operation" aoid="IsValidDurationRecord">
       <h1><span class="secnum">1.1.5</span> IsValidDurationRecord ( <var>record</var> )</h1>
-      <p>The abstract operation IsValidDurationRecord takes argument <var>record</var> (a <emu-xref href="#sec-duration-records" id="_ref_22"><a href="#sec-duration-records">Duration Record</a></emu-xref>). It returns <emu-val>true</emu-val> if <var>record</var> represents a valid duration, and <emu-val>false</emu-val> otherwise. It performs the following steps when called:</p>
-      <emu-alg><ol><li>Let <var>sign</var> be <emu-xref aoid="DurationRecordSign" id="_ref_23"><a href="#sec-durationrecordsign">DurationRecordSign</a></emu-xref>(<var>record</var>).</li><li>For each row of <emu-xref href="#table-duration-record-fields" id="_ref_2"><a href="#table-duration-record-fields">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>valueSlot</var> be the Field value of the current row.</li><li>Let <var>v</var> be <var>record</var>.[[&lt;<var>valueSlot</var>&gt;]].</li><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>v</var>) is <emu-xref href="#finite"><a href="https://tc39.es/ecma262/#finite">finite</a></emu-xref>.</li><li>If <var>v</var> &lt; 0 and <var>sign</var> &gt; 0, return <emu-val>false</emu-val>.</li><li>If <var>v</var> &gt; 0 and <var>sign</var> &lt; 0, return <emu-val>false</emu-val>.</li></ol></li><li>Return <emu-val>true</emu-val>.</li></ol></emu-alg>
+      <p>The abstract operation IsValidDurationRecord takes argument <var>record</var> (a <emu-xref href="#sec-duration-records" id="_ref_22"><a href="#sec-duration-records">Duration Record</a></emu-xref>) and returns a Boolean. It returns <emu-val>true</emu-val> if <var>record</var> represents a valid duration, and <emu-val>false</emu-val> otherwise. It performs the following steps when called:</p>
+      <emu-alg><ol><li>Let <var>sign</var> be <emu-xref aoid="DurationRecordSign" id="_ref_23"><a href="#sec-durationrecordsign">DurationRecordSign</a></emu-xref>(<var>record</var>).</li><li>For each row of <emu-xref href="#table-duration-record-fields" id="_ref_2"><a href="#table-duration-record-fields">Table 1</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>v</var> be the value of <var>record</var>'s field whose name is the Field value of the current row.</li><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>v</var>) is <emu-xref href="#finite"><a href="https://tc39.es/ecma262/#finite">finite</a></emu-xref>.</li><li>If <var>v</var> &lt; 0 and <var>sign</var> &gt; 0, return <emu-val>false</emu-val>.</li><li>If <var>v</var> &gt; 0 and <var>sign</var> &lt; 0, return <emu-val>false</emu-val>.</li></ol></li><li>Return <emu-val>true</emu-val>.</li></ol></emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-getdurationunitoptions" type="abstract operation" aoid="GetDurationUnitOptions">
       <h1><span class="secnum">1.1.6</span> GetDurationUnitOptions ( <var>unit</var>, <var>options</var>, <var>baseStyle</var>, <var>stylesList</var>, <var>digitalBase</var>, <var>prevStyle</var> )</h1>
-      <p>The abstract operation GetDurationUnitOptions takes arguments <var>unit</var> (a String), <var>options</var> (an <emu-xref href="#sec-ecmascript-language-types"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types">ECMAScript language value</a></emu-xref>), <var>baseStyle</var> (a String), <var>stylesList</var> (a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of String), <var>digitalBase</var> (a String), and <var>prevStyle</var> (a String) and returns either a <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">normal completion containing</a></emu-xref> a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with [[Style]] and [[Display]] fields, or an <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">abrupt completion</a></emu-xref>. It extracts the relevant options for any given <var>unit</var> from an options bag and returns them as a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref>. It performs the following steps when called:</p>
+      <p>The abstract operation GetDurationUnitOptions takes arguments <var>unit</var> (a String), <var>options</var> (an <emu-xref href="#sec-ecmascript-language-types"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types">ECMAScript language value</a></emu-xref>), <var>baseStyle</var> (a String), <var>stylesList</var> (a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of Strings), <var>digitalBase</var> (a String), and <var>prevStyle</var> (a String) and returns either a <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">normal completion containing</a></emu-xref> a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with <var class="field">[[Style]]</var> and <var class="field">[[Display]]</var> fields, or an <emu-xref href="#sec-completion-record-specification-type"><a href="https://tc39.es/ecma262/#sec-completion-record-specification-type">abrupt completion</a></emu-xref>. It extracts the relevant options for any given <var>unit</var> from an options bag and returns them as a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref>. It performs the following steps when called:</p>
 
-      <emu-alg><ol><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>unit</var>, <emu-const>string</emu-const>, <var>stylesList</var>, <emu-val>undefined</emu-val>).</li><li>Let <var>displayDefault</var> be <emu-val>"always"</emu-val>.</li><li>If <var>style</var> is <emu-val>undefined</emu-val>, then<ol><li>If <var>baseStyle</var> is <emu-val>"digital"</emu-val>, then<ol><li>If <var>unit</var> is not one of <emu-val>"hours"</emu-val>, <emu-val>"minutes"</emu-val>, or <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li></ol></li><li>Set <var>style</var> to <var>digitalBase</var>.</li></ol></li><li>Else,<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li><li>If <var>prevStyle</var> is <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>Set <var>style</var> to <emu-val>"numeric"</emu-val>.</li></ol></li><li>Else,<ol><li>Set <var>style</var> to <var>baseStyle</var>.</li></ol></li></ol></li></ol></li><li>Let <var>displayField</var> be the <emu-xref href="#string-concatenation"><a href="https://tc39.es/ecma262/#string-concatenation">string-concatenation</a></emu-xref> of <var>unit</var> and <emu-val>"Display"</emu-val>.</li><li>Let <var>display</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>displayField</var>, <emu-const>string</emu-const>, « <emu-val>"auto"</emu-val>, <emu-val>"always"</emu-val> », <var>displayDefault</var>).</li><li>If <var>prevStyle</var> is <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>If <var>style</var> is not <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>Throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Else if <var>unit</var> is <emu-val>"minutes"</emu-val> or <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>style</var> to <emu-val>"2-digit"</emu-val>.</li></ol></li><li>If <var>style</var> is <emu-val>"numeric"</emu-val> and <var>display</var> is <emu-val>"always"</emu-val> and <var>unit</var> is one of "milliseconds", "microseconds", or "nanoseconds", then<ol><li>Throw a <emu-val>RangeError</emu-val> exception.</li></ol></li></ol></li><li>Return the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {
-          [[Style]]: <var>style</var>,
-          [[Display]]: <var>display</var>
-        }.</li></ol></emu-alg>
+      <emu-alg><ol><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>unit</var>, <emu-const>string</emu-const>, <var>stylesList</var>, <emu-val>undefined</emu-val>).</li><li>Let <var>displayDefault</var> be <emu-val>"always"</emu-val>.</li><li>If <var>style</var> is <emu-val>undefined</emu-val>, then<ol><li>If <var>baseStyle</var> is <emu-val>"digital"</emu-val>, then<ol><li>If <var>unit</var> is not one of <emu-val>"hours"</emu-val>, <emu-val>"minutes"</emu-val>, or <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li></ol></li><li>Set <var>style</var> to <var>digitalBase</var>.</li></ol></li><li>Else,<ol><li>If <var>prevStyle</var> is <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>If <var>unit</var> is not one of <emu-val>"minutes"</emu-val> or <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li></ol></li><li>Set <var>style</var> to <emu-val>"numeric"</emu-val>.</li></ol></li><li>Else,<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li><li>Set <var>style</var> to <var>baseStyle</var>.</li></ol></li></ol></li></ol></li><li>Else if <var>style</var> is <emu-val>"numeric"</emu-val> and <var>unit</var> is one of <emu-val>"milliseconds"</emu-val>, <emu-val>"microseconds"</emu-val>, or <emu-val>"nanoseconds"</emu-val>, then<ol><li>Set <var>displayDefault</var> to <emu-val>"auto"</emu-val>.</li></ol></li><li>Let <var>displayField</var> be the <emu-xref href="#string-concatenation"><a href="https://tc39.es/ecma262/#string-concatenation">string-concatenation</a></emu-xref> of <var>unit</var> and <emu-val>"Display"</emu-val>.</li><li>Let <var>display</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <var>displayField</var>, <emu-const>string</emu-const>, « <emu-val>"auto"</emu-val>, <emu-val>"always"</emu-val> », <var>displayDefault</var>).</li><li>If <var>prevStyle</var> is <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>If <var>style</var> is not <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>Throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Else if <var>unit</var> is <emu-val>"minutes"</emu-val> or <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>style</var> to <emu-val>"2-digit"</emu-val>.</li></ol></li></ol></li><li>If <var>style</var> is <emu-val>"numeric"</emu-val> and <var>display</var> is <emu-val>"always"</emu-val> and <var>unit</var> is one of <emu-val>"milliseconds"</emu-val>, <emu-val>"microseconds"</emu-val>, or <emu-val>"nanoseconds"</emu-val>, then<ol><li>Throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Return the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> {
+          <var class="field">[[Style]]</var>: <var>style</var>,
+          <var class="field">[[Display]]</var>: <var>display</var>
+&nbsp;}.</li></ol></emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-partitiondurationformatpattern" type="abstract operation" aoid="PartitionDurationFormatPattern">
       <h1><span class="secnum">1.1.7</span> PartitionDurationFormatPattern ( <var>durationFormat</var>, <var>duration</var> )</h1>
       <p>The abstract operation PartitionDurationFormatPattern takes arguments <var>durationFormat</var> (a DurationFormat) and <var>duration</var> (a <emu-xref href="#sec-duration-records" id="_ref_24"><a href="#sec-duration-records">Duration Record</a></emu-xref>) and returns a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>. It creates and returns a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> with all the corresponding parts according to the effective locale and the formatting options of <var>durationFormat</var>. It performs the following steps when called:</p>
 
-      <emu-alg><ol><li>Let <var>result</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>Let <var>done</var> be <emu-val>false</emu-val>.</li><li>Let <var>separated</var> be <emu-val>false</emu-val>.</li><li>While <var>done</var> is <emu-val>false</emu-val>, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern" id="_ref_3"><a href="#table-partition-duration-format-pattern">Table 2</a></emu-xref> in table order, except the header row:<ol><li>Let <var>valueSlot</var> be the Value Slot value.</li><li>Let <var>styleSlot</var> be the Style Slot value.</li><li>Let <var>displaySlot</var> be the Display Slot value.</li><li>Let <var>unit</var> be the Unit value.</li><li>Let <var>numberFormatUnit</var> be the NumberFormat Unit value.</li><li>Let <var>style</var> be <var>durationFormat</var>.[[&lt;<var>styleSlot</var>&gt;]].</li><li>Let <var>display</var> be <var>durationFormat</var>.[[&lt;<var>displaySlot</var>&gt;]].</li><li>Let <var>value</var> be <var>duration</var>.[[&lt;<var>valueSlot</var>&gt;]].</li><li>Let <var>nfOpts</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(<emu-val>null</emu-val>).</li><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, <emu-val>"milliseconds"</emu-val>, or <emu-val>"microseconds"</emu-val>, then<ol><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, then<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.[[MillisecondsStyle]].</li></ol></li><li>Else if <var>unit</var> is <emu-val>"milliseconds"</emu-val>, then<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.[[MicrosecondsStyle]].</li></ol></li><li>Else,<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.[[NanosecondsStyle]].</li></ol></li><li>If <var>nextStyle</var> is <emu-val>"numeric"</emu-val>, then<ol><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.[[Milliseconds]] / 10<sup>3</sup> + <var>duration</var>.[[Microseconds]] / 10<sup>6</sup> + <var>duration</var>.[[Nanoseconds]] / 10<sup>9</sup>.</li></ol></li><li>Else if <var>unit</var> is <emu-val>"milliseconds"</emu-val>, then<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.[[Microseconds]] / 10<sup>3</sup> + <var>duration</var>.[[Nanoseconds]] / 10<sup>6</sup>.</li></ol></li><li>Else,<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.[[Nanoseconds]] / 10<sup>3</sup>.</li></ol></li><li>If <var>durationFormat</var>.[[FractionalDigits]] is <emu-val>undefined</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"maximumFractionDigits"</emu-val>, 9).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumFractionDigits"</emu-val>, 0).</li></ol></li><li>Else,<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"maximumFractionDigits"</emu-val>, <var>durationFormat</var>.[[FractionalDigits]]).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumFractionDigits"</emu-val>, <var>durationFormat</var>.[[FractionalDigits]]).</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"roundingMode"</emu-val>, <emu-val>"trunc"</emu-val>).</li><li>Set <var>done</var> to <emu-val>true</emu-val>.</li></ol></li></ol></li><li>If <var>style</var> is <emu-val>"2-digit"</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumIntegerDigits"</emu-val>, <emu-val>2</emu-val><sub>𝔽</sub>).</li></ol></li><li>If <var>value</var> is not 0 or <var>display</var> is not <emu-val>"auto"</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"numberingSystem"</emu-val>, <var>durationFormat</var>.[[NumberingSystem]]).</li><li>If <var>style</var> is <emu-val>"2-digit"</emu-val> or <emu-val>"numeric"</emu-val>, then<ol><li>Let <var>nf</var> be !&nbsp;<emu-xref aoid="Construct"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%NumberFormat%, « <var>durationFormat</var>.[[Locale]], <var>nfOpts</var> »).</li><li>Let <var>dataLocale</var> be <var>durationFormat</var>.[[DataLocale]].</li><li>Let <var>dataLocaleData</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_25"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]].[[&lt;<var>dataLocale</var>&gt;]].</li><li>If <var>separated</var> is <emu-val>false</emu-val>, then<ol><li>Append a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> to the end of <var>result</var>.</li></ol></li><li>Else,<ol><li>Set <var>separated</var> to <emu-val>false</emu-val>.</li></ol></li><li>Let <var>last</var> be the last element of <var>result</var>.</li><li>Let <var>parts</var> be !&nbsp;<emu-xref aoid="PartitionNumberPattern"><a href="https://tc39.github.io/ecma402/#sec-partitionnumberpattern">PartitionNumberPattern</a></emu-xref>(<var>nf</var>, <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>value</var>)).</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]], [[Value]] } <var>part</var> of <var>parts</var>, do<ol><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>part</var>.[[Type]], [[Value]]: <var>part</var>.[[Value]], [[Unit]]: <var>numberFormatUnit</var> } to the end of <var>last</var>.</li></ol></li><li>If <var>unit</var> is <emu-val>"hours"</emu-val> or <emu-val>"minutes"</emu-val>, then<ol><li>If <var>unit</var> is <emu-val>"hours"</emu-val>, then<ol><li>Let <var>nextValue</var> be <var>duration</var>.[[Minutes]].</li><li>Let <var>nextDisplay</var> be <var>durationFormat</var>.[[MinutesDisplay]].</li></ol></li><li>Else,<ol><li>Let <var>nextValue</var> be <var>duration</var>.[[Seconds]] + <var>duration</var>.[[Milliseconds]] / 10<sup>3</sup> + <var>duration</var>.[[Microseconds]] / 10<sup>6</sup> + <var>duration</var>.[[Nanoseconds]] / 10<sup>9</sup>.</li><li>Let <var>nextDisplay</var> be <var>durationFormat</var>.[[SecondsDisplay]].</li></ol></li><li>If <var>nextValue</var> is not 0 or <var>nextDisplay</var> is not <emu-val>"auto"</emu-val>, then<ol><li>Let <var>numberingSystem</var> be <var>durationFormat</var>.[[NumberingSystem]].</li><li>Let <var>separator</var> be <var>dataLocaleData</var>.[[digitalFormat]].[[&lt;<var>numberingSystem</var>&gt;]].</li><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <emu-val>"literal"</emu-val>, [[Value]]: <var>separator</var>} to the end of <var>last</var>.</li><li>Set <var>separated</var> to <emu-val>true</emu-val>.</li></ol></li></ol></li></ol></li><li>Else,<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"style"</emu-val>, <emu-val>"unit"</emu-val>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"unit"</emu-val>, <var>numberFormatUnit</var>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"unitDisplay"</emu-val>, <var>style</var>).</li><li>Let <var>nf</var> be !&nbsp;<emu-xref aoid="Construct"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%NumberFormat%, « <var>durationFormat</var>.[[Locale]], <var>nfOpts</var> »).</li><li>Let <var>list</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>Let <var>parts</var> be !&nbsp;<emu-xref aoid="PartitionNumberPattern"><a href="https://tc39.github.io/ecma402/#sec-partitionnumberpattern">PartitionNumberPattern</a></emu-xref>(<var>nf</var>, <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>value</var>)).</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]], [[Value]] } <var>part</var> in <var>parts</var>, do<ol><li>Append the new <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]]: <var>part</var>.[[Type]], [[Value]]: <var>part</var>.[[Value]], [[Unit]]: <var>numberFormatUnit</var> } to the end of <var>list</var>.</li></ol></li><li>Append <var>list</var> to the end of <var>result</var>.</li></ol></li></ol></li></ol></li><li>Let <var>lfOpts</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(<emu-val>null</emu-val>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>lfOpts</var>, <emu-val>"type"</emu-val>, <emu-val>"unit"</emu-val>).</li><li>Let <var>listStyle</var> be <var>durationFormat</var>.[[Style]].</li><li>If <var>listStyle</var> is <emu-val>"digital"</emu-val>, then<ol><li>Set <var>listStyle</var> to <emu-val>"short"</emu-val>.</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>lfOpts</var>, <emu-val>"style"</emu-val>, <var>listStyle</var>).</li><li>Let <var>lf</var> be !&nbsp;<emu-xref aoid="Construct"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%ListFormat%, « <var>durationFormat</var>.[[Locale]], <var>lfOpts</var> »).</li><li>Set <var>result</var> to !&nbsp;<emu-xref aoid="CreatePartsFromList"><a href="https://tc39.github.io/ecma402/#sec-createpartsfromlist">CreatePartsFromList</a></emu-xref>(<var>lf</var>, <var>result</var>).</li><li>Let <var>flattened</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]], [[Value]] } <var>part</var> in <var>result</var>, do<ol><li>If <var>part</var>.[[Type]] is <emu-val>"literal"</emu-val>, then<ol><li>Append <var>part</var> to the end of <var>flattened</var>.</li></ol></li><li>Else,<ol><li>Let <var>value</var> be <var>part</var>.[[Value]].</li><li>If <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>value</var>) is <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]], [[Value]], [[Unit]] }, then<ol><li>Append <var>value</var> to the end of <var>flattened</var>.</li></ol></li><li>Else,<ol><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <emu-xref aoid="Type"><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values">Type</a></emu-xref>(<var>value</var>) is <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> <var>element</var> in <var>value</var>, do<ol><li>Append <var>element</var> to the end of <var>flattened</var>.</li></ol></li></ol></li></ol></li></ol></li><li>Return <var>flattened</var>.</li></ol></emu-alg>
+      <emu-alg><ol><li>Let <var>result</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>Let <var>done</var> be <emu-val>false</emu-val>.</li><li>Let <var>needSeparator</var> be <emu-val>false</emu-val>.</li><li>Let <var>dataLocale</var> be <var>durationFormat</var>.<var class="field">[[DataLocale]]</var>.</li><li>Let <var>dataLocaleData</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_25"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.<var class="field">[[LocaleData]]</var>.[[&lt;<var>dataLocale</var>&gt;]].</li><li>Let <var>numberingSystem</var> be <var>durationFormat</var>.<var class="field">[[NumberingSystem]]</var>.</li><li>Let <var>separator</var> be <var>dataLocaleData</var>.<var class="field">[[digitalFormat]]</var>.[[&lt;<var>numberingSystem</var>&gt;]].</li><li>While <var>done</var> is <emu-val>false</emu-val>, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern" id="_ref_3"><a href="#table-partition-duration-format-pattern">Table 2</a></emu-xref> in table order, except the header row:<ol><li>Let <var>value</var> be the value of <var>duration</var>'s field whose name is the Value Field value of the current row.</li><li>Let <var>style</var> be the value of <var>durationFormat</var>'s internal slot whose name is the Style Slot value of the current row.</li><li>Let <var>display</var> be the value of <var>durationFormat</var>'s internal slot whose name is the Display Slot value of the current row.</li><li>Let <var>unit</var> be the Unit value of the current row.</li><li>Let <var>numberFormatUnit</var> be the NumberFormat Unit value of the current row.</li><li>Let <var>nfOpts</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(<emu-val>null</emu-val>).</li><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, <emu-val>"milliseconds"</emu-val>, or <emu-val>"microseconds"</emu-val>, then<ol><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, then<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.<var class="field">[[MillisecondsStyle]]</var>.</li></ol></li><li>Else if <var>unit</var> is <emu-val>"milliseconds"</emu-val>, then<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.<var class="field">[[MicrosecondsStyle]]</var>.</li></ol></li><li>Else,<ol><li>Let <var>nextStyle</var> be <var>durationFormat</var>.<var class="field">[[NanosecondsStyle]]</var>.</li></ol></li><li>If <var>nextStyle</var> is <emu-val>"numeric"</emu-val>, then<ol><li>If <var>unit</var> is <emu-val>"seconds"</emu-val>, then<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.<var class="field">[[Milliseconds]]</var> / 10<sup>3</sup> + <var>duration</var>.<var class="field">[[Microseconds]]</var> / 10<sup>6</sup> + <var>duration</var>.<var class="field">[[Nanoseconds]]</var> / 10<sup>9</sup>.</li></ol></li><li>Else if <var>unit</var> is <emu-val>"milliseconds"</emu-val>, then<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.<var class="field">[[Microseconds]]</var> / 10<sup>3</sup> + <var>duration</var>.<var class="field">[[Nanoseconds]]</var> / 10<sup>6</sup>.</li></ol></li><li>Else,<ol><li>Set <var>value</var> to <var>value</var> + <var>duration</var>.<var class="field">[[Nanoseconds]]</var> / 10<sup>3</sup>.</li></ol></li><li>If <var>durationFormat</var>.<var class="field">[[FractionalDigits]]</var> is <emu-val>undefined</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"maximumFractionDigits"</emu-val>, <emu-val>9</emu-val><sub>𝔽</sub>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumFractionDigits"</emu-val>, <emu-val>+0</emu-val><sub>𝔽</sub>).</li></ol></li><li>Else,<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"maximumFractionDigits"</emu-val>, <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>durationFormat</var>.<var class="field">[[FractionalDigits]]</var>)).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumFractionDigits"</emu-val>, <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>durationFormat</var>.<var class="field">[[FractionalDigits]]</var>)).</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"roundingMode"</emu-val>, <emu-val>"trunc"</emu-val>).</li><li>Set <var>done</var> to <emu-val>true</emu-val>.</li></ol></li></ol></li><li>Let <var>displayRequired</var> be <emu-val>"false"</emu-val>.</li><li>Let <var>hoursStyle</var> be <var>durationFormat</var>.<var class="field">[[HoursStyle]]</var>.</li><li>If <var>unit</var> is <emu-val>"minutes"</emu-val>, then<ol><li>If <var>hoursStyle</var> is <emu-val>"numeric"</emu-val> or <emu-val>"2-digit"</emu-val>, then<ol><li>Let <var>hoursDisplay</var> be <var>durationFormat</var>.<var class="field">[[HoursDisplay]]</var>.</li><li>Let <var>hoursValue</var> be <var>durationFormat</var>.<var class="field">[[HoursValue]]</var>.</li><li>If <var>hoursDisplay</var> is <emu-val>"always"</emu-val> or <var>hoursValue</var> is not 0, then<ol><li>Let <var>secondsDisplay</var> be <var>durationFormat</var>.<var class="field">[[SecondsDisplay]]</var>.</li><li>Let <var>secondsValue</var> be <var>durationFormat</var>.<var class="field">[[SecondsValue]]</var>.</li><li>If <var>secondsDisplay</var> is <emu-val>"always"</emu-val> or <var>secondsValue</var> is not 0, then<ol><li>Set <var>displayRequired</var> to <emu-val>"true"</emu-val>.</li></ol></li></ol></li></ol></li></ol></li><li>If <var>value</var> is not 0 or <var>display</var> is not <emu-val>"auto"</emu-val> or <var>displayRequired</var> is <emu-val>"true"</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"numberingSystem"</emu-val>, <var>durationFormat</var>.<var class="field">[[NumberingSystem]]</var>).</li><li>If <var>style</var> is <emu-val>"2-digit"</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"minimumIntegerDigits"</emu-val>, <emu-val>2</emu-val><sub>𝔽</sub>).</li></ol></li><li>If <var>style</var> is neither <emu-val>"2-digit"</emu-val> nor <emu-val>"numeric"</emu-val>, then<ol><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"style"</emu-val>, <emu-val>"unit"</emu-val>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"unit"</emu-val>, <var>numberFormatUnit</var>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>nfOpts</var>, <emu-val>"unitDisplay"</emu-val>, <var>style</var>).</li></ol></li><li>Let <var>nf</var> be !&nbsp;<emu-xref aoid="Construct"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%NumberFormat%, « <var>durationFormat</var>.<var class="field">[[Locale]]</var>, <var>nfOpts</var> »).</li><li>If <var>needSeparator</var> is <emu-val>false</emu-val>, then<ol><li>Let <var>list</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li></ol></li><li>Else,<ol><li>Let <var>list</var> be the last element of <var>result</var>.</li><li>Append the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>: <emu-val>"literal"</emu-val>, <var class="field">[[Value]]</var>: <var>separator</var>, <var class="field">[[Unit]]</var>: <emu-const>empty</emu-const>&nbsp;} to <var>list</var>.</li></ol></li><li>Let <var>parts</var> be !&nbsp;<emu-xref aoid="PartitionNumberPattern"><a href="https://tc39.github.io/ecma402/#sec-partitionnumberpattern">PartitionNumberPattern</a></emu-xref>(<var>nf</var>, <var>value</var>).</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>&nbsp;} <var>part</var> of <var>parts</var>, do<ol><li>Append the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>: <var>part</var>.<var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>: <var>part</var>.<var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>: <var>numberFormatUnit</var>&nbsp;} to <var>list</var>.</li></ol></li><li>If <var>needSeparator</var> is <emu-val>false</emu-val>, then<ol><li>If <var>style</var> is <emu-val>"2-digit"</emu-val> or <emu-val>"numeric"</emu-val>, then<ol><li>Set <var>needSeparator</var> to <emu-val>true</emu-val>.</li></ol></li><li>Append <var>list</var> to <var>result</var>.</li></ol></li></ol></li><li>Else,<ol><li>Set <var>needSeparator</var> to <emu-val>false</emu-val>.</li></ol></li></ol></li><li>Let <var>lfOpts</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(<emu-val>null</emu-val>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>lfOpts</var>, <emu-val>"type"</emu-val>, <emu-val>"unit"</emu-val>).</li><li>Let <var>listStyle</var> be <var>durationFormat</var>.<var class="field">[[Style]]</var>.</li><li>If <var>listStyle</var> is <emu-val>"digital"</emu-val>, then<ol><li>Set <var>listStyle</var> to <emu-val>"short"</emu-val>.</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>lfOpts</var>, <emu-val>"style"</emu-val>, <var>listStyle</var>).</li><li>Let <var>lf</var> be !&nbsp;<emu-xref aoid="Construct"><a href="https://tc39.es/ecma262/#sec-construct">Construct</a></emu-xref>(%ListFormat%, « <var>durationFormat</var>.<var class="field">[[Locale]]</var>, <var>lfOpts</var> »).</li><li>Let <var>strings</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each element <var>parts</var> of <var>result</var>, do<ol><li>Let <var>string</var> be the empty String.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>&nbsp;} <var>part</var> in <var>parts</var>, do<ol><li>Set <var>string</var> to the <emu-xref href="#string-concatenation"><a href="https://tc39.es/ecma262/#string-concatenation">string-concatenation</a></emu-xref> of <var>string</var> and <var>part</var>.<var class="field">[[Value]]</var>.</li></ol></li><li>Append <var>string</var> to <var>strings</var>.</li></ol></li><li>Let <var>formatted</var> be <emu-xref aoid="CreatePartsFromList"><a href="https://tc39.github.io/ecma402/#sec-createpartsfromlist">CreatePartsFromList</a></emu-xref>(<var>lf</var>, <var>strings</var>).</li><li>Let <var>resultIndex</var> be 0.</li><li>Let <var>resultLength</var> be the number of elements in <var>result</var>.</li><li>Let <var>flattened</var> be a new empty <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref>.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>&nbsp;} <var>listPart</var> in <var>formatted</var>, do<ol><li>If <var>listPart</var>.<var class="field">[[Type]]</var> is <emu-val>"element"</emu-val>, then<ol><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>resultIndex</var> &lt; <var>resultLength</var>.</li><li>Let <var>parts</var> be <var>result</var>[<var>resultIndex</var>].</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>&nbsp;} <var>part</var> in <var>parts</var>, do<ol><li>Append <var>part</var> to <var>flattened</var>.</li></ol></li><li>Set <var>resultIndex</var> to <var>resultIndex</var> + 1.</li></ol></li><li>Else,<ol><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>listPart</var>.<var class="field">[[Type]]</var> is <emu-val>"literal"</emu-val>.</li><li>Append the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>: <emu-val>"literal"</emu-val>, <var class="field">[[Value]]</var>: <var>listPart</var>.<var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>: <emu-const>empty</emu-const>&nbsp;} to <var>flattened</var>.</li></ol></li></ol></li><li>Return <var>flattened</var>.</li></ol></emu-alg>
 
     <emu-table id="table-partition-duration-format-pattern"><figure><figcaption>Table 2: DurationFormat instance internal slots and properties relevant to <emu-xref aoid="PartitionDurationFormatPattern" id="_ref_26"><a href="#sec-partitiondurationformatpattern">PartitionDurationFormatPattern</a></emu-xref></figcaption>
       
         <table class="real-table">
           <thead>
             <tr>
-              <th>Value Slot</th>
+              <th>Value Field</th>
               <th>Style Slot</th>
               <th>Display Slot</th>
               <th>Unit</th>
@@ -2658,87 +2831,77 @@ li.menu-search-result-term:before {
             </tr>
           </thead>
           <tbody><tr>
-            <td>[[Years]]</td>
-            <td>[[YearsStyle]]</td>
-            <td>[[YearsDisplay]]</td>
+            <td><var class="field">[[Years]]</var></td>
+            <td><var class="field">[[YearsStyle]]</var></td>
+            <td><var class="field">[[YearsDisplay]]</var></td>
             <td><emu-val>"years"</emu-val></td>
             <td><emu-val>"year"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Months]]</td>
-            <td>[[MonthsStyle]]</td>
-            <td>[[MonthsDisplay]]</td>
+            <td><var class="field">[[Months]]</var></td>
+            <td><var class="field">[[MonthsStyle]]</var></td>
+            <td><var class="field">[[MonthsDisplay]]</var></td>
             <td><emu-val>"months"</emu-val></td>
             <td><emu-val>"month"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Weeks]]</td>
-            <td>[[WeeksStyle]]</td>
-            <td>[[WeeksDisplay]]</td>
+            <td><var class="field">[[Weeks]]</var></td>
+            <td><var class="field">[[WeeksStyle]]</var></td>
+            <td><var class="field">[[WeeksDisplay]]</var></td>
             <td><emu-val>"weeks"</emu-val></td>
             <td><emu-val>"week"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Days]]</td>
-            <td>[[DaysStyle]]</td>
-            <td>[[DaysDisplay]]</td>
+            <td><var class="field">[[Days]]</var></td>
+            <td><var class="field">[[DaysStyle]]</var></td>
+            <td><var class="field">[[DaysDisplay]]</var></td>
             <td><emu-val>"days"</emu-val></td>
             <td><emu-val>"day"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Hours]]</td>
-            <td>[[HoursStyle]]</td>
-            <td>[[HoursDisplay]]</td>
+            <td><var class="field">[[Hours]]</var></td>
+            <td><var class="field">[[HoursStyle]]</var></td>
+            <td><var class="field">[[HoursDisplay]]</var></td>
             <td><emu-val>"hours"</emu-val></td>
             <td><emu-val>"hour"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Minutes]]</td>
-            <td>[[MinutesStyle]]</td>
-            <td>[[MinutesDisplay]]</td>
+            <td><var class="field">[[Minutes]]</var></td>
+            <td><var class="field">[[MinutesStyle]]</var></td>
+            <td><var class="field">[[MinutesDisplay]]</var></td>
             <td><emu-val>"minutes"</emu-val></td>
             <td><emu-val>"minute"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Seconds]]</td>
-            <td>[[SecondsStyle]]</td>
-            <td>[[SecondsDisplay]]</td>
+            <td><var class="field">[[Seconds]]</var></td>
+            <td><var class="field">[[SecondsStyle]]</var></td>
+            <td><var class="field">[[SecondsDisplay]]</var></td>
             <td><emu-val>"seconds"</emu-val></td>
             <td><emu-val>"second"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Milliseconds]]</td>
-            <td>[[MillisecondsStyle]]</td>
-            <td>[[MillisecondsDisplay]]</td>
+            <td><var class="field">[[Milliseconds]]</var></td>
+            <td><var class="field">[[MillisecondsStyle]]</var></td>
+            <td><var class="field">[[MillisecondsDisplay]]</var></td>
             <td><emu-val>"milliseconds"</emu-val></td>
             <td><emu-val>"millisecond"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Microseconds]]</td>
-            <td>[[MicrosecondsStyle]]</td>
-            <td>[[MicrosecondsDisplay]]</td>
+            <td><var class="field">[[Microseconds]]</var></td>
+            <td><var class="field">[[MicrosecondsStyle]]</var></td>
+            <td><var class="field">[[MicrosecondsDisplay]]</var></td>
             <td><emu-val>"microseconds"</emu-val></td>
             <td><emu-val>"microsecond"</emu-val></td>
           </tr>
           <tr>
-            <td>[[Nanoseconds]]</td>
-            <td>[[NanosecondsStyle]]</td>
-            <td>[[NanosecondsDisplay]]</td>
+            <td><var class="field">[[Nanoseconds]]</var></td>
+            <td><var class="field">[[NanosecondsStyle]]</var></td>
+            <td><var class="field">[[NanosecondsDisplay]]</var></td>
             <td><emu-val>"nanoseconds"</emu-val></td>
             <td><emu-val>"nanosecond"</emu-val></td>
           </tr>
         </tbody></table>
       </figure></emu-table>
-
-      <emu-note type="editor"><span class="note">Editor's Note</span><div class="note-contents">
-        In order to work, this needs all the necessary units be supported by <emu-val>NumberFormat</emu-val>, which is tracked in https://github.com/tc39/ecma402/issues/702 and https://github.com/tc39/ecma402/issues/704.
-      </div></emu-note>
-      <emu-note type="editor"><span class="note">Editor's Note</span><div class="note-contents">
-        <emu-xref aoid="CreatePartsFromList"><a href="https://tc39.github.io/ecma402/#sec-createpartsfromlist">CreatePartsFromList</a></emu-xref> will be changed to accept a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> of <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Records</a></emu-xref> in the form {[[Type]], [[Value]]}.
-      </div></emu-note>
-      <emu-note type="editor"><span class="note">Editor's Note</span><div class="note-contents">
-        Adding the time separator as a separate list element is wrong, because it will be formatted as a single entry through the list formatter resulting in strings like <emu-val>"12, :, 30, :, and 45"</emu-val>.
-      </div></emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -2752,7 +2915,7 @@ li.menu-search-result-term:before {
 
       <p>When the <code>Intl.DurationFormat</code> function is called with optional arguments <var>locales</var> and <var>options</var>, the following steps are taken:</p>
 
-      <emu-alg><ol><li>If NewTarget is <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>durationFormat</var> be ?&nbsp;<emu-xref aoid="OrdinaryCreateFromConstructor"><a href="https://tc39.es/ecma262/#sec-ordinarycreatefromconstructor">OrdinaryCreateFromConstructor</a></emu-xref>(NewTarget, <emu-val>"%DurationFormatPrototype%"</emu-val>, « [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] »).</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Let <var>options</var> be ?&nbsp;<emu-xref aoid="GetOptionsObject"><a href="https://tc39.github.io/ecma402/#sec-getoptionsobject">GetOptionsObject</a></emu-xref>(<var>options</var>).</li><li>Let <var>matcher</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"localeMatcher"</emu-val>, <emu-const>string</emu-const>, « <emu-val>"lookup"</emu-val>, <emu-val>"best fit"</emu-val> », <emu-val>"best fit"</emu-val>).</li><li>Let <var>numberingSystem</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"numberingSystem"</emu-val>, <emu-const>string</emu-const>, <emu-val>undefined</emu-val>, <emu-val>undefined</emu-val>).</li><li>If <var>numberingSystem</var> is not <emu-val>undefined</emu-val>, then<ol><li>If <var>numberingSystem</var> does not match the Unicode Locale Identifier <code>type</code> nonterminal, throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Let <var>opt</var> be the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[localeMatcher]]: <var>matcher</var>, [[nu]]: <var>numberingSystem</var> }.</li><li>Let <var>r</var> be <emu-xref aoid="ResolveLocale"><a href="https://tc39.github.io/ecma402/#sec-resolvelocale">ResolveLocale</a></emu-xref>(<emu-xref href="#sec-intl-durationformat-constructor" id="_ref_27"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[AvailableLocales]], <var>requestedLocales</var>, <var>opt</var>, <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_28"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[RelevantExtensionKeys]], <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_29"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[LocaleData]]).</li><li>Let <var>locale</var> be r.[[locale]].</li><li>Set <var>durationFormat</var>.[[Locale]] to <var>locale</var>.</li><li>Set <var>durationFormat</var>.[[NumberingSystem]] to <var>r</var>.[[nu]].</li><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"style"</emu-val>, <emu-const>string</emu-const>, « <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"digital"</emu-val> », <emu-val>"short"</emu-val>).</li><li>Set <var>durationFormat</var>.[[Style]] to <var>style</var>.</li><li>Set <var>durationFormat</var>.[[DataLocale]] to <var>r</var>.[[dataLocale]].</li><li>Let <var>prevStyle</var> be the empty String.</li><li>For each row of <emu-xref href="#table-durationformat" id="_ref_4"><a href="#table-durationformat">Table 3</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>styleSlot</var> be the Style Slot value of the current row.</li><li>Let <var>displaySlot</var> be the Display Slot value of the current row.</li><li>Let <var>unit</var> be the Unit value.</li><li>Let <var>valueList</var> be the Values value.</li><li>Let <var>digitalBase</var> be the Digital Default value.</li><li>Let <var>unitOptions</var> be ?&nbsp;<emu-xref aoid="GetDurationUnitOptions" id="_ref_30"><a href="#sec-getdurationunitoptions">GetDurationUnitOptions</a></emu-xref>(<var>unit</var>, <var>options</var>, <var>style</var>, <var>valueList</var>, <var>digitalBase</var>, <var>prevStyle</var>).</li><li>Set the value of the <var>styleSlot</var> slot of <var>durationFormat</var> to <var>unitOptions</var>.[[Style]].</li><li>Set the value of the <var>displaySlot</var> slot of <var>durationFormat</var> to <var>unitOptions</var>.[[Display]].</li><li>If <var>unit</var> is one of <emu-val>"hours"</emu-val>, <emu-val>"minutes"</emu-val>, <emu-val>"seconds"</emu-val>, <emu-val>"milliseconds"</emu-val>, or <emu-val>"microseconds"</emu-val>, then<ol><li>Set <var>prevStyle</var> to <var>unitOptions</var>.[[Style]].</li></ol></li></ol></li><li>Set <var>durationFormat</var>.[[FractionalDigits]] to ?&nbsp;<emu-xref aoid="GetNumberOption"><a href="https://tc39.github.io/ecma402/#sec-getnumberoption">GetNumberOption</a></emu-xref>(<var>options</var>, <emu-val>"fractionalDigits"</emu-val>, 0, 9, <emu-val>undefined</emu-val>).</li><li>Return <var>durationFormat</var>.</li></ol></emu-alg>
+      <emu-alg><ol><li>If NewTarget is <emu-val>undefined</emu-val>, throw a <emu-val>TypeError</emu-val> exception.</li><li>Let <var>durationFormat</var> be ?&nbsp;<emu-xref aoid="OrdinaryCreateFromConstructor"><a href="https://tc39.es/ecma262/#sec-ordinarycreatefromconstructor">OrdinaryCreateFromConstructor</a></emu-xref>(NewTarget, <emu-val>"%DurationFormatPrototype%"</emu-val>, « <var class="field">[[InitializedDurationFormat]]</var>, <var class="field">[[Locale]]</var>, <var class="field">[[DataLocale]]</var>, <var class="field">[[NumberingSystem]]</var>, <var class="field">[[Style]]</var>, <var class="field">[[YearsStyle]]</var>, <var class="field">[[YearsDisplay]]</var>, <var class="field">[[MonthsStyle]]</var>, <var class="field">[[MonthsDisplay]]</var> , <var class="field">[[WeeksStyle]]</var>, <var class="field">[[WeeksDisplay]]</var> , <var class="field">[[DaysStyle]]</var>, <var class="field">[[DaysDisplay]]</var> , <var class="field">[[HoursStyle]]</var>, <var class="field">[[HoursDisplay]]</var> , <var class="field">[[MinutesStyle]]</var>, <var class="field">[[MinutesDisplay]]</var> , <var class="field">[[SecondsStyle]]</var>, <var class="field">[[SecondsDisplay]]</var> , <var class="field">[[MillisecondsStyle]]</var>, <var class="field">[[MillisecondsDisplay]]</var> , <var class="field">[[MicrosecondsStyle]]</var>, <var class="field">[[MicrosecondsDisplay]]</var> , <var class="field">[[NanosecondsStyle]]</var>, <var class="field">[[NanosecondsDisplay]]</var>, <var class="field">[[FractionalDigits]]</var> »).</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Let <var>options</var> be ?&nbsp;<emu-xref aoid="GetOptionsObject"><a href="https://tc39.github.io/ecma402/#sec-getoptionsobject">GetOptionsObject</a></emu-xref>(<var>options</var>).</li><li>Let <var>matcher</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"localeMatcher"</emu-val>, <emu-const>string</emu-const>, « <emu-val>"lookup"</emu-val>, <emu-val>"best fit"</emu-val> », <emu-val>"best fit"</emu-val>).</li><li>Let <var>numberingSystem</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"numberingSystem"</emu-val>, <emu-const>string</emu-const>, <emu-val>undefined</emu-val>, <emu-val>undefined</emu-val>).</li><li>If <var>numberingSystem</var> is not <emu-val>undefined</emu-val>, then<ol><li>If <var>numberingSystem</var> does not match the Unicode Locale Identifier <code>type</code> nonterminal, throw a <emu-val>RangeError</emu-val> exception.</li></ol></li><li>Let <var>opt</var> be the <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[localeMatcher]]</var>: <var>matcher</var>, <var class="field">[[nu]]</var>: <var>numberingSystem</var>&nbsp;}.</li><li>Let <var>r</var> be <emu-xref aoid="ResolveLocale"><a href="https://tc39.github.io/ecma402/#sec-resolvelocale">ResolveLocale</a></emu-xref>(<emu-xref href="#sec-intl-durationformat-constructor" id="_ref_27"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.<var class="field">[[AvailableLocales]]</var>, <var>requestedLocales</var>, <var>opt</var>, <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_28"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.<var class="field">[[RelevantExtensionKeys]]</var>, <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_29"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.<var class="field">[[LocaleData]]</var>).</li><li>Let <var>locale</var> be r.<var class="field">[[locale]]</var>.</li><li>Set <var>durationFormat</var>.<var class="field">[[Locale]]</var> to <var>locale</var>.</li><li>Set <var>durationFormat</var>.<var class="field">[[NumberingSystem]]</var> to <var>r</var>.<var class="field">[[nu]]</var>.</li><li>Let <var>style</var> be ?&nbsp;<emu-xref aoid="GetOption"><a href="https://tc39.github.io/ecma402/#sec-getoption">GetOption</a></emu-xref>(<var>options</var>, <emu-val>"style"</emu-val>, <emu-const>string</emu-const>, « <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"digital"</emu-val> », <emu-val>"short"</emu-val>).</li><li>Set <var>durationFormat</var>.<var class="field">[[Style]]</var> to <var>style</var>.</li><li>Set <var>durationFormat</var>.<var class="field">[[DataLocale]]</var> to <var>r</var>.<var class="field">[[dataLocale]]</var>.</li><li>Let <var>prevStyle</var> be the empty String.</li><li>For each row of <emu-xref href="#table-durationformat" id="_ref_4"><a href="#table-durationformat">Table 3</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>styleSlot</var> be the Style Slot value of the current row.</li><li>Let <var>displaySlot</var> be the Display Slot value of the current row.</li><li>Let <var>unit</var> be the Unit value.</li><li>Let <var>valueList</var> be the Values value.</li><li>Let <var>digitalBase</var> be the Digital Default value.</li><li>Let <var>unitOptions</var> be ?&nbsp;<emu-xref aoid="GetDurationUnitOptions" id="_ref_30"><a href="#sec-getdurationunitoptions">GetDurationUnitOptions</a></emu-xref>(<var>unit</var>, <var>options</var>, <var>style</var>, <var>valueList</var>, <var>digitalBase</var>, <var>prevStyle</var>).</li><li>Set the value of the <var>styleSlot</var> slot of <var>durationFormat</var> to <var>unitOptions</var>.<var class="field">[[Style]]</var>.</li><li>Set the value of the <var>displaySlot</var> slot of <var>durationFormat</var> to <var>unitOptions</var>.<var class="field">[[Display]]</var>.</li><li>If <var>unit</var> is one of <emu-val>"hours"</emu-val>, <emu-val>"minutes"</emu-val>, <emu-val>"seconds"</emu-val>, <emu-val>"milliseconds"</emu-val>, or <emu-val>"microseconds"</emu-val>, then<ol><li>Set <var>prevStyle</var> to <var>unitOptions</var>.<var class="field">[[Style]]</var>.</li></ol></li></ol></li><li>Set <var>durationFormat</var>.<var class="field">[[FractionalDigits]]</var> to ?&nbsp;<emu-xref aoid="GetNumberOption"><a href="https://tc39.github.io/ecma402/#sec-getnumberoption">GetNumberOption</a></emu-xref>(<var>options</var>, <emu-val>"fractionalDigits"</emu-val>, 0, 9, <emu-val>undefined</emu-val>).</li><li>Return <var>durationFormat</var>.</li></ol></emu-alg>
       <emu-table id="table-durationformat"><figure><figcaption>Table 3: Internal slots and property names of DurationFormat instances relevant to Intl.DurationFormat <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref></figcaption>
       
         <table class="real-table">
@@ -2766,71 +2929,71 @@ li.menu-search-result-term:before {
             </tr>
           </thead>
           <tbody><tr>
-            <td>[[YearsStyle]]</td>
-            <td>[[YearsDisplay]]</td>
+            <td><var class="field">[[YearsStyle]]</var></td>
+            <td><var class="field">[[YearsDisplay]]</var></td>
             <td><emu-val>"years"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val> »</td>
             <td><emu-val>"short"</emu-val></td>
           </tr>
           <tr>
-            <td>[[MonthsStyle]]</td>
-            <td>[[MonthsDisplay]]</td>
+            <td><var class="field">[[MonthsStyle]]</var></td>
+            <td><var class="field">[[MonthsDisplay]]</var></td>
             <td><emu-val>"months"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val> »</td>
             <td><emu-val>"short"</emu-val></td>
           </tr>
           <tr>
-            <td>[[WeeksStyle]]</td>
-            <td>[[WeeksDisplay]]</td>
+            <td><var class="field">[[WeeksStyle]]</var></td>
+            <td><var class="field">[[WeeksDisplay]]</var></td>
             <td><emu-val>"weeks"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val> »</td>
             <td><emu-val>"short"</emu-val></td>
           </tr>
           <tr>
-            <td>[[DaysStyle]]</td>
-            <td>[[DaysDisplay]]</td>
+            <td><var class="field">[[DaysStyle]]</var></td>
+            <td><var class="field">[[DaysDisplay]]</var></td>
             <td><emu-val>"days"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val> »</td>
             <td><emu-val>"short"</emu-val></td>
           </tr>
           <tr>
-            <td>[[HoursStyle]]</td>
-            <td>[[HoursDisplay]]</td>
+            <td><var class="field">[[HoursStyle]]</var></td>
+            <td><var class="field">[[HoursDisplay]]</var></td>
             <td><emu-val>"hours"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val>, <emu-val>"2-digit"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
           </tr>
           <tr>
-            <td>[[MinutesStyle]]</td>
-            <td>[[MinutesDisplay]]</td>
+            <td><var class="field">[[MinutesStyle]]</var></td>
+            <td><var class="field">[[MinutesDisplay]]</var></td>
             <td><emu-val>"minutes"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val>, <emu-val>"2-digit"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
           </tr>
           <tr>
-            <td>[[SecondsStyle]]</td>
-            <td>[[SecondsDisplay]]</td>
+            <td><var class="field">[[SecondsStyle]]</var></td>
+            <td><var class="field">[[SecondsDisplay]]</var></td>
             <td><emu-val>"seconds"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val>, <emu-val>"2-digit"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
           </tr>
           <tr>
-            <td>[[MillisecondsStyle]]</td>
-            <td>[[MillisecondsDisplay]]</td>
+            <td><var class="field">[[MillisecondsStyle]]</var></td>
+            <td><var class="field">[[MillisecondsDisplay]]</var></td>
             <td><emu-val>"milliseconds"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
           </tr>
           <tr>
-            <td>[[MicrosecondsStyle]]</td>
-            <td>[[MicrosecondsDisplay]]</td>
+            <td><var class="field">[[MicrosecondsStyle]]</var></td>
+            <td><var class="field">[[MicrosecondsDisplay]]</var></td>
             <td><emu-val>"microseconds"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
           </tr>
           <tr>
-            <td>[[NanosecondsStyle]]</td>
-            <td>[[NanosecondsDisplay]]</td>
+            <td><var class="field">[[NanosecondsStyle]]</var></td>
+            <td><var class="field">[[NanosecondsDisplay]]</var></td>
             <td><emu-val>"nanoseconds"</emu-val></td>
             <td>« <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <br><emu-val>"numeric"</emu-val> »</td>
             <td><emu-val>"numeric"</emu-val></td>
@@ -2850,7 +3013,7 @@ li.menu-search-result-term:before {
 
           <p>The value of <code>Intl.DurationFormat.prototype</code> is <emu-xref href="#sec-properties-of-intl-durationformat-prototype-object" id="_ref_31"><a href="#sec-properties-of-intl-durationformat-prototype-object">%DurationFormatPrototype%</a></emu-xref>.</p>
 
-          <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>false</emu-val> }.</p>
+          <p>This property has the attributes { <var class="field">[[Writable]]</var>: <emu-val>false</emu-val>, <var class="field">[[Enumerable]]</var>: <emu-val>false</emu-val>, <var class="field">[[Configurable]]</var>: <emu-val>false</emu-val> }.</p>
         </emu-clause>
 
         <emu-clause id="sec-Intl.DurationFormat.supportedLocalesOf">
@@ -2858,21 +3021,21 @@ li.menu-search-result-term:before {
 
           <p>When the <code>supportedLocalesOf</code> method is called with arguments <var>locales</var> and <var>options</var>, the following steps are taken:</p>
 
-          <emu-alg><ol><li>Let <var>availableLocales</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_32"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.[[AvailableLocales]].</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Return ?&nbsp;<emu-xref aoid="SupportedLocales"><a href="https://tc39.github.io/ecma402/#sec-supportedlocales">SupportedLocales</a></emu-xref>(<var>availableLocales</var>, <var>requestedLocales</var>, <var>options</var>).</li></ol></emu-alg>
+          <emu-alg><ol><li>Let <var>availableLocales</var> be <emu-xref href="#sec-intl-durationformat-constructor" id="_ref_32"><a href="#sec-intl-durationformat-constructor">%DurationFormat%</a></emu-xref>.<var class="field">[[AvailableLocales]]</var>.</li><li>Let <var>requestedLocales</var> be ?&nbsp;<emu-xref aoid="CanonicalizeLocaleList"><a href="https://tc39.github.io/ecma402/#sec-canonicalizelocalelist">CanonicalizeLocaleList</a></emu-xref>(<var>locales</var>).</li><li>Return ?&nbsp;<emu-xref aoid="SupportedLocales"><a href="https://tc39.github.io/ecma402/#sec-supportedlocales">SupportedLocales</a></emu-xref>(<var>availableLocales</var>, <var>requestedLocales</var>, <var>options</var>).</li></ol></emu-alg>
         </emu-clause>
 
         <emu-clause id="sec-Intl.DurationFormat-internal-slots">
           <h1><span class="secnum">1.3.3</span> Internal slots</h1>
 
-          <p>The value of the [[AvailableLocales]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref>.</p>
+          <p>The value of the <var class="field">[[AvailableLocales]]</var> internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref>.</p>
 
-          <p>The value of the [[RelevantExtensionKeys]] internal slot is « <emu-val>"nu"</emu-val> ».</p>
+          <p>The value of the <var class="field">[[RelevantExtensionKeys]]</var> internal slot is « <emu-val>"nu"</emu-val> ».</p>
 
-          <p>The value of the [[LocaleData]] internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref> and the following additional constraints for all locale values <var>locale</var>:</p>
+          <p>The value of the <var class="field">[[LocaleData]]</var> internal slot is implementation defined within the constraints described in <emu-xref href="#sec-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-internal-slots">9.1</a></emu-xref> and the following additional constraints for all locale values <var>locale</var>:</p>
 
       <ul>
-        <li>[[LocaleData]].[[&lt;<var>locale</var>&gt;]].[[nu]] must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-intl.numberformat-internal-slots">12.3.3</a></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;<var>locale</var>&gt;]].[[digitalFormat]] must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with keys corresponding to each numbering system available for the given locale and String values containing the appropriate time unit separator for that combination of locale and numbering system.</li>
+        <li><var class="field">[[LocaleData]]</var>.[[&lt;<var>locale</var>&gt;]].<var class="field">[[nu]]</var> must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">List</a></emu-xref> as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"><a href="https://tc39.github.io/ecma402/#sec-intl.numberformat-internal-slots">12.3.3</a></emu-xref>.</li>
+        <li><var class="field">[[LocaleData]]</var>.[[&lt;<var>locale</var>&gt;]].<var class="field">[[digitalFormat]]</var> must be a <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> with keys corresponding to each numbering system available for the given locale and String values containing the appropriate time unit separator for that combination of locale and numbering system.</li>
       </ul>
 
           <emu-note><span class="note">Note</span><div class="note-contents">It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</div></emu-note>
@@ -2882,7 +3045,7 @@ li.menu-search-result-term:before {
       <emu-clause id="sec-properties-of-intl-durationformat-prototype-object">
         <h1><span class="secnum">1.4</span> Properties of the Intl.DurationFormat Prototype Object</h1>
 
-        <p>The Intl.DurationFormat prototype object is itself an <emu-xref href="#ordinary-object"><a href="https://tc39.es/ecma262/#ordinary-object">ordinary object</a></emu-xref>. <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
+        <p>The Intl.DurationFormat prototype object is itself an <emu-xref href="#ordinary-object"><a href="https://tc39.es/ecma262/#ordinary-object">ordinary object</a></emu-xref>. <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an <var class="field">[[InitializedDurationFormat]]</var> internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
 
         <emu-clause id="sec-Intl.DurationFormat.prototype.constructor">
           <h1><span class="secnum">1.4.1</span> Intl.DurationFormat.prototype.constructor</h1>
@@ -2894,7 +3057,7 @@ li.menu-search-result-term:before {
           <h1><span class="secnum">1.4.2</span> Intl.DurationFormat.prototype [ @@toStringTag ]</h1>
 
           <p>The initial value of the <emu-xref href="#sec-well-known-symbols"><a href="https://tc39.es/ecma262/#sec-well-known-symbols">@@toStringTag</a></emu-xref> property is the string value <emu-val>"Intl.DurationFormat"</emu-val>.</p>
-          <p>This property has the attributes { [[Writable]]: <emu-val>false</emu-val>, [[Enumerable]]: <emu-val>false</emu-val>, [[Configurable]]: <emu-val>true</emu-val> }.</p>
+          <p>This property has the attributes { <var class="field">[[Writable]]</var>: <emu-val>false</emu-val>, <var class="field">[[Enumerable]]</var>: <emu-val>false</emu-val>, <var class="field">[[Configurable]]</var>: <emu-val>true</emu-val> }.</p>
         </emu-clause>
 
         <emu-clause id="sec-Intl.DurationFormat.prototype.format">
@@ -2902,21 +3065,21 @@ li.menu-search-result-term:before {
 
           <p>When the <code>format</code> method is called with an argument <var>duration</var>, the following steps are taken:</p>
 
-          <emu-alg><ol><li>Let <var>df</var> be <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, [[InitializedDurationFormat]]).</li><li>Let <var>record</var> be ?&nbsp;<emu-xref aoid="ToDurationRecord" id="_ref_34"><a href="#sec-todurationrecord">ToDurationRecord</a></emu-xref>(<var>duration</var>).</li><li>Let <var>parts</var> be <emu-xref aoid="PartitionDurationFormatPattern" id="_ref_35"><a href="#sec-partitiondurationformatpattern">PartitionDurationFormatPattern</a></emu-xref>(<var>df</var>, <var>record</var>).</li><li>Let <var>result</var> be a new empty String.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { [[Type]], [[Value]] } <var>part</var> in <var>parts</var>, do<ol><li>Set <var>result</var> to the <emu-xref href="#string-concatenation"><a href="https://tc39.es/ecma262/#string-concatenation">string-concatenation</a></emu-xref> of <var>result</var> and <var>part</var>.[[Value]].</li></ol></li><li>Return <var>result</var>.</li></ol></emu-alg>
+          <emu-alg><ol><li>Let <var>df</var> be <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, <var class="field">[[InitializedDurationFormat]]</var>).</li><li>Let <var>record</var> be ?&nbsp;<emu-xref aoid="ToDurationRecord" id="_ref_34"><a href="#sec-todurationrecord">ToDurationRecord</a></emu-xref>(<var>duration</var>).</li><li>Let <var>parts</var> be <emu-xref aoid="PartitionDurationFormatPattern" id="_ref_35"><a href="#sec-partitiondurationformatpattern">PartitionDurationFormatPattern</a></emu-xref>(<var>df</var>, <var>record</var>).</li><li>Let <var>result</var> be the empty String.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>&nbsp;} <var>part</var> in <var>parts</var>, do<ol><li>Set <var>result</var> to the <emu-xref href="#string-concatenation"><a href="https://tc39.es/ecma262/#string-concatenation">string-concatenation</a></emu-xref> of <var>result</var> and <var>part</var>.<var class="field">[[Value]]</var>.</li></ol></li><li>Return <var>result</var>.</li></ol></emu-alg>
         </emu-clause>
         <emu-clause id="sec-Intl.DurationFormat.prototype.formatToParts">
           <h1><span class="secnum">1.4.4</span> Intl.DurationFormat.prototype.formatToParts ( <var>duration</var> )</h1>
 
           <p>When the <code>formatToParts</code> method is called with an argument <var>duration</var>, the following steps are taken:</p>
 
-          <emu-alg><ol><li>Let <var>df</var> be <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, [[InitializedDurationFormat]]).</li><li>Let <var>record</var> be ?&nbsp;<emu-xref aoid="ToDurationRecord" id="_ref_36"><a href="#sec-todurationrecord">ToDurationRecord</a></emu-xref>(<var>duration</var>).</li><li>Let <var>parts</var> be <emu-xref aoid="PartitionDurationFormatPattern" id="_ref_37"><a href="#sec-partitiondurationformatpattern">PartitionDurationFormatPattern</a></emu-xref>(<var>df</var>, <var>record</var>).</li><li>Let <var>result</var> be !&nbsp;<emu-xref aoid="ArrayCreate"><a href="https://tc39.es/ecma262/#sec-arraycreate">ArrayCreate</a></emu-xref>(0).</li><li>Let <var>n</var> be 0.</li><li>For each { [[Type]], [[Value]] } <var>part</var> in <var>parts</var>, do<ol><li>Let <var>obj</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(%ObjectPrototype%).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"type"</emu-val>, <var>part</var>.[[Type]]).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"value"</emu-val>, <var>part</var>.[[Value]]).</li><li>If <var>part</var>.[[Unit]] is set, Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"unit"</emu-val>, <var>part</var>.[[Unit]]).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>result</var>, !&nbsp;<emu-xref aoid="ToString"><a href="https://tc39.es/ecma262/#sec-tostring">ToString</a></emu-xref>(<var>n</var>), <var>obj</var>).</li><li>Increment <var>n</var> by 1.</li></ol></li><li>Return <var>result</var>.</li></ol></emu-alg>
+          <emu-alg><ol><li>Let <var>df</var> be <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, <var class="field">[[InitializedDurationFormat]]</var>).</li><li>Let <var>record</var> be ?&nbsp;<emu-xref aoid="ToDurationRecord" id="_ref_36"><a href="#sec-todurationrecord">ToDurationRecord</a></emu-xref>(<var>duration</var>).</li><li>Let <var>parts</var> be <emu-xref aoid="PartitionDurationFormatPattern" id="_ref_37"><a href="#sec-partitiondurationformatpattern">PartitionDurationFormatPattern</a></emu-xref>(<var>df</var>, <var>record</var>).</li><li>Let <var>result</var> be !&nbsp;<emu-xref aoid="ArrayCreate"><a href="https://tc39.es/ecma262/#sec-arraycreate">ArrayCreate</a></emu-xref>(0).</li><li>Let <var>n</var> be 0.</li><li>For each <emu-xref href="#sec-list-and-record-specification-type"><a href="https://tc39.es/ecma262/#sec-list-and-record-specification-type">Record</a></emu-xref> { <var class="field">[[Type]]</var>, <var class="field">[[Value]]</var>, <var class="field">[[Unit]]</var>&nbsp;} <var>part</var> in <var>parts</var>, do<ol><li>Let <var>obj</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(%ObjectPrototype%).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"type"</emu-val>, <var>part</var>.<var class="field">[[Type]]</var>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"value"</emu-val>, <var>part</var>.<var class="field">[[Value]]</var>).</li><li>If <var>part</var>.<var class="field">[[Unit]]</var> is not <emu-const>empty</emu-const>, perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>obj</var>, <emu-val>"unit"</emu-val>, <var>part</var>.<var class="field">[[Unit]]</var>).</li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>result</var>, !&nbsp;<emu-xref aoid="ToString"><a href="https://tc39.es/ecma262/#sec-tostring">ToString</a></emu-xref>(<var>n</var>), <var>obj</var>).</li><li>Set <var>n</var> to <var>n</var> + 1.</li></ol></li><li>Return <var>result</var>.</li></ol></emu-alg>
         </emu-clause>
         <emu-clause id="sec-Intl.DurationFormat.prototype.resolvedOptions">
           <h1><span class="secnum">1.4.5</span> Intl.DurationFormat.prototype.resolvedOptions ( )</h1>
 
           <p>This function provides access to the locale and options computed during initialization of the object.</p>
 
-          <emu-alg><ol><li>Let <var>df</var> be the <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, [[InitializedDurationFormat]]).</li><li>Let <var>options</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(%ObjectPrototype%).</li><li>For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties" id="_ref_5"><a href="#table-durationformat-resolvedoptions-properties">Table 4</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>p</var> be the Property value of the current row.</li><li>Let <var>v</var> be the value of <var>df</var>'s internal slot whose name is the Internal Slot value of the current row.</li><li>If <var>p</var> is not <emu-val>"fractionalDigits"</emu-val>, then<ol><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>v</var> is not <emu-val>undefined</emu-val>.</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>options</var>, <var>p</var>, <var>v</var>).</li></ol></li><li>Return <var>options</var>.</li></ol></emu-alg>
+          <emu-alg><ol><li>Let <var>df</var> be the <emu-val>this</emu-val> value.</li><li>Perform ?&nbsp;<emu-xref aoid="RequireInternalSlot"><a href="https://tc39.es/ecma262/#sec-requireinternalslot">RequireInternalSlot</a></emu-xref>(<var>df</var>, <var class="field">[[InitializedDurationFormat]]</var>).</li><li>Let <var>options</var> be <emu-xref aoid="OrdinaryObjectCreate"><a href="https://tc39.es/ecma262/#sec-ordinaryobjectcreate">OrdinaryObjectCreate</a></emu-xref>(%ObjectPrototype%).</li><li>For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties" id="_ref_5"><a href="#table-durationformat-resolvedoptions-properties">Table 4</a></emu-xref>, except the header row, in table order, do<ol><li>Let <var>p</var> be the Property value of the current row.</li><li>Let <var>v</var> be the value of <var>df</var>'s internal slot whose name is the Internal Slot value of the current row.</li><li>If <var>p</var> is <emu-val>"fractionalDigits"</emu-val>, then<ol><li>If <var>v</var> is not <emu-val>undefined</emu-val>, set <var>v</var> to <emu-xref aoid="𝔽"><a href="https://tc39.es/ecma262/#𝔽">𝔽</a></emu-xref>(<var>v</var>).</li></ol></li><li>Else,<ol><li><emu-xref href="#assert"><a href="https://tc39.es/ecma262/#assert">Assert</a></emu-xref>: <var>v</var> is not <emu-val>undefined</emu-val>.</li></ol></li><li>Perform !&nbsp;<emu-xref aoid="CreateDataPropertyOrThrow"><a href="https://tc39.es/ecma262/#sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a></emu-xref>(<var>options</var>, <var>p</var>, <var>v</var>).</li></ol></li><li>Return <var>options</var>.</li></ol></emu-alg>
 
           <emu-table id="table-durationformat-resolvedoptions-properties"><figure><figcaption>Table 4: Resolved Options of DurationFormat Instances</figcaption>
             
@@ -2928,101 +3091,104 @@ li.menu-search-result-term:before {
                 </tr>
               </thead>
               <tbody><tr>
-                <td>[[Locale]]</td>
+                <td><var class="field">[[Locale]]</var></td>
                 <td><emu-val>"locale"</emu-val></td>
               </tr>
               <tr>
+
                 <td>[[NumberingSystem]]</td>
                 <td><emu-val>"numberingSystem"</emu-val></td>
               </tr>
               <tr>
                 <td>[[Style]]</td>
+
                 <td><emu-val>"style"</emu-val></td>
               </tr>
               <tr>
-                <td>[[YearsStyle]]</td>
+                <td><var class="field">[[YearsStyle]]</var></td>
                 <td><emu-val>"years"</emu-val></td>
               </tr>
               <tr>
-                <td>[[YearsDisplay]]</td>
+                <td><var class="field">[[YearsDisplay]]</var></td>
                 <td><emu-val>"yearsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MonthsStyle]]</td>
+                <td><var class="field">[[MonthsStyle]]</var></td>
                 <td><emu-val>"months"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MonthsDisplay]]</td>
+                <td><var class="field">[[MonthsDisplay]]</var></td>
                 <td><emu-val>"monthsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[WeeksStyle]]</td>
+                <td><var class="field">[[WeeksStyle]]</var></td>
                 <td><emu-val>"weeks"</emu-val></td>
               </tr>
               <tr>
-                <td>[[WeeksDisplay]]</td>
+                <td><var class="field">[[WeeksDisplay]]</var></td>
                 <td><emu-val>"weeksDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[DaysStyle]]</td>
+                <td><var class="field">[[DaysStyle]]</var></td>
                 <td><emu-val>"days"</emu-val></td>
               </tr>
               <tr>
-                <td>[[DaysDisplay]]</td>
+                <td><var class="field">[[DaysDisplay]]</var></td>
                 <td><emu-val>"daysDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[HoursStyle]]</td>
+                <td><var class="field">[[HoursStyle]]</var></td>
                 <td><emu-val>"hours"</emu-val></td>
               </tr>
               <tr>
-                <td>[[HoursDisplay]]</td>
+                <td><var class="field">[[HoursDisplay]]</var></td>
                 <td><emu-val>"hoursDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MinutesStyle]]</td>
+                <td><var class="field">[[MinutesStyle]]</var></td>
                 <td><emu-val>"minutes"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MinutesDisplay]]</td>
+                <td><var class="field">[[MinutesDisplay]]</var></td>
                 <td><emu-val>"minutesDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[SecondsStyle]]</td>
+                <td><var class="field">[[SecondsStyle]]</var></td>
                 <td><emu-val>"seconds"</emu-val></td>
               </tr>
               <tr>
-                <td>[[SecondsDisplay]]</td>
+                <td><var class="field">[[SecondsDisplay]]</var></td>
                 <td><emu-val>"secondsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MillisecondsStyle]]</td>
+                <td><var class="field">[[MillisecondsStyle]]</var></td>
                 <td><emu-val>"milliseconds"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MillisecondsDisplay]]</td>
+                <td><var class="field">[[MillisecondsDisplay]]</var></td>
                 <td><emu-val>"millisecondsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MicrosecondsStyle]]</td>
+                <td><var class="field">[[MicrosecondsStyle]]</var></td>
                 <td><emu-val>"microseconds"</emu-val></td>
               </tr>
               <tr>
-                <td>[[MicrosecondsDisplay]]</td>
+                <td><var class="field">[[MicrosecondsDisplay]]</var></td>
                 <td><emu-val>"microsecondsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[NanosecondsStyle]]</td>
+                <td><var class="field">[[NanosecondsStyle]]</var></td>
                 <td><emu-val>"nanoseconds"</emu-val></td>
               </tr>
               <tr>
-                <td>[[NanosecondsDisplay]]</td>
+                <td><var class="field">[[NanosecondsDisplay]]</var></td>
                 <td><emu-val>"nanosecondsDisplay"</emu-val></td>
               </tr>
               <tr>
-                <td>[[FractionalDigits]]</td>
+                <td><var class="field">[[FractionalDigits]]</var></td>
                 <td><emu-val>"fractionalDigits"</emu-val></td>
               </tr>
+
            </tbody></table>
           </figure></emu-table>
         </emu-clause>
@@ -3032,45 +3198,45 @@ li.menu-search-result-term:before {
         <h1><span class="secnum">1.5</span> Properties of Intl.DurationFormat Instances</h1>
 
         <p>Intl.DurationFormat instances inherit properties from <emu-xref href="#sec-properties-of-intl-durationformat-prototype-object" id="_ref_38"><a href="#sec-properties-of-intl-durationformat-prototype-object">%DurationFormatPrototype%</a></emu-xref>.</p>
-        <p>Intl.DurationFormat instances have an [[InitializedDurationFormat]] internal slot.</p>
+        <p>Intl.DurationFormat instances have an <var class="field">[[InitializedDurationFormat]]</var> internal slot.</p>
         <p>Intl.DurationFormat instances also have several internal slots that are computed by the <emu-xref href="#constructor"><a href="https://tc39.es/ecma262/#constructor">constructor</a></emu-xref>:</p>
 
         <ul>
-          <li>[[Locale]] <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the language tag of the locale whose localization is used for formatting.</li>
-          <li>[[DataLocale]] <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of [[Locale]].</li>
-          <li>[[NumberingSystem]] <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the <emu-val>"type"</emu-val> given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
-          <li>[[Style]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"digital"</emu-val> identifying the duration formatting style used.</li>
-          <li>[[YearsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the years field.</li>
-          <li>[[YearsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the years field.</li>
-          <li>[[MonthsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the months field.</li>
-          <li>[[MonthsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the months field.</li>
-          <li>[[WeeksStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the weeks field.</li>
-          <li>[[WeeksDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the weeks field.</li>
-          <li>[[DaysStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the days field.</li>
-          <li>[[DaysDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the days field.</li>
-          <li>[[HoursStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the hours field.</li>
-          <li>[[HoursDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the hours field.</li>
-          <li>[[MinutesStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the minutes field.</li>
-          <li>[[MinutesDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the minutes field.</li>
-          <li>[[SecondsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the seconds field.</li>
-          <li>[[SecondsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the seconds field.</li>
-          <li>[[MillisecondsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the milliseconds field.</li>
-          <li>[[MillisecondsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the milliseconds field.</li>
-          <li>[[MicrosecondsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the microseconds field.</li>
-          <li>[[MicrosecondsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the microseconds field.</li>
-          <li>[[NanosecondsStyle]] is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the nanoseconds field.</li>
-          <li>[[NanosecondsDisplay]] is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the nanoseconds field.</li>
-          <li>[[FractionalDigits]] <emu-xref href="#sec-ecmascript-language-types-number-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-number-type">is a Number</a></emu-xref> value, identifying the number of fractional digits to be used with numeric styles, or is <emu-val>undefined</emu-val>.</li>
+          <li><var class="field">[[Locale]]</var> <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the language tag of the locale whose localization is used for formatting.</li>
+          <li><var class="field">[[DataLocale]]</var> <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the language tag of the nearest locale for which the implementation has data to perform the formatting operation. It will be a parent locale of <var class="field">[[Locale]]</var>.</li>
+          <li><var class="field">[[NumberingSystem]]</var> <emu-xref href="#sec-ecmascript-language-types-string-type"><a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type">is a String</a></emu-xref> value with the <emu-val>"type"</emu-val> given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
+          <li><var class="field">[[Style]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"digital"</emu-val> identifying the duration formatting style used.</li>
+          <li><var class="field">[[YearsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the years field.</li>
+          <li><var class="field">[[YearsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the years field.</li>
+          <li><var class="field">[[MonthsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the months field.</li>
+          <li><var class="field">[[MonthsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the months field.</li>
+          <li><var class="field">[[WeeksStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the weeks field.</li>
+          <li><var class="field">[[WeeksDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the weeks field.</li>
+          <li><var class="field">[[DaysStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, or <emu-val>"narrow"</emu-val> identifying the formatting style used for the days field.</li>
+          <li><var class="field">[[DaysDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the days field.</li>
+          <li><var class="field">[[HoursStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the hours field.</li>
+          <li><var class="field">[[HoursDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the hours field.</li>
+          <li><var class="field">[[MinutesStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the minutes field.</li>
+          <li><var class="field">[[MinutesDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the minutes field.</li>
+          <li><var class="field">[[SecondsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, <emu-val>"2-digit"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the seconds field.</li>
+          <li><var class="field">[[SecondsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the seconds field.</li>
+          <li><var class="field">[[MillisecondsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the milliseconds field.</li>
+          <li><var class="field">[[MillisecondsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the milliseconds field.</li>
+          <li><var class="field">[[MicrosecondsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the microseconds field.</li>
+          <li><var class="field">[[MicrosecondsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the microseconds field.</li>
+          <li><var class="field">[[NanosecondsStyle]]</var> is one of the String values <emu-val>"long"</emu-val>, <emu-val>"short"</emu-val>, <emu-val>"narrow"</emu-val>, or <emu-val>"numeric"</emu-val> identifying the formatting style used for the nanoseconds field.</li>
+          <li><var class="field">[[NanosecondsDisplay]]</var> is one of the String values <emu-val>"auto"</emu-val> or <emu-val>"always"</emu-val> identifying when to display the nanoseconds field.</li>
+          <li><var class="field">[[FractionalDigits]]</var> is a non-negative <emu-xref href="#integer"><a href="https://tc39.es/ecma262/#integer">integer</a></emu-xref>, identifying the number of fractional digits to be used with numeric styles, or is <emu-val>undefined</emu-val>.</li>
         </ul>
       </emu-clause>
     </emu-clause><emu-annex id="sec-copyright-and-software-license">
       <h1><span class="secnum">A</span> Copyright &amp; Software License</h1>
       
       <h2>Copyright Notice</h2>
-      <p>© 2023 Ujjwal Sharma, Younies Mahmoud</p>
+      <p>© 2024 Ujjwal Sharma, Younies Mahmoud</p>
 
       <h2>Software License</h2>
-      <p>All Software contained in this document ("Software") is protected by copyright and is being made available under the "BSD License", included below. This Software may be subject to third party rights (rights from parties other than Ecma International), including patent rights, and no licenses under such third party rights are granted under this license even if the third party concerned is a member of Ecma International. SEE THE ECMA CODE OF CONDUCT IN PATENT MATTERS AVAILABLE AT https://ecma-international.org/memento/codeofconduct.htm FOR INFORMATION REGARDING THE LICENSING OF PATENT CLAIMS THAT ARE REQUIRED TO IMPLEMENT ECMA INTERNATIONAL STANDARDS.</p>
+      <p>All Software contained in this document ("Software") is protected by copyright and is being made available under the "BSD License", included below. This Software may be subject to third party rights (rights from parties other than Ecma International), including patent rights, and no licenses under such third party rights are granted under this license even if the third party concerned is a member of Ecma International. SEE THE ECMA CODE OF CONDUCT IN PATENT MATTERS AVAILABLE AT <a href="https://ecma-international.org/memento/codeofconduct.htm">https://ecma-international.org/memento/codeofconduct.htm</a> FOR INFORMATION REGARDING THE LICENSING OF PATENT CLAIMS THAT ARE REQUIRED TO IMPLEMENT ECMA INTERNATIONAL STANDARDS.</p>
 
 <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
 
