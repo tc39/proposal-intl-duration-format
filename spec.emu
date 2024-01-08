@@ -316,8 +316,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. If _style_ is *"2-digit"* or *"numeric"*, then
                 1. Set _needSeparator_ to *true*.
               1. Append _list_ to _result_.
-          1. Else,
-            1. Set _needSeparator_ to *false*.
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
         1. Let _listStyle_ be _durationFormat_.[[Style]].
