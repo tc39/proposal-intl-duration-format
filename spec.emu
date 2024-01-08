@@ -289,8 +289,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _displayRequired_ be *false*.
           1. If _unit_ is *"minutes"* and _needSeparator_ is true, then
             1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
-            1. Let _secondsValue_ be _durationFormat_.[[SecondsValue]].
-            1. If _secondsDisplay_ is *"always"* or _secondsValue_ is not 0, then
+            1. If _secondsDisplay_ is *"always"*, or _duration_.[[Seconds]] is not 0, or _duration_.[[Milliseconds]] is not 0, or _duration_.[[Microseconds]] is not 0, or _duration_.[[Nanoseconds]] is not 0, then
               1. Set _displayRequired_ to *true*.
           1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *true*, then
             1. If _displayNegativeSign_ is *true*, then
