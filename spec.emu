@@ -300,6 +300,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *"true"*, then
             1. If _displayNegativeSign_ is *true*, then
               1. Set _displayNegativeSign_ to *false*.
+              1. If _value_ is 0 and DurationRecordSign(_duration_) is -1, then
+                1. Set _value_ to ~negative-zero~.
             1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
