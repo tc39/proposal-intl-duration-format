@@ -190,7 +190,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         GetDurationUnitOptions (
           _unit_: a String,
-          _options_: an ECMAScript language value,
+          _options_: an Object,
           _baseStyle_: a String,
           _stylesList_: a List of Strings,
           _digitalBase_: a String,
@@ -199,7 +199,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It extracts the relevant options for any given _unit_ from an options bag and returns them as a Record.</dd>
+        <dd>It extracts the relevant options for any given _unit_ from an Object and returns them as a Record.</dd>
       </dl>
 
       <emu-alg>
@@ -211,28 +211,60 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Set _displayDefault_ to *"auto"*.
             1. Set _style_ to _digitalBase_.
           1. Else,
-            1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+            1. If _prevStyle_ is *"fractional"*, *"numeric"* or *"2-digit"*, then
               1. If _unit_ is not one of *"minutes"* or *"seconds"*, then
                 1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to *"numeric"*.
             1. Else,
               1. Set _displayDefault_ to *"auto"*.
               1. Set _style_ to _baseStyle_.
-        1. Else if _style_ is *"numeric"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
-          1. Set _displayDefault_ to *"auto"*.
+        1. If _style_ is *"numeric"*, then
+          1. If _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
+            1. Set _style_ to *"fractional"*.
+            1. Set _displayDefault_ to *"auto"*.
         1. Let _displayField_ be the string-concatenation of _unit_ and *"Display"*.
         1. Let _display_ be ? GetOption(_options_, _displayField_, ~string~, &laquo; *"auto"*, *"always"* &raquo;, _displayDefault_).
-        1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
-          1. If _style_ is not *"numeric"* or *"2-digit"*, then
+        1. If _display_ is *"always"* and _style_ is *"fractional"*, then
             1. Throw a *RangeError* exception.
-          1. Else if _unit_ is *"minutes"* or *"seconds"*, then
+        1. If _prevStyle_ is *"fractional"*, then
+          1. If _style_ is not *"fractional"*, then
+            1. Throw a *RangeError* exception.
+        1. If _prevStyle_ is *"numeric"* or *"2-digit"*, then
+          1. If _style_ is not *"fractional"*, *"numeric"* or *"2-digit"*, then
+            1. Throw a *RangeError* exception.
+          1. If _unit_ is *"minutes"* or *"seconds"*, then
             1. Set _style_ to *"2-digit"*.
-        1. If _style_ is *"numeric"* and _display_ is *"always"* and _unit_ is one of *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*, then
-          1. Throw a *RangeError* exception.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
         }.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-addfractionaldigits" type="abstract operation">
+      <h1>
+        AddFractionalDigits (
+          _durationFormat_: a DurationFormat Object,
+          _duration_: a Duration Record,
+        ): a mathematical value
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It computes the sum of all values in _durationFormat_ units with *"fractional"* style, expressed as a fraction of the smallest unit of _durationFormat_ that does not use *"fractional"* style.</dd>
+      </dl>
+
+      <emu-alg>
+        1. Let _result_ be 0.
+        1. Let _exponent_ be 3.
+        1. For each row of <emu-xref href="#table-partition-duration-format-pattern"></emu-xref>, except the header row, in table order, do
+          1. Let _style_ be the value of _durationFormat_'s internal slot whose name is the Style Slot value of the current row.
+          1. If _style_ is *"fractional"*, then
+            1. Assert: The Unit value of the current row is *"milliseconds"*, *"microseconds"*, or *"nanoseconds"*.
+            1. Let _value_ be the value of _duration_'s field whose name is the Value Field value of the current row.
+            1. Set _value_ to _value_ / 10<sup>_exponent_</sup>.
+            1. Set _result_ to _result_ + _value_.
+            1. Set _exponent_ to _exponent_ + 3.
+        1. Return _result_.
       </emu-alg>
     </emu-clause>
 
@@ -271,19 +303,16 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
             1. Else,
               1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
-            1. If _nextStyle_ is *"numeric"*, then
-              1. If _unit_ is *"seconds"*, then
-                1. Set _value_ to _value_ + _duration_.[[Milliseconds]] / 10<sup>3</sup> + _duration_.[[Microseconds]] / 10<sup>6</sup> + _duration_.[[Nanoseconds]] / 10<sup>9</sup>.
-              1. Else if _unit_ is *"milliseconds"*, then
-                1. Set _value_ to _value_ + _duration_.[[Microseconds]] / 10<sup>3</sup> + _duration_.[[Nanoseconds]] / 10<sup>6</sup>.
-              1. Else,
-                1. Set _value_ to _value_ + _duration_.[[Nanoseconds]] / 10<sup>3</sup>.
+            1. If _nextStyle_ is *"fractional"*, then
+              1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
               1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, *9*<sub>𝔽</sub>).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, *+0*<sub>𝔽</sub>).
+                1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
+                1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
               1. Else,
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, 𝔽(_durationFormat_.[[FractionalDigits]])).
+                1. Let _maximumFractionDigits_ be 𝔽(_durationFormat_.[[FractionalDigits]]).
+                1. Let _minimumFractionDigits_ be 𝔽(_durationFormat_.[[FractionalDigits]]).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_ ).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_ ).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
               1. Set _done_ to *true*.
           1. Let _displayRequired_ be *"false"*.
@@ -307,7 +336,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
             1. If _style_ is *"2-digit"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-            1. If _style_ is neither *"2-digit"* nor *"numeric"*, then
+            1. If _style_ is not *"fractional"*, *"numeric"*, or *"2-digit"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
@@ -474,9 +503,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. For each row of <emu-xref href="#table-durationformat"></emu-xref>, except the header row, in table order, do
           1. Let _styleSlot_ be the Style Slot value of the current row.
           1. Let _displaySlot_ be the Display Slot value of the current row.
-          1. Let _unit_ be the Unit value.
-          1. Let _valueList_ be the Values value.
-          1. Let _digitalBase_ be the Digital Default value.
+          1. Let _unit_ be the Unit value of the current row.
+          1. Let _valueList_ be the Values value of the current row.
+          1. Let _digitalBase_ be the Digital Default value of the current row.
           1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set the value of the _styleSlot_ slot of _durationFormat_ to _unitOptions_.[[Style]].
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
@@ -550,22 +579,22 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <td>[[MillisecondsStyle]]</td>
             <td>[[MillisecondsDisplay]]</td>
             <td>*"milliseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
             <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[MicrosecondsStyle]]</td>
             <td>[[MicrosecondsDisplay]]</td>
             <td>*"microseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
-            <td>*"numeric"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
+            <td>*"fractional"*</td>
           </tr>
           <tr>
             <td>[[NanosecondsStyle]]</td>
             <td>[[NanosecondsDisplay]]</td>
             <td>*"nanoseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
-            <td>*"numeric"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
+            <td>*"fractional"*</td>
           </tr>
         </table>
     </emu-table>
@@ -687,6 +716,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. If _v_ is not *undefined*, set _v_ to 𝔽(_v_).
               1. Else,
                 1. Assert: _v_ is not *undefined*.
+              1. If _v_ is *"fractional"*, then
+                1. Assert: The Internal Slot value of the current row is [[MillisecondsStyle]], [[MicrosecondsStyle]], or [[NanosecondsStyle]] .
+                1. Set _v_ to *"numeric"*.
               1. If _v_ is not *undefined*, then
                 1. Perform ! CreateDataPropertyOrThrow(_options_, _p_, _v_).
             1. Return _options_.
@@ -828,11 +860,11 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <li>[[MinutesDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the minutes field.</li>
           <li>[[SecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, *"2-digit"*, or *"numeric"* identifying the formatting style used for the seconds field.</li>
           <li>[[SecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the seconds field.</li>
-          <li>[[MillisecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the milliseconds field.</li>
+          <li>[[MillisecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"fractional"* identifying the formatting style used for the milliseconds field.</li>
           <li>[[MillisecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the milliseconds field.</li>
-          <li>[[MicrosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the microseconds field.</li>
+          <li>[[MicrosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"fractional"* identifying the formatting style used for the microseconds field.</li>
           <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
-          <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"numeric"* identifying the formatting style used for the nanoseconds field.</li>
+          <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"fractional"* identifying the formatting style used for the nanoseconds field.</li>
           <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
           <li>[[FractionalDigits]] is a non-negative integer, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
         </ul>
