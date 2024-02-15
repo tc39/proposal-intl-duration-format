@@ -268,6 +268,31 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-set-fractional-digit-options" type="abstract operation">
+      <h1>
+        SetFractionalDigitOptions (
+        _durationFormat_: a DurationFormat Object,
+        _nfOpts_: An Object,
+        ): ~unused~
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It creates properties on _nfOpts_ needed for formatting fractional units.</dd>
+      </dl>
+
+      <emu-alg>
+        1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
+          1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
+          1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
+        1. Else,
+          1. Let _maximumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+          1. Let _minimumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-next-unit-fractional" type="abstract operation">
       <h1>
         NextUnitFractional (
@@ -324,15 +349,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If NextUnitFractional(_durationFormat_, _duration_, _unit_) is *true*, then
               1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
-              1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
-                1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
-                1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
-              1. Else,
-                1. Let _maximumFractionDigits_ be 𝔽(_durationFormat_.[[FractionalDigits]]).
-                1. Let _minimumFractionDigits_ be 𝔽(_durationFormat_.[[FractionalDigits]]).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_ ).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_ ).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+              1. Perform SetFractionalDigitOptions(_durationFormat_, _nfOpts_).
               1. Set _done_ to *true*.
           1. Let _displayRequired_ be *"false"*.
           1. Let _hoursStyle_ be _durationFormat_.[[HoursStyle]].
