@@ -268,6 +268,31 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-next-unit-fractional" type="abstract operation">
+      <h1>
+        NextUnitFractional (
+          _durationFormat_: a DurationFormat Object,
+          _duration_: a Duration Record,
+          _unit_: a String,
+        ): a Boolean
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It returns *true* if the next smallest unit uses the *"fractional"* style.</dd>
+      </dl>
+
+      <emu-alg>
+        1. Assert: _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*.
+        1. If _unit_ is *"seconds"*, then
+          1. If _durationFormat_.[[MillisecondsStyle]] is *"fractional"*, return *true*.
+        1. If _unit_ is *"milliseconds"*, then
+          1. If _durationFormat_.[[MicrosecondsStyle]] is *"fractional"*, return *true*.
+        1. If _unit_ is *"microseconds"*, then
+          1. If _durationFormat_.[[NanosecondsStyle]] is *"fractional"*, return *true*.
+        1. Return *false*.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-partitiondurationformatpattern" type="abstract operation">
       <h1>
         PartitionDurationFormatPattern (
@@ -297,13 +322,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
           1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
-            1. If _unit_ is *"seconds"*, then
-              1. Let _nextStyle_ be _durationFormat_.[[MillisecondsStyle]].
-            1. Else if _unit_ is *"milliseconds"*, then
-              1. Let _nextStyle_ be _durationFormat_.[[MicrosecondsStyle]].
-            1. Else,
-              1. Let _nextStyle_ be _durationFormat_.[[NanosecondsStyle]].
-            1. If _nextStyle_ is *"fractional"*, then
+            1. If NextUnitFractional(_durationFormat_, _duration_, _unit_) is *true*, then
               1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
               1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
                 1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
