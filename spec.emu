@@ -350,7 +350,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _hoursStyle_ is *"2-digit"*, then
             1. Perform ! CreateDataPropertyOrThrow(_hoursNfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
           1. Let _hoursValue_ be _duration_.[[Hours]].
-          1. Let _hoursNf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat.[[Locale]], _hoursNfOpts_ &raquo;).
+          1. Let _hoursNf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _hoursNfOpts_ &raquo;).
           1. Let _hoursParts_ be ! PartitionNumberPattern(_hoursNf_, _hoursValue_).
           1. For each Record { [[Type]], [[Value]] } _part_ of _hoursParts_, do
             1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"hour"* } to _numericPartsList_.
