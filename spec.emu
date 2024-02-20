@@ -722,7 +722,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[digitalFormat]] must be a Record with keys corresponding to each numbering system available for the given locale and String values containing the appropriate time unit separator for that combination of locale and numbering system.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[DigitalFormat]] must be a Record with keys corresponding to each numbering system available for the given locale, Record values containing the fields [[HourMinutesSeparator]] and [[MinutesSecondsSeparator]], each of which holds String values containing the appropriate time unit separator for that combination of locale, numbering system, and unit, and [[HoursDigits]], which must be an integer indicating the number of digits used to display hours when using the "numeric" style. The only valid values for [[HoursDigits]] are 1 and 2.</li>
       </ul>
 
           <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
