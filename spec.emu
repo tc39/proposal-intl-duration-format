@@ -1,4 +1,5 @@
 <!doctype html>
+              1. Perform SetFractionalDigitOptions(_durationFormat_, _nfOpts_).
 <meta charset="utf8">
 <pre class="metadata">
 title: Intl.DurationFormat
@@ -189,6 +190,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     <emu-clause id="sec-getdurationunitoptions" type="abstract operation">
       <h1>
         GetDurationUnitOptions (
+          _durationFormat_: a DurationFormat Object,
           _unit_: a String,
           _options_: an Object,
           _baseStyle_: a String,
@@ -234,6 +236,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Throw a *RangeError* exception.
           1. If _unit_ is *"minutes"* or *"seconds"*, then
             1. Set _style_ to *"2-digit"*.
+        1. If _unit_ is *"hours"* and _durationFormat_.[[TwoDigitHours]] is *true*, then
+          1. Set _style_ to *"2-digit"*.
         1. Return the Record {
           [[Style]]: _style_,
           [[Display]]: _display_
@@ -324,7 +328,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           _durationFormat_: a DurationFormat Object,
           _duration_: a Duration Record,
           _firstNumericUnit_: a String,
-          _nfOpts_: an Object,
+          _isFirstDisplayedUnit_: a Boolean,
         ): a List of Records
       </h1>
       <dl class="header">
@@ -335,58 +339,68 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Assert: _firstNumericUnit_ is *"hours"*, *"minutes"*, or *"seconds"*.
         1. Let _numericPartsList_ be a new empty List.
-        1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
-        1. Let _dataLocaleData_ be %DurationFormat%.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
-        1. Let _numberingSystem_ be _dataLocaleData_.[[NumberingSystem]].
-        1. Let _digitalFormat_ be _durationFormat_.[[DigitalFormat]].[[&lt;_numberingSystem_&gt;]].
-        1. Let _separator_ be an empty String.
-        1. Let _hoursNfOpts_ be a copy of _nfOpts_.
-        1. Let _minutesNfOpts_ be a copy of _nfOpts_.
-        1. Let _secondsNfOpts_ be a copy of _nfOpts_.
-        1. Let _minutesDisplayed_ be *false*.
-        1. If _firstNumericUnit_ is *"hours"*, then
-          1. Set _separator_ to _digitalFormat_.[[HoursMinutesSeparator]].
-          1. Let _hoursStyle_ be _durationFormat_.[[HoursStyle]].
-          1. If _hoursStyle_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_hoursNfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-          1. Let _hoursValue_ be _duration_.[[Hours]].
-          1. Let _hoursNf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _hoursNfOpts_ &raquo;).
-          1. Let _hoursParts_ be ! PartitionNumberPattern(_hoursNf_, _hoursValue_).
-          1. For each Record { [[Type]], [[Value]] } _part_ of _hoursParts_, do
-            1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"hour"* } to _numericPartsList_.
-          1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _numericPartsList_.
-          1. Let _signDisplaySet_ be ! HasOwnProperty(_minutesNfOpts_, *"signDisplay"*).
-          1. If _signDisplaySet_ is *false*, then
-            1. Perform ! CreateDataPropertyOrThrow(_minutesNfOpts_, *"signDisplay"*, *"never"*).
-        1. If _firstNumericUnit_ is *"hours"* or *"minutes*", then
-          1. Set _minutesDisplayed_ to *true*.
-          1. Let _minutesStyle_ be _durationFormat_.[[MinutesStyle]].
-          1. If _minutesStyle_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-          1. Let _minutesValue_ be _duration_.[[Minutes]].
-          1. Let _minutesNf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _minutesNfOpts_ &raquo;).
-          1. Let _minutesParts_ be ! PartitionNumberPattern(_minutesNf_, _minutesValue_).
-          1. For each Record { [[Type]], [[Value]] } _part_ of _minutesParts_, do
-            1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: "*minute*" } to _numericPartsList_.
-        1. Let _secondsDisplay_ be durationFormat.[[SecondsDisplay]].
-        1. Let _secondsValue_ be duration.[[Seconds]].
-        1. If _minutesDisplayed_ is *true*, then
-          1. Set _separator_ to _digitalFormat_.[[MinutesSecondsSeparator]].
-          1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _numericPartsList_.
+        1. Let _hoursValue_ be _duration_.[[Hours]].
+        1. Let _hoursDisplay_ be _durationFormat_.[[HoursDisplay]].
+        1. Let _minutesValue_ be _duration_.[[Minutes]].
+        1. Let _minutesDisplay_ be _durationFormat_.[[MinutesDisplay]].
+        1. Let _secondsValue_ be _duration_.[[Seconds]].
+        1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
+        1. If _hoursValue_ is not 0 or _hoursDisplay_ is not *"auto"*, then
+          1. Let _hoursFormatted_ be *true*.
         1. Else,
-          1. If NextUnitFractional(_durationFormat_, _duration_, *"seconds"*), then
-              1. Set _secondsValue_ to _secondsValue_ + AddFractionalDigits(_durationFormat_, _duration_).
-              1. Perform SetFractionalDigitOptions(_durationFormat_, _secondsNfOpts_).
-        1. If _secondsDisplay_ is not *"auto"* or _secondsValue_ is not 0, then
-          1. Let _secondsStyle_ be _durationFormat_.[[SecondsStyle]].
-          1. If _secondsStyle_ is *"2-digit"*, then
-            1. Perform ! CreateDataPropertyOrThrow(_secondsNfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-          1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _numericPartsList_.
-          1. Let _secondsNf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _secondsNfOpts_ &raquo;).
-          1. Let _secondsParts_ be ! PartitionNumberPattern(_secondsNf_, _secondsValue_).
-          1. For each Record { [[Type]], [[Value]] } _part_ in _secondsParts_ , do
-            1. Append the Record { [[Type]]: _secondsParts_.[[Type]], [[Value]]: _secondsParts_.[[Value]], [[Unit]]: "*seconds*" } to _numericPartsList_.
+          1. Let _hoursFormatted_ be *false*.
+        1. If _secondsValue_ is not 0 or _secondsDisplay_ is not *"auto"*, then
+          1. Let _secondsFormatted_ be *true*.
+        1. Else,
+          1. Let _secondsFormatted_ be *false*.
+        1. If _hoursFormatted_ is *true* and _secondsFormatted_ is *true*, then
+          1. Let _minutesFormatted_ be *true*.
+        1. Else if _minutesValue_ is not 0 or _minutesDisplay_ is not *"auto"*, then
+          1. Let _minutesFormatted_ be *true*.
+        1. Else,
+          1. Let _minutesFormatted_ be *false*.
+        1. Set _minutesFormatted_ to *undefined*.
         1. Return _numericPartsList_.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-listformatparts" type="abstract operation">
+      <h1>ListFormatParts (
+          _nfResult_: a List of Records,
+          ): a List
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It creates and returns a List with all the corresponding parts as formatted by ListFormat.</dd>
+      </dl>
+        1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
+        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
+        1. Let _listStyle_ be _durationFormat_.[[Style]].
+        1. If _listStyle_ is *"digital"*, then
+          1. Set _listStyle_ to *"short"*.
+        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
+        1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
+        1. Let _strings_ be a new empty List.
+        1. For each element _parts_ of _nfResult_, do
+          1. Let _string_ be the empty String.
+          1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+            1. Set _string_ to the string-concatenation of _string_ and _part_.[[Value]].
+          1. Append _string_ to _strings_.
+        1. Let _formatted_ be CreatePartsFromList(_lf_, _strings_).
+        1. Let _nfResultIndex_ be 0.
+        1. Let _nfResultLength_ be the number of elements in _nfResult_.
+        1. Let _flattened_ be a new empty List.
+        1. For each Record { [[Type]], [[Value]] } _listPart_ in _formatted_, do
+          1. If _listPart_.[[Type]] is *"element"*, then
+            1. Assert: _nfResultIndex_ &lt; _nfResultLength_.
+            1. Let _parts_ be _nfResult_[_nfResultIndex_].
+            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
+              1. Append _part_ to _flattened_.
+            1. Set _nfResultIndex_ to _nfResultIndex_ + 1.
+          1. Else,
+            1. Assert: _listPart_.[[Type]] is *"literal"*.
+            1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _listPart_.[[Value]], [[Unit]]: ~empty~ } to _flattened_.
+        1. Return _flattened_.
       </emu-alg>
     </emu-clause>
 
@@ -404,32 +418,39 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. Let _result_ be a new empty List.
-        1. Let _numericlikeStyleFound_ be *false*.
-        1. Let _firstUnit_ be *true*.
-        1. While _numericlikeStyleFound_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
-          1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
+        1. Let _isFirstDisplayedUnit_ be *true*.
+        1. Let _fractionalUnitFound_ be *false*.
+        1. While _fractionalUnitFound_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
           1. Let _value_ be the value of _duration_'s field whose name is the Value Field of the current row.
           1. Let _style_ be the value of _durationFormat_'s internal slot whose name is the Style Slot value of the current row.
           1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
           1. Let _unit_ be the Unit value of the current row.
+          1. If _style_ is *"numeric"* or *"2-digit"*, then
+              1. Append FormatNumericUnits(_durationFormat_, _duration_, _unit_, _isFirstDisplayedUnit_) to _result_.
+              1. Return _result_.
+          1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
           1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
             1. If NextUnitFractional(_durationFormat_, _duration_, _unit_) is *true*, then
               1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
-              1. Perform SetFractionalDigitOptions(_durationFormat_, _nfOpts_).
-              1. Set _numericlikeStyleFound_ to *true*.
-          1. If _value_ is not 0 or _display_ is not *"auto"*, then
-            1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
-            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _numberingSystem_).
-            1. If _firstUnit_ is *true*, then
-              1. Set _firstUnit_ to *false*.
-              1. If _value_ is 0 and DurationRecordSign(_duration_) is -1, then
-                1. Set _value_ to ~negative-zero~.
-            1. Else,
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
-            1. If _style_ is *"numeric"* or *"2-digit"*, then
-              1. Let _list_ be FormatNumericUnits(_durationFormat_, _duration_, _unit_, _nfOpts_).
-              1. Set _numericlikeStyleFound_ to *true*.
-            1. Else,
+              1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
+                1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
+                1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
+              1. Else,
+                1. Let _maximumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+                1. Let _minimumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+              1. Set _fractionalUnitFound_ to *true*.
+            1. If _value_ is not 0 or _display_ is not *"auto"*, then
+              1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _numberingSystem_).
+              1. If _isFirstDisplayedUnit_ is *true*, then
+                1. Set _isFirstDisplayedUnit_ to *false*.
+                1. If _value_ is 0 and DurationRecordSign(_duration_) is -1, then
+                  1. Set _value_ to ~negative-zero~.
+              1. Else,
+                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
               1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
@@ -440,34 +461,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
                 1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
               1. Append _list_ to _result_.
-        1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
-        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"type"*, *"unit"*).
-        1. Let _listStyle_ be _durationFormat_.[[Style]].
-        1. If _listStyle_ is *"digital"*, then
-          1. Set _listStyle_ to *"short"*.
-        1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
-        1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
-        1. Let _strings_ be a new empty List.
-        1. For each element _parts_ of _result_, do
-          1. Let _string_ be the empty String.
-          1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
-            1. Set _string_ to the string-concatenation of _string_ and _part_.[[Value]].
-          1. Append _string_ to _strings_.
-        1. Let _formatted_ be CreatePartsFromList(_lf_, _strings_).
-        1. Let _resultIndex_ be 0.
-        1. Let _resultLength_ be the number of elements in _result_.
-        1. Let _flattened_ be a new empty List.
-        1. For each Record { [[Type]], [[Value]] } _listPart_ in _formatted_, do
-          1. If _listPart_.[[Type]] is *"element"*, then
-            1. Assert: _resultIndex_ &lt; _resultLength_.
-            1. Let _parts_ be _result_[_resultIndex_].
-            1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
-              1. Append _part_ to _flattened_.
-            1. Set _resultIndex_ to _resultIndex_ + 1.
-          1. Else,
-            1. Assert: _listPart_.[[Type]] is *"literal"*.
-            1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _listPart_.[[Value]], [[Unit]]: ~empty~ } to _flattened_.
-        1. Return _flattened_.
+        1. Return ListFormatParts(_result_).
       </emu-alg>
 
     <emu-table id="table-partition-duration-format-pattern">
@@ -569,7 +563,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]] , [[WeeksStyle]], [[WeeksDisplay]] , [[DaysStyle]], [[DaysDisplay]] , [[HoursStyle]], [[HoursDisplay]] , [[MinutesStyle]], [[MinutesDisplay]] , [[SecondsStyle]], [[SecondsDisplay]] , [[MillisecondsStyle]], [[MillisecondsDisplay]] , [[MicrosecondsStyle]], [[MicrosecondsDisplay]] , [[NanosecondsStyle]], [[NanosecondsDisplay]], [[FractionalDigits]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]], [[WeeksStyle]], [[WeeksDisplay]], [[DaysStyle]], [[DaysDisplay]], [[HoursStyle]], [[HoursDisplay]], [[MinutesStyle]], [[MinutesDisplay]], [[SecondsStyle]], [[SecondsDisplay]], [[MillisecondsStyle]], [[MillisecondsDisplay]], [[MicrosecondsStyle]], [[MicrosecondsDisplay]], [[NanosecondsStyle]], [[NanosecondsDisplay]], [[HoursMinutesSeparator]], [[MinutesSecondsSeparator]], [[FractionalDigits]], [[TwoDigitHours]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be ? GetOptionsObject(_options_).
         1. Let _matcher_ be ? GetOption(_options_, *"localeMatcher"*, ~string~, &laquo; *"lookup"*, *"best fit"* &raquo;, *"best fit"*).
@@ -580,10 +574,19 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], %DurationFormat%.[[LocaleData]]).
         1. Let _locale_ be r.[[locale]].
         1. Set _durationFormat_.[[Locale]] to _locale_.
+        1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
+        1. Let _dataLocale_ be _durationFormat_.[[DataLocale]].
+        1. Let _dataLocaleData_ be _durationFormat_.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
+        1. Let _digitalFormat_ be _dataLocaleData_.[[DigitalFormat]].
+        1. Let _twoDigitHours_ be _digitalFormat_.[[TwoDigitHours]].
+        1. Set _durationFormat_.[[TwoDigitHours]] to _twoDigitHours_.
+        1. Let _hoursMinutesSeparator_ be _digitalFormat_.[[HoursMinutesSeparator]].
+        1. Set _durationFormat_.[[HoursMinutesSeparator]] to _hoursMinutesSeparator_.
+        1. Let _minutesSecondsSeparator_ be _digitalFormat_.[[MinutesSecondsSeparator]].
+        1. Set _durationFormat_.[[MinutesSecondsSeparator]] to _minutesSecondsSeparator_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, *"style"*, ~string~, &laquo; *"long"*, *"short"*, *"narrow"*, *"digital"* &raquo;, *"short"*).
         1. Set _durationFormat_.[[Style]] to _style_.
-        1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
         1. Let _prevStyle_ be the empty String.
         1. For each row of <emu-xref href="#table-durationformat"></emu-xref>, except the header row, in table order, do
           1. Let _styleSlot_ be the Style Slot value of the current row.
@@ -591,7 +594,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _unit_ be the Unit value of the current row.
           1. Let _valueList_ be the Values value of the current row.
           1. Let _digitalBase_ be the Digital Default value of the current row.
-          1. Let _unitOptions_ be ? GetDurationUnitOptions(_unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
+          1. Let _unitOptions_ be ? GetDurationUnitOptions(_durationFormat_, _unit_, _options_, _style_, _valueList_, _digitalBase_, _prevStyle_).
           1. Set the value of the _styleSlot_ slot of _durationFormat_ to _unitOptions_.[[Style]].
           1. Set the value of the _displaySlot_ slot of _durationFormat_ to _unitOptions_.[[Display]].
           1. If _unit_ is one of *"hours"*, *"minutes"*, *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
@@ -722,7 +725,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
-        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[DigitalFormat]] must be a Record with keys corresponding to each numbering system available for the given locale, Record values containing the fields [[HourMinutesSeparator]] and [[MinutesSecondsSeparator]], each of which holds String values containing the appropriate time unit separator for that combination of locale, numbering system, and unit, and [[HoursDigits]], which must be an integer indicating the number of digits used to display hours when using the "numeric" style. The only valid values for [[HoursDigits]] are 1 and 2.</li>
+        <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[DigitalFormat]] must be a Record with keys corresponding to each numbering system available for the given locale, with Record values containing the following fields:
+          <ul><li>[[HourMinutesSeparator]] is a String value that is the appropriate separator between hours and minutes for that combination of locale, numbering system, and unit when using *"numeric"* or "2-digit" styles</li>
+            <li>[[MinutesSecondsSeparator]] is a String value that is the appropriate separator between minutes and seconds for that combination of locale, numbering system, and unit when using *"numeric"* or *"2-digit"* styles.</li>
+            <li>[[TwoDigitHours]] is a Boolean value indicating whether hours are always displayed using two digits when the *"numeric"* style is used.</li>
+          </ul>
+        </li>
       </ul>
 
           <emu-note>It is recommended that implementations use the locale data provided by the Common Locale Data Repository (available at <a href="http://cldr.unicode.org/">http://cldr.unicode.org/</a>).</emu-note>
