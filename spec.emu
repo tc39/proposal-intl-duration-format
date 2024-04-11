@@ -320,10 +320,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _unit_ is *"minutes"*, then
               1. If _hoursStyle_ is *"numeric"* or *"2-digit"*, then
                 1. Let _hoursDisplay_ be _durationFormat_.[[HoursDisplay]].
-                1. Let _hoursValue_ be _durationFormat_.[[HoursValue]].
+                1. Let _hoursValue_ be _duration_.[[Hours]].
                 1. If _hoursDisplay_ is *"always"* or _hoursValue_ is not 0, then
                   1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
-                  1. Let _secondsValue_ be _durationFormat_.[[SecondsValue]].
+                  1. Let _secondsValue_ be _duration_.[[Seconds]].
                   1. If _secondsDisplay_ is *"always"* or _secondsValue_ is not 0, then
                     1. Set _displayRequired_ to *"true"*.
           1. If _value_ is not 0 or _display_ is not *"auto"* or _displayRequired_ is *"true"*, then
