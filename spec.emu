@@ -579,22 +579,22 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             <td>[[MillisecondsStyle]]</td>
             <td>[[MillisecondsDisplay]]</td>
             <td>*"milliseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
             <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[MicrosecondsStyle]]</td>
             <td>[[MicrosecondsDisplay]]</td>
             <td>*"microseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
-            <td>*"fractional"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
           <tr>
             <td>[[NanosecondsStyle]]</td>
             <td>[[NanosecondsDisplay]]</td>
             <td>*"nanoseconds"*</td>
-            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"fractional"* &raquo;</td>
-            <td>*"fractional"*</td>
+            <td>&laquo; *"long"*, *"short"*, *"narrow"*, <br/>*"numeric"* &raquo;</td>
+            <td>*"numeric"*</td>
           </tr>
         </table>
     </emu-table>
