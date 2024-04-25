@@ -336,7 +336,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _durationFormat_.[[NumberingSystem]]).
             1. If _style_ is *"2-digit"*, then
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
-            1. If _style_ is not *"fractional"*, *"numeric"*, or *"2-digit"*, then
+            1. If _style_ is *"fractional"*, *"numeric"*, or *"2-digit"*, then
+              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
+            1. Else,
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
