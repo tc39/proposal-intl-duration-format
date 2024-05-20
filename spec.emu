@@ -268,9 +268,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-addfractionaldigits" type="abstract operation">
+    <emu-clause id="sec-computefractionaldigits" oldids="sec-addfractionaldigits" type="abstract operation">
       <h1>
-        AddFractionalDigits (
+        ComputeFractionalDigits (
           _durationFormat_: a DurationFormat Object,
           _duration_: a Duration Record,
         ): a mathematical value
@@ -455,7 +455,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _minutesDisplay_ be _durationFormat_.[[MinutesDisplay]].
         1. Let _secondsValue_ be _duration_.[[Seconds]].
         1. If _duration_.[[Milliseconds]] is not 0 or _duration_.[[Microseconds]] is not 0 or _duration_.[[Nanoseconds]] is not 0, then
-          1. Set _secondsValue_ to _secondsValue_ + AddFractionalDigits(_durationFormat_, _duration_).
+          1. Set _secondsValue_ to _secondsValue_ + ComputeFractionalDigits(_durationFormat_, _duration_).
         1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
         1. Let _hoursFormatted_ be *false*.
         1. If _firstNumericUnit_ is *"hours"*, then
@@ -560,7 +560,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
             1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
               1. If NextUnitFractional(_durationFormat_, _unit_) is *true*, then
-                1. Set _value_ to _value_ + AddFractionalDigits(_durationFormat_, _duration_).
+                1. Set _value_ to _value_ + ComputeFractionalDigits(_durationFormat_, _duration_).
                 1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
                   1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
                   1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
