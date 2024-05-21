@@ -87,7 +87,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-table>
     </emu-clause>
 
-    <emu-clause id="sec-tointegerwithoutrounding" type="abstract operation">
+    <emu-clause id="sec-tointegerifintegral" oldids="sec-tointegerwithoutrounding" type="abstract operation">
       <h1>
         ToIntegerIfIntegral (
           _argument_: an ECMAScript language value,
@@ -207,6 +207,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If abs(_normalizedSeconds_) &ge; 2<sup>53</sup>, return *false*.
         1. Return *true*.
       </emu-alg>
+      <emu-note>The abstract operations ToIntegerIfIntegral, ToDurationRecord, DurationSign, and IsValidDuration take the same parameters as the abstract operations of the same name in the Temporal proposal's specification, and will be removed in favor of those abstract operations if the Temporal proposal becomes part of ECMA-402 before this proposal does.</emu-note>
     </emu-clause>
 
     <emu-clause id="sec-getdurationunitoptions" type="abstract operation">
