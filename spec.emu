@@ -425,6 +425,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _secondsParts_ be ! PartitionNumberPattern(_nf_, _secondsValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _secondsParts_, do
           1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"second"* } to _result_.
