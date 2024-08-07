@@ -469,9 +469,15 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Else if _minutesValue_ is not 0 or _minutesDisplay_ is not *"auto"*, then
             1. Set _minutesFormatted_ to *true*.
         1. If _hoursFormatted_ is *true*, then
+          1. If _signDisplayed_ is *true*, then
+            1. If _hoursValue_ is 0 and DurationSign(_duration_.[[Years]], _duration_.[[Months]], _duration_.[[Weeks]], _duration_.[[Days]], _duration_.[[Hours]], _duration_.[[Minutes]], _duration_.[[Seconds]], _duration_.[[Milliseconds]], _duration_.[[Microseconds]], _duration_.[[Nanoseconds]]) is -1, then
+              1. Set _hoursValue_ to ~negative-zero~.
           1. Append FormatNumericHours(_durationFormat_, _hoursValue_, _signDisplayed_) to _numericPartsList_.
           1. Set _signDisplayed_ to *false*.
         1. If _minutesFormatted_ is *true*, then
+          1. If _signDisplayed_ is *true*, then
+            1. If _minutesValue_ is 0 and DurationSign(_duration_.[[Years]], _duration_.[[Months]], _duration_.[[Weeks]], _duration_.[[Days]], _duration_.[[Hours]], _duration_.[[Minutes]], _duration_.[[Seconds]], _duration_.[[Milliseconds]], _duration_.[[Microseconds]], _duration_.[[Nanoseconds]]) is -1, then
+              1. Set _minutesValue_ to ~negative-zero~.
           1. Append FormatNumericMinutes(_durationFormat_, _minutesValue_, _hoursFormatted_, _signDisplayed_) to _numericPartsList_.
           1. Set _signDisplayed_ to *false*.
         1. If _secondsFormatted_ is *true*, then
