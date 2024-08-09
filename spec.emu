@@ -340,6 +340,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
         1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _hoursParts_ be ! PartitionNumberPattern(_nf_, _hoursValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _hoursParts_, do
@@ -376,6 +377,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
         1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _minutesParts_ be ! PartitionNumberPattern(_nf_, _minutesValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _minutesParts_, do
@@ -412,6 +414,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumIntegerDigits"*, *2*<sub>𝔽</sub>).
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
         1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
           1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
