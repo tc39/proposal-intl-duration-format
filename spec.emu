@@ -366,7 +366,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _hoursDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[HoursMinutesSeparator]].
+          1. Let _separator_ be _durationFormat_.[[HoursMinutesSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _minutesStyle_ be _durationFormat_.[[MinutesStyle]].
         1. Assert: _minutesStyle_ is *"numeric"* or _minutesStyle_ is *"2-digit"*.
@@ -405,7 +405,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Assert: _secondsStyle_ is *"numeric"* or _secondsStyle_ is *"2-digit"*.
         1. Let _result_ be a new empty List.
         1. If _minutesDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[MinutesSecondsSeparator]].
+          1. Let _separator_ be _durationFormat_.[[MinutesSecondsSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
         1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
@@ -415,7 +415,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
-        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
           1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
           1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
