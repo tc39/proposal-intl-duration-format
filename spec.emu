@@ -15,7 +15,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
     <emu-clause id="sec-duration-records">
       <h1>Duration Records</h1>
       <p>A <dfn variants="Duration Records">Duration Record</dfn> is a Record value used to represent a Duration.</p>
-      <p>Duration Records have the fields in <emu-xref href="#table-duration-record-fields"></emu-xref></p>
+      <p>Duration Records have the fields listed in <emu-xref href="#table-duration-record-fields"></emu-xref></p>
       <emu-table id="table-duration-record-fields" caption="Duration Record Fields">
         <table class="real-table">
           <tr>
@@ -325,7 +325,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates a List of Records containing the formatted parts of _hoursValue_ interpreted as the value of a Duration Record's [[Hours]] field according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>_hoursValue_ is an integer indicating a number of hours. It creates the parts for _hoursValue_ according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
 
       <emu-alg>
@@ -359,7 +359,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates a List of Records containing the formatted parts of _minutesValue_ interpreted as the value of a Duration Record's [[Minutes]] field according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>_minutesValue_ is an integer indicating a number of minutes. It creates the parts for _minutesValue_ according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
 
       <emu-alg>
@@ -389,14 +389,14 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <h1>
         FormatNumericSeconds (
           _durationFormat_: a DurationFormat Object,
-          _secondsValue_: an integer,
+          _secondsValue_: a mathematical value,
           _minutesDisplayed_ : a Boolean,
           _signDisplayed_: a Boolean,
           ) : a List of Records
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates a List of Records containing the formatted parts of _secondsValue_ interpreted as the value of a Duration Record's [[Seconds]] field according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>_secondsValue_ is a mathematical value indicating a number of seconds. It creates the parts for _secondsValue_ according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
 
       <emu-alg>
@@ -442,7 +442,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates a List of Lists of Records containing the formatted parts of _duration_ that use *"numeric"* or *"2-digit"* style according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>It creates the parts representing the elements of _duration_ that use *"numeric"* or *"2-digit"* style according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
 
       <emu-alg>
@@ -497,7 +497,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates and returns a List with all the corresponding parts according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>It creates a List corresponding to the parts within the Lists in _partitionedPartsList_ according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
       <emu-alg>
         1. Let _lfOpts_ be OrdinaryObjectCreate(*null*).
@@ -540,7 +540,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It creates and returns a List with all the corresponding parts according to the effective locale and the formatting options of _durationFormat_.</dd>
+        <dd>It creates the corresponding parts for _duration_ according to the effective locale and the formatting options of _durationFormat_.</dd>
       </dl>
 
       <emu-alg>
@@ -889,7 +889,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <p>When the `format` method is called with an argument _duration_, the following steps are taken:</p>
 
           <emu-alg>
-            1. Let _df_ be *this* value.
+            1. Let _df_ be the *this* value.
             1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
             1. Let _record_ be ? ToDurationRecord(_duration_).
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
@@ -905,7 +905,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <p>When the `formatToParts` method is called with an argument _duration_, the following steps are taken:</p>
 
           <emu-alg>
-            1. Let _df_ be *this* value.
+            1. Let _df_ be the *this* value.
             1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
             1. Let _record_ be ? ToDurationRecord(_duration_).
             1. Let _parts_ be PartitionDurationFormatPattern(_df_, _record_).
