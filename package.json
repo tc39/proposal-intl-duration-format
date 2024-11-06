@@ -5,7 +5,7 @@
     "scripts": {
         "start": "npm run build-loose -- --watch",
         "build": "npm run build-loose -- --strict",
-        "build-loose": "ecmarkup --verbose --lint-spec --load-biblio @tc39/ecma262-biblio spec.emu index.html"
+        "build-loose": "ecmarkup --verbose --lint-spec --load-biblio @tc39/ecma262-biblio --load-biblio @tc39/ecma402-biblio spec.emu index.html"
     },
     "homepage": "https://tc39.es/proposal-intl-duration-format/",
     "repository": {
@@ -14,7 +14,8 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "@tc39/ecma262-biblio": "=2.1.2458",
-        "ecmarkup": "^17.1.1"
+        "@tc39/ecma262-biblio": "=2.1.2799",
+        "@tc39/ecma402-biblio": "=2.1.1122",
+        "ecmarkup": "^20.0.0"
     }
 }
