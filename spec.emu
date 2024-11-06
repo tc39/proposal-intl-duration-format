@@ -341,7 +341,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
-        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+        1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _hoursParts_ be ! PartitionNumberPattern(_nf_, _hoursValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _hoursParts_, do
           1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"hour"* } to _result_.
@@ -378,7 +378,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
-        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+        1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _minutesParts_ be ! PartitionNumberPattern(_nf_, _minutesValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _minutesParts_, do
           1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"minute"* } to _result_.
@@ -415,7 +415,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
-        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+        1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
           1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
           1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
@@ -507,7 +507,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _listStyle_ is *"digital"*, then
           1. Set _listStyle_ to *"short"*.
         1. Perform ! CreateDataPropertyOrThrow(_lfOpts_, *"style"*, _listStyle_).
-        1. Let _lf_ be ! Construct(%ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
+        1. Let _lf_ be ! Construct(%Intl.ListFormat%, &laquo; _durationFormat_.[[Locale]], _lfOpts_ &raquo;).
         1. Let _strings_ be a new empty List.
         1. For each element _parts_ of _partitionedPartsList_, do
           1. Let _string_ be the empty String.
@@ -584,7 +584,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
-              1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+              1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
               1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
               1. Let _list_ be a new empty List.
               1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
@@ -683,7 +683,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
   <emu-clause id="sec-intl-durationformat-constructor">
     <h1>The Intl.DurationFormat Constructor</h1>
 
-    <p>The DurationFormat constructor is the <dfn>%DurationFormat%</dfn> intrinsic object and a standard built-in property of the Intl object. Behaviour common to all service constructor properties of the Intl object is specified in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
+    <p>The DurationFormat constructor is the <dfn>%Intl.DurationFormat%</dfn> intrinsic object and a standard built-in property of the Intl object. Behaviour common to all service constructor properties of the Intl object is specified in <emu-xref href="#sec-internal-slots"></emu-xref>.</p>
 
     <emu-clause id="sec-Intl.DurationFormat">
       <h1>Intl.DurationFormat ( [ _locales_ [ , _options_ ] ] )</h1>
@@ -692,7 +692,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]], [[WeeksStyle]], [[WeeksDisplay]], [[DaysStyle]], [[DaysDisplay]], [[HoursStyle]], [[HoursDisplay]], [[MinutesStyle]], [[MinutesDisplay]], [[SecondsStyle]], [[SecondsDisplay]], [[MillisecondsStyle]], [[MillisecondsDisplay]], [[MicrosecondsStyle]], [[MicrosecondsDisplay]], [[NanosecondsStyle]], [[NanosecondsDisplay]], [[HoursMinutesSeparator]], [[MinutesSecondsSeparator]], [[FractionalDigits]], [[TwoDigitHours]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%Intl.DurationFormat.prototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]], [[WeeksStyle]], [[WeeksDisplay]], [[DaysStyle]], [[DaysDisplay]], [[HoursStyle]], [[HoursDisplay]], [[MinutesStyle]], [[MinutesDisplay]], [[SecondsStyle]], [[SecondsDisplay]], [[MillisecondsStyle]], [[MillisecondsDisplay]], [[MicrosecondsStyle]], [[MicrosecondsDisplay]], [[NanosecondsStyle]], [[NanosecondsDisplay]], [[HoursMinutesSeparator]], [[MinutesSecondsSeparator]], [[FractionalDigits]], [[TwoDigitHours]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be ? GetOptionsObject(_options_).
         1. Let _matcher_ be ? GetOption(_options_, *"localeMatcher"*, ~string~, &laquo; *"lookup"*, *"best fit"* &raquo;, *"best fit"*).
@@ -700,7 +700,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _numberingSystem_ is not *undefined*, then
           1. If _numberingSystem_ does not match the Unicode Locale Identifier `type` nonterminal, throw a *RangeError* exception.
         1. Let _opt_ be the Record { [[localeMatcher]]: _matcher_, [[nu]]: _numberingSystem_ }.
-        1. Let _r_ be ResolveLocale(%DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %DurationFormat%.[[RelevantExtensionKeys]], %DurationFormat%.[[LocaleData]]).
+        1. Let _r_ be ResolveLocale(%Intl.DurationFormat%.[[AvailableLocales]], _requestedLocales_, _opt_, %Intl.DurationFormat%.[[RelevantExtensionKeys]], %Intl.DurationFormat%.[[LocaleData]]).
         1. Let _locale_ be r.[[locale]].
         1. Set _durationFormat_.[[Locale]] to _locale_.
         1. Set _durationFormat_.[[DataLocale]] to _r_.[[dataLocale]].
@@ -826,7 +826,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         <emu-clause id="sec-Intl.DurationFormat.prototype">
           <h1>Intl.DurationFormat.prototype</h1>
 
-          <p>The value of `Intl.DurationFormat.prototype` is %DurationFormatPrototype%.</p>
+          <p>The value of `Intl.DurationFormat.prototype` is %Intl.DurationFormat.prototype%.</p>
 
           <p>This property has the attributes { [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *false* }.</p>
         </emu-clause>
@@ -837,7 +837,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <p>When the `supportedLocalesOf` method is called with arguments _locales_ and _options_, the following steps are taken:</p>
 
           <emu-alg>
-            1. Let _availableLocales_ be %DurationFormat%.[[AvailableLocales]].
+            1. Let _availableLocales_ be %Intl.DurationFormat%.[[AvailableLocales]].
             1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
             1. Return ? SupportedLocales(_availableLocales_, _requestedLocales_, _options_).
           </emu-alg>
@@ -869,12 +869,12 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-clause id="sec-properties-of-intl-durationformat-prototype-object">
         <h1>Properties of the Intl.DurationFormat Prototype Object</h1>
 
-        <p>The Intl.DurationFormat prototype object is itself an ordinary object. <dfn>%DurationFormatPrototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
+        <p>The Intl.DurationFormat prototype object is itself an ordinary object. <dfn>%Intl.DurationFormat.prototype%</dfn> is not an Intl.DurationFormat instance and does not have an [[InitializedDurationFormat]] internal slot or any of the other internal slots of Intl.DurationFormat instance objects.</p>
 
         <emu-clause id="sec-Intl.DurationFormat.prototype.constructor">
           <h1>Intl.DurationFormat.prototype.constructor</h1>
 
-          <p>The initial value of `Intl.DurationFormat.prototype.constructor` is the intrinsic object %DurationFormat%.</p>
+          <p>The initial value of `Intl.DurationFormat.prototype.constructor` is the intrinsic object %Intl.DurationFormat%.</p>
         </emu-clause>
 
         <emu-clause id="sec-Intl.DurationFormat.prototype-@@tostringtag">
@@ -913,7 +913,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
             1. Let _result_ be ! ArrayCreate(0).
             1. Let _n_ be 0.
             1. For each Record { [[Type]], [[Value]], [[Unit]] } _part_ in _parts_, do
-              1. Let _obj_ be OrdinaryObjectCreate(%ObjectPrototype%).
+              1. Let _obj_ be OrdinaryObjectCreate(%Object.prototype%).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"type"*, _part_.[[Type]]).
               1. Perform ! CreateDataPropertyOrThrow(_obj_, *"value"*, _part_.[[Value]]).
               1. If _part_.[[Unit]] is not ~empty~, perform ! CreateDataPropertyOrThrow(_obj_, *"unit"*, _part_.[[Unit]]).
@@ -930,7 +930,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <emu-alg>
             1. Let _df_ be the *this* value.
             1. Perform ? RequireInternalSlot(_df_, [[InitializedDurationFormat]]).
-            1. Let _options_ be OrdinaryObjectCreate(%ObjectPrototype%).
+            1. Let _options_ be OrdinaryObjectCreate(%Object.prototype%).
             1. For each row of <emu-xref href="#table-durationformat-resolvedoptions-properties"></emu-xref>, except the header row, in table order, do
               1. Let _p_ be the Property value of the current row.
               1. Let _v_ be the value of _df_'s internal slot whose name is the Internal Slot value of the current row.
@@ -1059,7 +1059,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-clause id="sec-properties-of-intl-durationformat-instances">
         <h1>Properties of Intl.DurationFormat Instances</h1>
 
-        <p>Intl.DurationFormat instances inherit properties from %DurationFormatPrototype%.</p>
+        <p>Intl.DurationFormat instances inherit properties from %Intl.DurationFormat.prototype%.</p>
         <p>Intl.DurationFormat instances have an [[InitializedDurationFormat]] internal slot.</p>
         <p>Intl.DurationFormat instances also have several internal slots that are computed by the constructor:</p>
 
