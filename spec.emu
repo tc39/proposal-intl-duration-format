@@ -316,6 +316,56 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-formatnonnumericunit" type="abstract operation">
+      <h1>
+        FormatNonNumericUnit (
+          _durationFormat_: a DurationFormat object,
+          _duration_: a Duration Record,
+          _style_: a String,
+          _unit_: a String,
+          _numberFormatUnit_: a String,
+          _value_: an integer,
+          _signDisplayed_: a Boolean,
+          ) : a List of Records
+      </h1>
+      <dl class="header">
+        <dt>description</dt>
+        <dd>It creates the parts representing the _unit_ unit of _duration_ according to the effective locale and the formatting options of _durationFormat_.</dd>
+      </dl>
+
+      <emu-alg>
+        1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
+        1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
+          1. If NextUnitFractional(_durationFormat_, _unit_) is *true*, then
+            1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
+              1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
+              1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
+            1. Else,
+              1. Let _maximumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+              1. Let _minimumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
+            1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+        1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _numberingSystem_).
+        1. If _signDisplayed_ is *true*, then
+          1. Set _signDisplayed_ to *false*.
+          1. If _value_ is 0 and DurationSign(_duration_.[[Years]], _duration_.[[Months]], _duration_.[[Weeks]], _duration_.[[Days]], _duration_.[[Hours]], _duration_.[[Minutes]], _duration_.[[Seconds]], _duration_.[[Milliseconds]], _duration_.[[Microseconds]], _duration_.[[Nanoseconds]]) is -1, then
+            1. Set _value_ to ~negative-zero~.
+        1. Else,
+          1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
+        1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
+        1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
+        1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
+        1. Let _list_ be a new empty List.
+        1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
+          1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
+        1. Return _list_.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-formatnumerichours" type="abstract operation">
       <h1>
         FormatNumericHours (
@@ -549,47 +599,20 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _signDisplayed_ be *true*.
         1. Let _numericUnitFound_ be *false*.
         1. While _numericUnitFound_ is *false*, repeat for each row in <emu-xref href="#table-partition-duration-format-pattern"></emu-xref> in table order, except the header row:
-          1. Let _value_ be the value of _duration_'s field whose name is the Value Field value of the current row.
           1. Let _style_ be the value of _durationFormat_'s internal slot whose name is the Style Slot value of the current row.
-          1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
           1. Let _unit_ be the Unit value of the current row.
           1. If _style_ is *"numeric"* or *"2-digit"*, then
-              1. Append FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_) to _result_.
-              1. Set _numericUnitFound_ to *true*.
+            1. Append FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_) to _result_.
+            1. Set _numericUnitFound_ to *true*.
           1. Else,
-            1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
-            1. If _unit_ is *"seconds"*, *"milliseconds"*, or *"microseconds"*, then
-              1. If NextUnitFractional(_durationFormat_, _unit_) is *true*, then
-                1. Set _value_ to _value_ + ComputeFractionalDigits(_durationFormat_, _duration_).
-                1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
-                  1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
-                  1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
-                1. Else,
-                  1. Let _maximumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
-                  1. Let _minimumFractionDigits_ be _durationFormat_.[[FractionalDigits]].
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
-                1. Set _numericUnitFound_ to *true*.
+            1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
+            1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
+            1. Let _value_ be the value of _duration_'s field whose name is the Value Field value of the current row.
+            1. If NextUnitFractional(_durationFormat_, _unit_) is *true*, then
+              1. Set _numericUnitFound_ to *true*.
+              1. Set _value_ to _value_ + ComputeFractionalDigits(_durationFormat_, _duration_).
             1. If _value_ is not 0 or _display_ is not *"auto"*, then
-              1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _numberingSystem_).
-              1. If _signDisplayed_ is *true*, then
-                1. Set _signDisplayed_ to *false*.
-                1. If _value_ is 0 and DurationSign(_duration_.[[Years]], _duration_.[[Months]], _duration_.[[Weeks]], _duration_.[[Days]], _duration_.[[Hours]], _duration_.[[Minutes]], _duration_.[[Seconds]], _duration_.[[Milliseconds]], _duration_.[[Microseconds]], _duration_.[[Nanoseconds]]) is -1, then
-                  1. Set _value_ to ~negative-zero~.
-              1. Else,
-                1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
-              1. Let _numberFormatUnit_ be the NumberFormat Unit value of the current row.
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"style"*, *"unit"*).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unit"*, _numberFormatUnit_).
-              1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"unitDisplay"*, _style_).
-              1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
-              1. Let _parts_ be ! PartitionNumberPattern(_nf_, _value_).
-              1. Let _list_ be a new empty List.
-              1. For each Record { [[Type]], [[Value]] } _part_ of _parts_, do
-                1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: _numberFormatUnit_ } to _list_.
-              1. Append _list_ to _result_.
+              1. Append FormatNonNumericUnit(_durationFormat_, _duration_, _style_, _unit_, _numberFormatUnit_, _value_, _signDisplayed_) to _result_.
         1. Return ListFormatParts(_durationFormat_, _result_).
       </emu-alg>
 
