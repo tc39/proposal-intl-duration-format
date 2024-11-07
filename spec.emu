@@ -414,7 +414,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _signDisplayed_ is *false*, then
           1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"signDisplay"*, *"never"*).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"useGrouping"*, *false*).
-        1. Let _nf_ be ! Construct(%Intl.NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. If _durationFormat_.[[FractionalDigits]] is *undefined*, then
           1. Let _maximumFractionDigits_ be *9*<sub>𝔽</sub>.
           1. Let _minimumFractionDigits_ be *+0*<sub>𝔽</sub>.
@@ -424,6 +423,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"maximumFractionDigits"*, _maximumFractionDigits_).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
         1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
+        1. Let _nf_ be ! Construct(%NumberFormat%, &laquo; _durationFormat_.[[Locale]], _nfOpts_ &raquo;).
         1. Let _secondsParts_ be PartitionNumberPattern(_nf_, _secondsValue_).
         1. For each Record { [[Type]], [[Value]] } _part_ of _secondsParts_, do
           1. Append the Record { [[Type]]: _part_.[[Type]], [[Value]]: _part_.[[Value]], [[Unit]]: *"second"* } to _result_.
