@@ -365,7 +365,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _hoursDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[HoursMinutesSeparator]].
+          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[HourMinuteSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _minutesStyle_ be _durationFormat_.[[MinutesStyle]].
         1. Assert: _minutesStyle_ is *"numeric"* or _minutesStyle_ is *"2-digit"*.
@@ -402,7 +402,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _minutesDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[MinutesSecondsSeparator]].
+          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[MinuteSecondSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _secondsStyle_ be _durationFormat_.[[SecondsStyle]].
         1. Assert: _secondsStyle_ is *"numeric"* or _secondsStyle_ is *"2-digit"*.
@@ -691,7 +691,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
 
       <emu-alg>
         1. If NewTarget is *undefined*, throw a *TypeError* exception.
-        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%Intl.DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]], [[WeeksStyle]], [[WeeksDisplay]], [[DaysStyle]], [[DaysDisplay]], [[HoursStyle]], [[HoursDisplay]], [[MinutesStyle]], [[MinutesDisplay]], [[SecondsStyle]], [[SecondsDisplay]], [[MillisecondsStyle]], [[MillisecondsDisplay]], [[MicrosecondsStyle]], [[MicrosecondsDisplay]], [[NanosecondsStyle]], [[NanosecondsDisplay]], [[HoursMinutesSeparator]], [[MinutesSecondsSeparator]], [[FractionalDigits]] &raquo;).
+        1. Let _durationFormat_ be ? OrdinaryCreateFromConstructor(NewTarget, *"%Intl.DurationFormatPrototype%"*, &laquo; [[InitializedDurationFormat]], [[Locale]], [[DataLocale]], [[NumberingSystem]], [[Style]], [[YearsStyle]], [[YearsDisplay]], [[MonthsStyle]], [[MonthsDisplay]], [[WeeksStyle]], [[WeeksDisplay]], [[DaysStyle]], [[DaysDisplay]], [[HoursStyle]], [[HoursDisplay]], [[MinutesStyle]], [[MinutesDisplay]], [[SecondsStyle]], [[SecondsDisplay]], [[MillisecondsStyle]], [[MillisecondsDisplay]], [[MicrosecondsStyle]], [[MicrosecondsDisplay]], [[NanosecondsStyle]], [[NanosecondsDisplay]], [[HourMinuteSeparator]], [[MinuteSecondSeparator]], [[FractionalDigits]] &raquo;).
         1. Let _requestedLocales_ be ? CanonicalizeLocaleList(_locales_).
         1. Let _options_ be ? GetOptionsObject(_options_).
         1. Let _matcher_ be ? GetOption(_options_, *"localeMatcher"*, ~string~, &laquo; *"lookup"*, *"best fit"* &raquo;, *"best fit"*).
@@ -707,10 +707,10 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _dataLocaleData_ be _durationFormat_.[[LocaleData]].[[&lt;_dataLocale_&gt;]].
         1. Let _digitalFormat_ be _dataLocaleData_.[[DigitalFormat]].
         1. Let _twoDigitHours_ be _digitalFormat_.[[TwoDigitHours]].
-        1. Let _hoursMinutesSeparator_ be _digitalFormat_.[[HoursMinutesSeparator]].
-        1. Set _durationFormat_.[[HoursMinutesSeparator]] to _hoursMinutesSeparator_.
-        1. Let _minutesSecondsSeparator_ be _digitalFormat_.[[MinutesSecondsSeparator]].
-        1. Set _durationFormat_.[[MinutesSecondsSeparator]] to _minutesSecondsSeparator_.
+        1. Let _hourMinuteSeparator_ be _digitalFormat_.[[HourMinuteSeparator]].
+        1. Set _durationFormat_.[[HourMinuteSeparator]] to _hourMinuteSeparator_.
+        1. Let _minuteSecondSeparator_ be _digitalFormat_.[[MinuteSecondSeparator]].
+        1. Set _durationFormat_.[[MinuteSecondSeparator]] to _minuteSecondSeparator_.
         1. Set _durationFormat_.[[NumberingSystem]] to _r_.[[nu]].
         1. Let _style_ be ? GetOption(_options_, *"style"*, ~string~, &laquo; *"long"*, *"short"*, *"narrow"*, *"digital"* &raquo;, *"short"*).
         1. Set _durationFormat_.[[Style]] to _style_.
@@ -853,8 +853,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <ul>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[nu]] must be a List as specified in <emu-xref href="#sec-intl.numberformat-internal-slots"></emu-xref>.</li>
         <li>[[LocaleData]].[[&lt;_locale_&gt;]].[[DigitalFormat]] must be a Record with keys corresponding to each numbering system available for the given locale, with Record values containing the following fields:
-          <ul><li>[[HourMinutesSeparator]] is a String value that is the appropriate separator between hours and minutes for that combination of locale, numbering system, and unit when using *"numeric"* or "2-digit" styles</li>
-            <li>[[MinutesSecondsSeparator]] is a String value that is the appropriate separator between minutes and seconds for that combination of locale, numbering system, and unit when using *"numeric"* or *"2-digit"* styles.</li>
+          <ul><li>[[HourMinuteSeparator]] is a String value that is the appropriate separator between hours and minutes for that combination of locale, numbering system, and unit when using *"numeric"* or *"2-digit"* styles</li>
+            <li>[[MinuteSecondSeparator]] is a String value that is the appropriate separator between minutes and seconds for that combination of locale, numbering system, and unit when using *"numeric"* or *"2-digit"* styles.</li>
             <li>[[TwoDigitHours]] is a Boolean value indicating whether hours are always displayed using two digits when the *"numeric"* style is used.</li>
           </ul>
         </li>
@@ -1086,6 +1086,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           <li>[[MicrosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the microseconds field.</li>
           <li>[[NanosecondsStyle]] is one of the String values *"long"*, *"short"*, *"narrow"*, or *"fractional"* identifying the formatting style used for the nanoseconds field.</li>
           <li>[[NanosecondsDisplay]] is one of the String values *"auto"* or *"always"* identifying when to display the nanoseconds field.</li>
+          <li>[[HourMinuteSeparator]] is a String value identifying the separator to be used between hours and minutes when both fields are displayed and both fields are formatted using numeric styles.</li>
+          <li>[[MinuteSecondSeparator]] is a String value identifying the separator to be used between minutes and seconds when both fields are displayed and both fields are formatted using numeric styles.</li>
           <li>[[FractionalDigits]] is a non-negative integer, identifying the number of fractional digits to be used with numeric styles, or is *undefined*.</li>
         </ul>
       </emu-clause>
