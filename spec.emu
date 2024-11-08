@@ -365,7 +365,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _hoursDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[HourMinuteSeparator]].
+          1. Let _separator_ be _durationFormat_.[[HourMinuteSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _minutesStyle_ be _durationFormat_.[[MinutesStyle]].
         1. Assert: _minutesStyle_ is *"numeric"* or _minutesStyle_ is *"2-digit"*.
@@ -402,7 +402,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       <emu-alg>
         1. Let _result_ be a new empty List.
         1. If _minutesDisplayed_ is *true*, then
-          1. Let _separator_ be _durationFormat_.[[DigitalFormat]].[[MinuteSecondSeparator]].
+          1. Let _separator_ be _durationFormat_.[[MinuteSecondSeparator]].
           1. Append the Record { [[Type]]: *"literal"*, [[Value]]: _separator_, [[Unit]]: ~empty~ } to _result_.
         1. Let _secondsStyle_ be _durationFormat_.[[SecondsStyle]].
         1. Assert: _secondsStyle_ is *"numeric"* or _secondsStyle_ is *"2-digit"*.
