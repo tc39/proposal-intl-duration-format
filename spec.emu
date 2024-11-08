@@ -469,16 +469,19 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. If _signDisplayed_ is *true*, then
             1. If _hoursValue_ is 0 and DurationSign(_duration_) is -1, then
               1. Set _hoursValue_ to ~negative-zero~.
-          1. Append FormatNumericHours(_durationFormat_, _hoursValue_, _signDisplayed_) to _numericPartsList_.
+          1. Let _hoursParts_ be FormatNumericHours(_durationFormat_, _hoursValue_, _signDisplayed_).
+          1. Set _numericPartsList_ to the list-concatenation of _numericPartsList_ and _hoursParts_.
           1. Set _signDisplayed_ to *false*.
         1. If _minutesFormatted_ is *true*, then
           1. If _signDisplayed_ is *true*, then
             1. If _minutesValue_ is 0 and DurationSign(_duration_) is -1, then
               1. Set _minutesValue_ to ~negative-zero~.
-          1. Append FormatNumericMinutes(_durationFormat_, _minutesValue_, _hoursFormatted_, _signDisplayed_) to _numericPartsList_.
+          1. Let _minutesParts_ be FormatNumericMinutes(_durationFormat_, _minutesValue_, _hoursFormatted_, _signDisplayed_).
+          1. Set _numericPartsList_ to the list-concatenation of _numericPartsList_ and _minutesParts_.
           1. Set _signDisplayed_ to *false*.
         1. If _secondsFormatted_ is *true*, then
-          1. Append FormatNumericSeconds(_durationFormat_, _secondsValue_, _minutesFormatted_, _signDisplayed_) to _numericPartsList_.
+          1. Let _secondsParts_ be FormatNumericSeconds(_durationFormat_, _secondsValue_, _minutesFormatted_, _signDisplayed_).
+          1. Set _numericPartsList_ to the list-concatenation of _numericPartsList_ and _secondsParts_.
         1. Return _numericPartsList_.
       </emu-alg>
     </emu-clause>
@@ -548,6 +551,8 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _unit_ be the Unit value of the current row.
           1. If _style_ is *"numeric"* or *"2-digit"*, then
               1. Append FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_) to _result_.
+              1. Let _numericPartsList_ be FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_).
+              1. If _numericPartsList_ is not empty, append _numericPartsList_ to _result_.
               1. Set _numericUnitFound_ to *true*.
           1. Else,
             1. Let _nfOpts_ be OrdinaryObjectCreate(*null*).
