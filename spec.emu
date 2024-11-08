@@ -479,7 +479,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Set _signDisplayed_ to *false*.
         1. If _secondsFormatted_ is *true*, then
           1. Append FormatNumericSeconds(_durationFormat_, _secondsValue_, _minutesFormatted_, _signDisplayed_) to _numericPartsList_.
-          1. Set _signDisplayed_ to *false*.
         1. Return _numericPartsList_.
       </emu-alg>
     </emu-clause>
