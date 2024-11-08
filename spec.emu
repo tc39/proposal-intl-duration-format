@@ -453,9 +453,9 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. Let _secondsDisplay_ be _durationFormat_.[[SecondsDisplay]].
         1. Let _hoursFormatted_ be *false*.
         1. If _firstNumericUnit_ is *"hours"*, then
-          1. If _hoursValue_ is not 0 or _hoursDisplay_ is not *"auto"*, then
+          1. If _hoursValue_ is not 0 or _hoursDisplay_ is *"always"*, then
             1. Set _hoursFormatted_ to *true*.
-        1. If _secondsValue_ is not 0 or _secondsDisplay_ is not *"auto"*, then
+        1. If _secondsValue_ is not 0 or _secondsDisplay_ is *"always"*, then
           1. Let _secondsFormatted_ be *true*.
         1. Else,
           1. Let _secondsFormatted_ be *false*.
@@ -463,7 +463,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
         1. If _firstNumericUnit_ is *"hours"* or _firstNumericUnit_ is *"minutes"*, then
           1. If _hoursFormatted_ is *true* and _secondsFormatted_ is *true*, then
             1. Set _minutesFormatted_ to *true*.
-          1. Else if _minutesValue_ is not 0 or _minutesDisplay_ is not *"auto"*, then
+          1. Else if _minutesValue_ is not 0 or _minutesDisplay_ is *"always"*, then
             1. Set _minutesFormatted_ to *true*.
         1. If _hoursFormatted_ is *true*, then
           1. If _signDisplayed_ is *true*, then
@@ -565,7 +565,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"minimumFractionDigits"*, _minimumFractionDigits_).
                 1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"roundingMode"*, *"trunc"*).
                 1. Set _numericUnitFound_ to *true*.
-            1. If _value_ is not 0 or _display_ is not *"auto"*, then
+            1. If _value_ is not 0 or _display_ is *"always"*, then
               1. Let _numberingSystem_ be _durationFormat_.[[NumberingSystem]].
               1. Perform ! CreateDataPropertyOrThrow(_nfOpts_, *"numberingSystem"*, _numberingSystem_).
               1. If _signDisplayed_ is *true*, then
