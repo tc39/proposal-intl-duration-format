@@ -550,7 +550,6 @@ contributors: Ujjwal Sharma, Younies Mahmoud
           1. Let _display_ be the value of _durationFormat_'s internal slot whose name is the Display Slot value of the current row.
           1. Let _unit_ be the Unit value of the current row.
           1. If _style_ is *"numeric"* or *"2-digit"*, then
-              1. Append FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_) to _result_.
               1. Let _numericPartsList_ be FormatNumericUnits(_durationFormat_, _duration_, _unit_, _signDisplayed_).
               1. If _numericPartsList_ is not empty, append _numericPartsList_ to _result_.
               1. Set _numericUnitFound_ to *true*.
