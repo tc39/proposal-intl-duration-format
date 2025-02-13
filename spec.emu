@@ -154,7 +154,7 @@ contributors: Ujjwal Sharma, Younies Mahmoud
       </h1>
       <dl class="header">
         <dt>description</dt>
-        <dd>It returns 1 if the most significant non-zero element in its arguments is positive, and -1 if the most significant non-zero element is negative. If all of its arguments are zero, it returns 0.</dd>
+        <dd>It returns 1 if the most significant non-zero field in the _duration_ argument is positive, and -1 if the most significant non-zero field is negative. If all of _duration_'s fields are zero, it returns 0.</dd>
       </dl>
       <emu-alg>
         1. For each value _v_ of « _duration_.[[Years]], _duration_.[[Months]], _duration_.[[Weeks]], _duration_.[[Days]], _duration_.[[Hours]], _duration_.[[Minutes]], _duration_.[[Seconds]], _duration_.[[Milliseconds]], _duration_.[[Microseconds]], _duration_.[[Nanoseconds]] », do
